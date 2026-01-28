@@ -1,51 +1,79 @@
-{{extend 'layout.html'}}
+{{extend 'malayout.html'}}
 
-{{block header}}
-<div class="jumbotron jumbotron-fluid background" style="background-color: #333; color:white; padding:30px;word-wrap:break-word;">
-  <div class="container center">
-    <h1 class="display-5">/{{=request.application}}/{{=request.controller}}/{{=request.function}}</h1>
-  </div>
-</div>
-{{end}}
+<main class="max-w-4xl mx-auto mt-8 text-center px-4">
+    
+    <h1 class="text-5xl md:text-7xl font-extrabold mb-6 glitch-text leading-tight">
+        KILLING <span class="text-transparent bg-clip-text bg-gradient-to-r from-neonBlue to-purple-500">CSV HELL</span>
+    </h1>
+    
+    <p class="text-lg md:text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
+        Do your clients send you horrible Excel files?<br>
+        <span class="text-neonOrange font-bold">Stop wasting hours cleaning data.</span> 
+        AI handles the dirty work so you can import in 3 clicks.
+    </p>
 
-<div class="row">
-  <div class="col-md-12">
-    {{if 'message' in globals():}}
-    <h2>{{=message}}</h2>
-    <p class="lead">{{=T('How did you get here?')}}</p>
-    <ol style="word-wrap:break-word;">
-      <li>{{=T('You are successfully running web2py')}}</li>
-      <li>{{=XML(T('You visited the url %s', A(request.env.path_info,_href=request.env.path_info)))}}</li>
-      <li>{{=XML(T('Which called the function %s located in the file %s',
-        (A(request.function+'()',_href='#'),
-        A('web2py/applications/%(application)s/controllers/%(controller)s.py' % request,
-        _href=URL('admin','default','peek', args=(request.application,'controllers',request.controller+'.py'))))))}}</li>
-      <li>{{=XML(T('The output of the file is a dictionary that was rendered by the view %s',
-        A('web2py/applications/%(application)s/views/%(controller)s/index.html' % request,
-        _href=URL('admin','default','peek',args=(request.application,'views',request.controller,'index.html')))))}}</li>
-      <li>{{=T('You can modify this application and adapt it to your needs')}}</li>
-    </ol>
-    <div class="jumbotron jumbotron-fluid" style="padding:30px;word-wrap:break-word;">
-      <div class="container center">
-        <a class="btn btn-primary" href="{{=URL('admin','default','index')}}">
-          <i class="fa fa-cog"></i>
-          {{=T("admin")}}
-        </a>
-        <a class="btn btn-secondary" href="{{=URL('examples','default','index')}}">{{=T("Online examples")}}</a>
-        <a class="btn btn-secondary" href="http://web2py.com">web2py.com</a>
-        <a class="btn btn-secondary" href="http://web2py.com/book">{{=T('Documentation')}}</a>
-        <a class="btn btn-secondary" href="{{=URL('default','api_get_user_email')}}">{{=T('API Example')}}</a>
-        <a class="btn btn-secondary" href="{{=URL('default','grid/auth_user')}}">{{=T('Grid Example')}}</a>
-        <a class="btn btn-secondary" href="{{=URL('default','wiki')}}">{{=T('Wiki Example')}}</a>
-      </div>
+    <div class="bg-cardBg border-2 border-dashed border-gray-600 rounded-xl p-10 mt-8 hover:border-neonBlue transition-colors duration-300 relative group shadow-2xl" id="drop-zone">
+        
+        <div class="absolute top-0 right-0 bg-neonOrange text-black text-xs font-bold px-2 py-1 rounded-bl-lg">
+            AI ACTIVE 🧠
+        </div>
+
+        <div class="mb-4 transform group-hover:scale-110 transition-transform duration-300">
+            <svg class="w-16 h-16 mx-auto text-gray-400 group-hover:text-neonBlue transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
+            </svg>
+        </div>
+
+        <h3 class="text-2xl font-bold mb-2">Drop a "messy" file here</h3>
+        <p class="text-gray-400 text-sm mb-6">Watch AI map columns and fix errors in real-time.</p>
+        
+        <button class="bg-neonBlue text-black font-bold px-8 py-3 rounded-lg hover:bg-white hover:shadow-[0_0_15px_rgba(0,243,255,0.7)] transition-all duration-300">
+            Test the magic now
+        </button>
+
+        <input type="file" id="file-input" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
     </div>
-    {{elif 'content' in globals():}}
-    {{=content}}
-    {{else:}}
-    {{=BEAUTIFY(response._vars)}}
-    {{pass}}
-  </div>
-</div>
 
+    <div class="mt-16 grid grid-cols-1 md:grid-cols-3 gap-6 text-left">
+        
+        <div class="p-6 border border-gray-700 rounded-xl bg-gray-900/50 hover:bg-gray-800 transition">
+            <div class="text-neonOrange text-2xl mb-3">⚡</div>
+            <h4 class="font-bold text-white mb-2">Instant Onboarding</h4>
+            <p class="text-sm text-gray-400 leading-relaxed">
+                Stop losing leads because importing is too complicated. Your clients import their data themselves, without friction.
+            </p>
+        </div>
 
+        <div class="p-6 border border-gray-700 rounded-xl bg-gray-900/50 hover:bg-gray-800 transition">
+            <div class="text-neonBlue text-2xl mb-3">🧠</div>
+            <h4 class="font-bold text-white mb-2">Semantic Understanding</h4>
+            <p class="text-sm text-gray-400 leading-relaxed">
+                AI understands that "Tel.", "Mob.", and "Cell" are the same thing. No need to create Regex rules for every case.
+            </p>
+        </div>
 
+        <div class="p-6 border border-gray-700 rounded-xl bg-gray-900/50 hover:bg-gray-800 transition">
+            <div class="text-green-400 text-2xl mb-3">💎</div>
+            <h4 class="font-bold text-white mb-2">Zero Subscription</h4>
+            <p class="text-sm text-gray-400 leading-relaxed">
+                Why pay $500/mo for an API? Buy this code once, host it (Web2py), and it's yours forever.
+            </p>
+        </div>
+    </div>
+
+</main>
+
+<script type="text/python">
+from browser import document, alert
+
+def on_file_select(ev):
+    file = ev.target.files[0]
+    
+    alert(f"🚧 WORK IN PROGRESS (H+2) 🚧\n\n"
+          f"File received: {file.name}\n\n"
+          f"The Artificial Intelligence module is being built live right now!\n"
+          f"I am connecting the Python controller at this very moment.\n\n"
+          f"Come back in a few hours to see the magic happen.")
+
+document["file-input"].bind("change", on_file_select)
+</script>
