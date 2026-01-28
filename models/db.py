@@ -9,7 +9,7 @@ from gluon.tools import Auth
 import os
 import re
 
-REQUIRED_WEB2PY_VERSION = "3.0.10"
+REQUIRED_WEB2PY_VERSION = "2.0.10"
 
 # -------------------------------------------------------------------------
 # This scaffolding model makes your app work on Google App Engine too
