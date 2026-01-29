@@ -2,64 +2,84 @@
 
 <div id="app-container" class="max-w-6xl mx-auto px-4 py-8 min-h-screen">
 
-    <div id="view-dashboard" class="animate-fade-in">
+    <div id="view-dashboard" class="animate-fade-in relative">
+    
         <div class="flex justify-between items-end border-b border-gray-700 pb-4 mb-8">
             <div>
                 <h2 class="text-3xl font-bold text-white"><span class="text-neonBlue">AI-CRM</span> Importer</h2>
-                <p class="text-gray-400 text-sm">Bonjour, <span class="text-white font-bold">Alex</span>. Prêt à nettoyer de la data ?</p>
+                <p class="text-gray-400 text-sm">Bonjour, <span class="text-white font-bold">Alex</span>. Prêt à structurer votre CRM ?</p>
             </div>
-            <div class="flex gap-2">
-                <button class="text-gray-400 text-xs border border-gray-600 px-3 py-1 rounded hover:text-white">Settings</button>
-                <button class="text-neonOrange text-xs border border-neonOrange px-3 py-1 rounded hover:bg-neonOrange hover:text-black transition font-bold">API Key Configured</button>
+
+            <div class="flex items-center gap-4">
+                <div class="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full bg-gray-800 border border-gray-600 shadow-sm">
+                    <div class="w-5 h-5 rounded-full bg-gradient-to-tr from-neonBlue to-purple-500 border border-white/20"></div>
+                    <span class="text-xs font-bold text-gray-300">Alex</span>
+                </div>
+
+                <div class="h-6 w-px bg-gray-700 mx-1 hidden md:block"></div>
+
+                <button id="btn-api-config" class="text-xs border px-3 py-2 rounded-lg transition flex items-center gap-2 font-bold border-gray-600 text-gray-400 hover:text-white hover:border-gray-400 bg-gray-800/50">
+                    <span id="api-status-dot" class="w-2 h-2 rounded-full bg-red-500 shadow-[0_0_5px_rgba(239,68,68,0.5)] transition-all duration-300"></span>
+                    <span>Clé API</span>
+                </button>
+
+                <button id="btn-open-settings" class="text-gray-400 hover:text-neonBlue transition p-2 border border-gray-600 rounded-lg hover:border-neonBlue bg-gray-800/50" title="Paramètres Avancés">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                </button>
+
             </div>
         </div>
 
-        <div class="bg-cardBg border-2 border-dashed border-gray-600 rounded-xl p-12 text-center hover:border-neonBlue transition group cursor-pointer relative" id="drop-area">
-            <input type="file" id="file-upload" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
-            <div class="mb-4">
-                <svg class="w-16 h-16 mx-auto text-gray-500 group-hover:text-neonBlue transition duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+        <div id="drop-zone" class="bg-cardBg border-2 border-dashed border-gray-600 rounded-xl p-12 text-center transition-all duration-200 group cursor-pointer relative overflow-hidden">
+            
+            <input type="file" id="file-upload" 
+             accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
+             class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20">
+
+            <div id="drop-content-default" class="transition-opacity duration-300">
+                <div class="mb-4 transform group-hover:scale-110 transition duration-300">
+                    <svg class="w-16 h-16 mx-auto text-gray-500 group-hover:text-neonBlue" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+                </div>
+                <h3 class="text-2xl font-bold text-white mb-2">Importez vos données CRM sans effort</h3>
+                <p class="text-gray-500 text-sm mb-6">Glissez un fichier <span class="text-neonBlue">CSV</span> ou <span class="text-neonBlue">Excel</span>.</p>
+                <button class="bg-gray-700 text-white px-6 py-2 rounded hover:bg-gray-600 transition pointer-events-none border border-gray-500">
+                    [ Parcourir les fichiers ]
+                </button>
             </div>
-            <h3 class="text-2xl font-bold text-white mb-2">DROP YOUR CSV / EXCEL HERE</h3>
-            <p class="text-gray-500 text-sm mb-6">Drag & drop files or click to browse</p>
-            <button class="bg-gray-700 text-white px-6 py-2 rounded hover:bg-gray-600 transition pointer-events-none">
-                [ Browse Files ]
-            </button>
+
+            <div id="drop-content-loading" class="hidden absolute inset-0 flex flex-col items-center justify-center bg-cardBg z-10">
+                <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-neonBlue mb-4"></div>
+                <p class="text-white font-mono animate-pulse">Lecture locale du fichier...</p>
+            </div>
+
+            <div id="drop-message-error" class="hidden absolute top-4 left-0 right-0 mx-auto w-3/4 bg-red-900/90 text-white px-4 py-2 rounded border border-red-500 shadow-lg z-30">
+                ⚠️ Format non supporté. Seuls .csv et .xlsx sont acceptés.
+            </div>
         </div>
 
         <div class="mt-12">
-            <h3 class="text-white font-bold mb-4 border-l-4 border-neonBlue pl-3">RECENT IMPORTS (Last 5)</h3>
-            <div class="bg-cardBg rounded-lg overflow-hidden border border-gray-700">
+            <h3 class="text-white font-bold mb-4 border-l-4 border-neonBlue pl-3">HISTORIQUE RÉCENT</h3>
+            
+            <div id="history-empty" class="hidden bg-gray-800/50 rounded-lg p-8 text-center border border-gray-700 border-dashed">
+                <p class="text-gray-400">Votre base est vide, commencez par votre premier import.</p>
+            </div>
+
+            <div id="history-table" class="bg-cardBg rounded-lg overflow-hidden border border-gray-700">
                 <table class="w-full text-left text-sm text-gray-400">
                     <thead class="bg-gray-800 text-gray-200 uppercase font-mono text-xs">
                         <tr>
                             <th class="px-6 py-3">Date</th>
-                            <th class="px-6 py-3">File Name</th>
-                            <th class="px-6 py-3">Status</th>
-                            <th class="px-6 py-3 text-right">Rows</th>
+                            <th class="px-6 py-3">Fichier</th>
+                            <th class="px-6 py-3">Statut</th>
+                            <th class="px-6 py-3 text-right">Lignes</th>
                             <th class="px-6 py-3 text-right">Log</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-gray-700">
-                        <tr class="hover:bg-gray-700/50 transition">
-                            <td class="px-6 py-4">2026-01-28</td>
-                            <td class="px-6 py-4 text-white font-mono">clients_v2.csv</td>
-                            <td class="px-6 py-4"><span class="bg-green-900/50 text-green-400 border border-green-800 px-2 py-1 rounded text-xs font-bold">[ SUCCESS ]</span></td>
-                            <td class="px-6 py-4 text-right">1,240</td>
-                            <td class="px-6 py-4 text-right"><a href="#" class="text-neonBlue hover:underline">[View]</a></td>
-                        </tr>
-                        <tr class="hover:bg-gray-700/50 transition">
-                            <td class="px-6 py-4">2026-01-25</td>
-                            <td class="px-6 py-4 text-white font-mono">old_data.xlsx</td>
-                            <td class="px-6 py-4"><span class="bg-red-900/50 text-red-400 border border-red-800 px-2 py-1 rounded text-xs font-bold">[ FAILED ]</span></td>
-                            <td class="px-6 py-4 text-right">0</td>
-                            <td class="px-6 py-4 text-right"><a href="#" class="text-red-400 hover:underline">[Error]</a></td>
-                        </tr>
-                    </tbody>
+                    <tbody class="divide-y divide-gray-700" id="history-rows"></tbody>
                 </table>
             </div>
         </div>
     </div>
-
 
     <div id="view-mapping" class="hidden animate-fade-in">
         <div class="flex justify-between items-center mb-8">
@@ -70,7 +90,6 @@
         </div>
 
         <div class="grid grid-cols-[1fr_100px_1fr] gap-4 items-start">
-            
             <div class="bg-gray-800/50 border border-gray-600 rounded-lg p-4">
                 <h3 class="text-gray-400 font-mono text-xs uppercase mb-4 text-center">SOURCE (CSV Headers)</h3>
                 <div class="space-y-4" id="mapping-source-container">
@@ -125,14 +144,11 @@
         </div>
     </div>
 
-
     <div id="view-review" class="hidden animate-fade-in flex flex-col h-[80vh]">
         <div class="flex justify-between items-center mb-4">
             <h2 class="text-2xl font-bold text-white">STEP 3: Data Review</h2>
             <div class="flex items-center gap-4">
-                <span class="text-red-400 font-bold bg-red-900/20 px-3 py-1 rounded border border-red-500 animate-pulse">
-                    ! 24 Errors Found
-                </span>
+                <span class="text-red-400 font-bold bg-red-900/20 px-3 py-1 rounded border border-red-500 animate-pulse">! 24 Errors Found</span>
                 <label class="flex items-center space-x-2 text-sm text-gray-300 cursor-pointer hover:text-white">
                     <input type="checkbox" class="rounded bg-gray-700 border-gray-600 text-red-500 focus:ring-0">
                     <span>[ Filter: Errors Only ]</span>
@@ -180,21 +196,15 @@
         <div class="mt-4 pt-4 border-t border-gray-700 flex justify-between items-center">
             <div class="text-sm text-gray-400">
                 STATS: <span class="text-green-400 font-bold">480 Ready</span> | 
-                <span class="text-red-400 font-bold">20 Errors</span> | 
-                <span class="text-gray-500">0 Ignored</span>
+                <span class="text-red-400 font-bold">20 Errors</span>
             </div>
             <div class="flex gap-4">
-                <button class="px-4 py-2 bg-gray-800 text-neonBlue border border-gray-600 rounded text-xs hover:bg-gray-700">
-                    [ CLEAN AUTO (Trim/Caps) ]
-                </button>
+                <button class="px-4 py-2 bg-gray-800 text-neonBlue border border-gray-600 rounded text-xs hover:bg-gray-700">[ CLEAN AUTO ]</button>
                 <button id="btn-back-review" class="px-4 py-2 text-gray-400 hover:text-white">[ < BACK ]</button>
-                <button id="btn-commit" class="bg-green-600 text-white font-bold px-6 py-2 rounded hover:bg-green-500 hover:shadow-[0_0_15px_rgba(34,197,94,0.5)] transition">
-                    [ COMMIT IMPORT ]
-                </button>
+                <button id="btn-commit" class="bg-green-600 text-white font-bold px-6 py-2 rounded hover:bg-green-500 hover:shadow-[0_0_15px_rgba(34,197,94,0.5)] transition">[ COMMIT IMPORT ]</button>
             </div>
         </div>
     </div>
-
 
     <div id="view-success" class="hidden animate-fade-in text-center pt-20">
         <h2 class="text-4xl font-bold text-white mb-8 tracking-wider">IMPORT COMPLETE</h2>
@@ -236,78 +246,134 @@
                 [ Download Error Log (.csv) ]
             </button>
             <div class="flex gap-2">
-                <button class="bg-white text-black font-bold px-6 py-3 rounded hover:bg-gray-200 transition">
-                    [ VIEW CRM CONTACTS ]
-                </button>
-                <button id="btn-restart" class="bg-neonBlue text-black font-bold px-6 py-3 rounded hover:bg-neonBlue/80 transition">
-                    [ BACK TO DASHBOARD ]
-                </button>
+                <button class="bg-white text-black font-bold px-6 py-3 rounded hover:bg-gray-200 transition">[ VIEW CRM CONTACTS ]</button>
+                <button id="btn-restart" class="bg-neonBlue text-black font-bold px-6 py-3 rounded hover:bg-neonBlue/80 transition">[ BACK TO DASHBOARD ]</button>
             </div>
+        </div>
+    </div>
+
+    <div id="modal-api" class="hidden fixed inset-0 bg-black/90 backdrop-blur-sm z-50 flex items-center justify-center animate-fade-in transition-all">
+        <div class="bg-gray-900 border border-gray-700 p-8 rounded-xl max-w-lg w-full shadow-[0_0_40px_rgba(0,243,255,0.15)] relative transform transition-all" id="modal-card">
+            
+            <button id="btn-close-modal" class="absolute top-4 right-4 text-gray-500 hover:text-white transition focus:outline-none">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+
+            <div class="text-center mb-6">
+                <div id="status-badge" class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-900/30 text-blue-400 mb-2 border border-blue-500/30 transition-all">
+                    <span>✨</span> <span id="status-text">Powered by Google Gemini</span>
+                </div>
+                <h3 class="text-2xl font-bold text-white">Configuration IA</h3>
+            </div>
+
+            <div class="mb-6 relative">
+                <label class="block text-gray-400 text-xs uppercase font-bold mb-2">Clé API Google AI Studio</label>
+                <div class="relative">
+                    <input type="password" id="api-key-input" placeholder="Collez votre clé ici (AIza...)" 
+                           class="w-full bg-gray-800 border border-gray-600 rounded p-3 text-white focus:border-neonBlue focus:ring-1 focus:ring-neonBlue focus:outline-none transition-all">
+                    <div id="icon-success-input" class="hidden absolute right-3 top-3 text-green-500">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                    </div>
+                </div>
+                <p id="api-error-msg" class="hidden text-red-500 text-xs mt-2 font-bold flex items-center gap-1">
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    <span>Clé invalide. Elle doit commencer par "AIza".</span>
+                </p>
+            </div>
+
+            <div id="model-selection-container" class="mb-8 transition-opacity duration-300">
+                <label class="block text-gray-400 text-xs uppercase font-bold mb-2">Choisir le Modèle</label>
+                <div class="grid grid-cols-2 gap-4">
+                    <div id="model-card-flash" class="cursor-pointer border-2 border-neonBlue bg-blue-900/20 rounded-lg p-4 hover:bg-blue-900/40 transition relative group" onclick="select_model('flash')">
+                        <div class="absolute top-2 right-2 text-neonBlue"><svg id="icon-check-flash" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg></div>
+                        <div class="text-neonBlue font-bold text-lg mb-1">⚡ Flash 2.0</div>
+                        <p class="text-gray-400 text-xs leading-tight">Vitesse extrême.</p>
+                    </div>
+                    <div id="model-card-pro" class="cursor-pointer border-2 border-gray-700 bg-gray-800 rounded-lg p-4 hover:border-gray-500 transition relative group" onclick="select_model('pro')">
+                        <div class="absolute top-2 right-2 text-gray-500 hidden" id="icon-check-pro"><svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg></div>
+                        <div class="text-white font-bold text-lg mb-1">🧠 Pro 1.5</div>
+                        <p class="text-gray-400 text-xs leading-tight">Raisonnement pur.</p>
+                    </div>
+                </div>
+                <input type="hidden" id="selected-model-value" value="gemini-2.0-flash">
+            </div>
+
+            <button id="btn-save-api" class="w-full bg-gray-700 text-gray-300 font-bold py-3 rounded transition-all duration-300 flex justify-center items-center gap-2">
+                <span id="btn-save-text">Sauvegarder</span>
+                <svg id="btn-spinner" class="hidden animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <div id="modal-settings" class="hidden fixed inset-0 bg-black/90 backdrop-blur-sm z-50 flex items-center justify-center animate-fade-in">
+        <div class="bg-gray-900 border border-gray-700 rounded-xl max-w-2xl w-full shadow-[0_0_40px_rgba(255,153,0,0.15)] relative overflow-hidden flex flex-col max-h-[90vh]">
+            
+            <div class="bg-gray-800/50 border-b border-gray-700 p-6 pb-0">
+                <div class="flex justify-between items-start mb-6">
+                    <h3 class="text-2xl font-bold text-white">Paramètres ⚙️</h3>
+                    <button id="btn-close-settings" class="text-gray-500 hover:text-white"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
+                </div>
+                <div class="flex gap-6">
+                    <button id="tab-btn-general" onclick="switch_tab('general')" class="pb-3 border-b-2 border-neonBlue text-neonBlue font-bold text-sm hover:text-white transition">Général</button>
+                    <button id="tab-btn-brain" onclick="switch_tab('brain')" class="pb-3 border-b-2 border-transparent text-gray-400 font-bold text-sm hover:text-white hover:border-gray-600 transition">🧠 Intelligence</button>
+                </div>
+            </div>
+    
+            <div class="p-8 overflow-y-auto">
+                <div id="tab-content-general" class="space-y-6 animate-fade-in">
+                    <div>
+                        <label class="block text-gray-400 text-xs uppercase font-bold mb-3">Format de Date Cible</label>
+                        <select id="date-format-select" class="w-full bg-gray-800 border border-gray-600 rounded p-3 text-white focus:border-neonBlue focus:outline-none">
+                            <option value="%Y-%m-%d">ISO 8601 (2026-01-30)</option>
+                            <option value="%d/%m/%Y">Français (30/01/2026)</option>
+                            <option value="%m/%d/%Y">US (01/30/2026)</option>
+                        </select>
+                        <p class="text-gray-500 text-xs mt-2">L'IA convertira toutes les dates vers ce format standard.</p>
+                    </div>
+                </div>
+    
+                <div id="tab-content-brain" class="hidden space-y-6 animate-fade-in">
+                    <div class="bg-blue-900/20 border border-blue-500/30 p-4 rounded-lg">
+                        <p class="text-blue-300 text-xs">⚠️ Zone Expert. Modifiez les instructions système envoyées à Gemini.</p>
+                    </div>
+                    <div>
+                        <label class="block text-gray-400 text-xs uppercase font-bold mb-3">Prompt Système</label>
+                        <textarea id="system-prompt-input" rows="6" class="w-full bg-gray-800 border border-gray-600 rounded p-4 text-white font-mono text-sm leading-relaxed focus:border-neonOrange focus:outline-none placeholder-gray-600">Tu es un expert en Data Engineering...</textarea>
+                    </div>
+                    <div>
+                        <div class="flex justify-between mb-2">
+                            <label class="block text-gray-400 text-xs uppercase font-bold">Niveau de Créativité</label>
+                            <span id="strictness-label" class="text-neonOrange text-xs font-bold">Équilibré</span>
+                        </div>
+                        <input type="range" id="strictness-slider" min="0" max="2" step="1" value="1" class="w-full accent-neonOrange h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer">
+                        <div class="flex justify-between text-gray-500 text-[10px] mt-1 font-mono">
+                            <span>Strict</span><span>Équilibré</span><span>Créatif</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+    
+            <div class="bg-gray-800/50 border-t border-gray-700 p-6 flex justify-end">
+                <button id="btn-save-settings" class="bg-neonBlue text-black font-bold py-2 px-6 rounded hover:bg-white transition">Enregistrer</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="custom-alert" class="hidden fixed inset-0 z-[60] flex items-center justify-center bg-black/80 backdrop-blur-sm transition-opacity duration-300">
+        <div class="bg-gray-900 border border-red-500 rounded-xl p-8 max-w-sm w-full shadow-[0_0_50px_rgba(239,68,68,0.5)] text-center transform scale-100">
+            <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-900/50 mb-6 border border-red-500">
+                <svg class="h-10 w-10 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+            </div>
+            <h3 class="text-xl font-bold text-white mb-2">Format Refusé !</h3>
+            <p id="alert-message" class="text-gray-300 text-sm mb-6">Seuls les fichiers CSV et Excel sont acceptés.</p>
+            <button id="btn-close-alert" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-4 rounded transition focus:outline-none focus:ring-2 focus:ring-red-500">J'ai compris</button>
         </div>
     </div>
 
 </div>
 
-<script type="text/python">
-from browser import document, window, timer, alert
 
-# --- NAVIGATION MANAGER ---
-def show_view(view_id):
-    # Hide all views
-    for vid in ['view-dashboard', 'view-mapping', 'view-review', 'view-success']:
-        document[vid].classList.add('hidden')
-    
-    # Show target view
-    document[view_id].classList.remove('hidden')
-    window.scrollTo(0, 0)
-
-# --- EVENT HANDLERS ---
-
-def on_file_upload(ev):
-    # Simulate API Upload Delay
-    # In real app: POST to api_upload()
-    file = ev.target.files[0]
-    # alert(f"Uploading {file.name}...") 
-    
-    # Fake loading effect then switch
-    timer.set_timeout(lambda: show_view('view-mapping'), 800)
-
-def on_analyze(ev):
-    # Transition to Review Grid
-    # In real app: GET api_mapping_suggestion() check
-    document['btn-analyze'].text = "Processing..."
-    timer.set_timeout(lambda: show_view('view-review'), 500)
-    # Reset button text for later
-    timer.set_timeout(lambda: setattr(document['btn-analyze'], 'text', '[ ANALYZE DATA > ]'), 600)
-
-def on_commit(ev):
-    # Transition to Success
-    # In real app: POST api_save_data()
-    document['btn-commit'].text = "Saving..."
-    timer.set_timeout(lambda: show_view('view-success'), 1500)
-    timer.set_timeout(lambda: setattr(document['btn-commit'], 'text', '[ COMMIT IMPORT ]'), 1600)
-
-def on_restart(ev):
-    # Reset and go back home
-    show_view('view-dashboard')
-    # Clear file input
-    document['file-upload'].value = ''
-
-# --- BINDINGS (Equivalent to addEventListener) ---
-
-# Dashboard -> Mapping
-document['file-upload'].bind('change', on_file_upload)
-
-# Mapping -> Review
-document['btn-analyze'].bind('click', on_analyze)
-document['btn-back-mapping'].bind('click', lambda ev: show_view('view-dashboard'))
-
-# Review -> Success
-document['btn-commit'].bind('click', on_commit)
-document['btn-back-review'].bind('click', lambda ev: show_view('view-mapping'))
-
-# Success -> Dashboard
-document['btn-restart'].bind('click', on_restart)
-
-</script>
-
+<script type="text/python" src="{{=URL('static', 'python/app.py')}}"></script>
