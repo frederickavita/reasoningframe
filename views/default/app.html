@@ -1,0 +1,313 @@
+{{extend 'malayout.html'}}
+
+<div id="app-container" class="max-w-6xl mx-auto px-4 py-8 min-h-screen">
+
+    <div id="view-dashboard" class="animate-fade-in">
+        <div class="flex justify-between items-end border-b border-gray-700 pb-4 mb-8">
+            <div>
+                <h2 class="text-3xl font-bold text-white"><span class="text-neonBlue">AI-CRM</span> Importer</h2>
+                <p class="text-gray-400 text-sm">Bonjour, <span class="text-white font-bold">Alex</span>. Prêt à nettoyer de la data ?</p>
+            </div>
+            <div class="flex gap-2">
+                <button class="text-gray-400 text-xs border border-gray-600 px-3 py-1 rounded hover:text-white">Settings</button>
+                <button class="text-neonOrange text-xs border border-neonOrange px-3 py-1 rounded hover:bg-neonOrange hover:text-black transition font-bold">API Key Configured</button>
+            </div>
+        </div>
+
+        <div class="bg-cardBg border-2 border-dashed border-gray-600 rounded-xl p-12 text-center hover:border-neonBlue transition group cursor-pointer relative" id="drop-area">
+            <input type="file" id="file-upload" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
+            <div class="mb-4">
+                <svg class="w-16 h-16 mx-auto text-gray-500 group-hover:text-neonBlue transition duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+            </div>
+            <h3 class="text-2xl font-bold text-white mb-2">DROP YOUR CSV / EXCEL HERE</h3>
+            <p class="text-gray-500 text-sm mb-6">Drag & drop files or click to browse</p>
+            <button class="bg-gray-700 text-white px-6 py-2 rounded hover:bg-gray-600 transition pointer-events-none">
+                [ Browse Files ]
+            </button>
+        </div>
+
+        <div class="mt-12">
+            <h3 class="text-white font-bold mb-4 border-l-4 border-neonBlue pl-3">RECENT IMPORTS (Last 5)</h3>
+            <div class="bg-cardBg rounded-lg overflow-hidden border border-gray-700">
+                <table class="w-full text-left text-sm text-gray-400">
+                    <thead class="bg-gray-800 text-gray-200 uppercase font-mono text-xs">
+                        <tr>
+                            <th class="px-6 py-3">Date</th>
+                            <th class="px-6 py-3">File Name</th>
+                            <th class="px-6 py-3">Status</th>
+                            <th class="px-6 py-3 text-right">Rows</th>
+                            <th class="px-6 py-3 text-right">Log</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-700">
+                        <tr class="hover:bg-gray-700/50 transition">
+                            <td class="px-6 py-4">2026-01-28</td>
+                            <td class="px-6 py-4 text-white font-mono">clients_v2.csv</td>
+                            <td class="px-6 py-4"><span class="bg-green-900/50 text-green-400 border border-green-800 px-2 py-1 rounded text-xs font-bold">[ SUCCESS ]</span></td>
+                            <td class="px-6 py-4 text-right">1,240</td>
+                            <td class="px-6 py-4 text-right"><a href="#" class="text-neonBlue hover:underline">[View]</a></td>
+                        </tr>
+                        <tr class="hover:bg-gray-700/50 transition">
+                            <td class="px-6 py-4">2026-01-25</td>
+                            <td class="px-6 py-4 text-white font-mono">old_data.xlsx</td>
+                            <td class="px-6 py-4"><span class="bg-red-900/50 text-red-400 border border-red-800 px-2 py-1 rounded text-xs font-bold">[ FAILED ]</span></td>
+                            <td class="px-6 py-4 text-right">0</td>
+                            <td class="px-6 py-4 text-right"><a href="#" class="text-red-400 hover:underline">[Error]</a></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+
+    <div id="view-mapping" class="hidden animate-fade-in">
+        <div class="flex justify-between items-center mb-8">
+            <h2 class="text-2xl font-bold text-white">STEP 2: Align Your Columns</h2>
+            <span class="text-neonOrange bg-orange-900/30 px-3 py-1 rounded border border-orange-500/50 text-sm">
+                🤖 AI Confidence: <span id="ai-score">8/10</span>
+            </span>
+        </div>
+
+        <div class="grid grid-cols-[1fr_100px_1fr] gap-4 items-start">
+            
+            <div class="bg-gray-800/50 border border-gray-600 rounded-lg p-4">
+                <h3 class="text-gray-400 font-mono text-xs uppercase mb-4 text-center">SOURCE (CSV Headers)</h3>
+                <div class="space-y-4" id="mapping-source-container">
+                    <div class="h-10 flex items-center px-3 bg-gray-700 rounded text-white border border-gray-600">"First_Name"</div>
+                    <div class="h-10 flex items-center px-3 bg-gray-700 rounded text-white border border-gray-600">"Contact_Email"</div>
+                    <div class="h-10 flex items-center px-3 bg-gray-700 rounded text-white border border-gray-600">"Mob."</div>
+                    <div class="h-10 flex items-center px-3 bg-gray-700 rounded text-white border border-gray-600">"Company_Name"</div>
+                </div>
+            </div>
+
+            <div class="flex flex-col space-y-4 pt-10 items-center text-gray-500">
+                <div class="h-10 flex items-center">-----></div>
+                <div class="h-10 flex items-center">-----></div>
+                <div class="h-10 flex items-center">-----></div>
+                <div class="h-10 flex items-center text-neonBlue font-bold text-xs">--(IA?)</div>
+            </div>
+
+            <div class="bg-gray-800/50 border border-neonBlue/30 rounded-lg p-4 shadow-[0_0_10px_rgba(0,243,255,0.1)]">
+                <h3 class="text-neonBlue font-mono text-xs uppercase mb-4 text-center">TARGET (CRM Fields)</h3>
+                <div class="space-y-4" id="mapping-target-container">
+                    <div class="h-10 flex items-center justify-between px-3 bg-green-900/20 border border-green-500/50 rounded text-green-400">
+                        <span>First Name</span> <span class="text-xs">[ V ]</span>
+                    </div>
+                    <div class="h-10 flex items-center justify-between px-3 bg-green-900/20 border border-green-500/50 rounded text-green-400">
+                        <span>Email</span> <span class="text-xs">[ V ]</span>
+                    </div>
+                    <div class="h-10 flex items-center justify-between px-3 bg-green-900/20 border border-green-500/50 rounded text-green-400">
+                        <span>Phone</span> <span class="text-xs">[ V ]</span>
+                    </div>
+                    <div class="h-10 flex items-center px-0">
+                        <select class="w-full bg-gray-900 text-white border border-neonOrange rounded h-full px-2 text-sm focus:outline-none focus:border-white">
+                            <option value="">[ Select Field ]</option>
+                            <option value="company" selected>Company</option>
+                            <option value="website">Website</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-8 flex justify-between items-center border-t border-gray-700 pt-6">
+            <label class="flex items-center space-x-2 cursor-pointer">
+                <input type="checkbox" checked class="form-checkbox text-neonBlue rounded bg-gray-700 border-gray-600">
+                <span class="text-gray-400 text-sm">Ignore unmapped columns</span>
+            </label>
+            <div class="flex gap-4">
+                <button id="btn-back-mapping" class="px-6 py-2 text-gray-400 hover:text-white transition">[ BACK ]</button>
+                <button id="btn-analyze" class="bg-neonBlue text-black font-bold px-6 py-2 rounded hover:bg-white hover:shadow-lg transition">
+                    [ ANALYZE DATA > ]
+                </button>
+            </div>
+        </div>
+    </div>
+
+
+    <div id="view-review" class="hidden animate-fade-in flex flex-col h-[80vh]">
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-2xl font-bold text-white">STEP 3: Data Review</h2>
+            <div class="flex items-center gap-4">
+                <span class="text-red-400 font-bold bg-red-900/20 px-3 py-1 rounded border border-red-500 animate-pulse">
+                    ! 24 Errors Found
+                </span>
+                <label class="flex items-center space-x-2 text-sm text-gray-300 cursor-pointer hover:text-white">
+                    <input type="checkbox" class="rounded bg-gray-700 border-gray-600 text-red-500 focus:ring-0">
+                    <span>[ Filter: Errors Only ]</span>
+                </label>
+            </div>
+        </div>
+
+        <div class="flex-grow overflow-auto bg-white rounded-lg shadow-inner">
+            <table class="w-full text-sm border-collapse text-gray-800 font-mono">
+                <thead class="bg-gray-200 sticky top-0 z-10">
+                    <tr>
+                        <th class="p-3 border border-gray-300 text-left w-16">ID</th>
+                        <th class="p-3 border border-gray-300 text-left">First Name</th>
+                        <th class="p-3 border border-gray-300 text-left">Email</th>
+                        <th class="p-3 border border-gray-300 text-left">Phone</th>
+                        <th class="p-3 border border-gray-300 text-left">Company</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white">
+                    <tr>
+                        <td class="p-2 border border-gray-200 bg-gray-50 text-center">001</td>
+                        <td class="p-2 border border-gray-200" contenteditable="true">John</td>
+                        <td class="p-2 border border-gray-200" contenteditable="true">john@doe.com</td>
+                        <td class="p-2 border border-gray-200" contenteditable="true">+33612345678</td>
+                        <td class="p-2 border border-gray-200" contenteditable="true">ACME</td>
+                    </tr>
+                    <tr class="bg-red-50">
+                        <td class="p-2 border border-gray-200 bg-red-100 text-center text-red-700 font-bold">002</td>
+                        <td class="p-2 border border-gray-200" contenteditable="true">Sarah</td>
+                        <td class="p-2 border border-red-500 bg-red-200 text-red-900 font-bold cursor-help" title="Invalid Email Format">[!!! Invalid !!]</td>
+                        <td class="p-2 border border-gray-200" contenteditable="true">+33600000001</td>
+                        <td class="p-2 border border-gray-200" contenteditable="true">TechCorp</td>
+                    </tr>
+                    <tr class="bg-red-50">
+                        <td class="p-2 border border-gray-200 bg-red-100 text-center text-red-700 font-bold">003</td>
+                        <td class="p-2 border border-red-500 bg-red-200 text-red-900 italic" title="Required Field">[Empty]</td>
+                        <td class="p-2 border border-gray-200" contenteditable="true">mike@test.fr</td>
+                        <td class="p-2 border border-red-500 bg-red-200 text-red-900 font-bold" title="Format Error">[!! Format !!]</td>
+                        <td class="p-2 border border-gray-200" contenteditable="true">Solo</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="mt-4 pt-4 border-t border-gray-700 flex justify-between items-center">
+            <div class="text-sm text-gray-400">
+                STATS: <span class="text-green-400 font-bold">480 Ready</span> | 
+                <span class="text-red-400 font-bold">20 Errors</span> | 
+                <span class="text-gray-500">0 Ignored</span>
+            </div>
+            <div class="flex gap-4">
+                <button class="px-4 py-2 bg-gray-800 text-neonBlue border border-gray-600 rounded text-xs hover:bg-gray-700">
+                    [ CLEAN AUTO (Trim/Caps) ]
+                </button>
+                <button id="btn-back-review" class="px-4 py-2 text-gray-400 hover:text-white">[ < BACK ]</button>
+                <button id="btn-commit" class="bg-green-600 text-white font-bold px-6 py-2 rounded hover:bg-green-500 hover:shadow-[0_0_15px_rgba(34,197,94,0.5)] transition">
+                    [ COMMIT IMPORT ]
+                </button>
+            </div>
+        </div>
+    </div>
+
+
+    <div id="view-success" class="hidden animate-fade-in text-center pt-20">
+        <h2 class="text-4xl font-bold text-white mb-8 tracking-wider">IMPORT COMPLETE</h2>
+        
+        <div class="relative w-48 h-48 mx-auto mb-10 flex items-center justify-center rounded-full border-4 border-gray-700">
+            <div class="absolute inset-0 rounded-full border-4 border-green-500 border-t-transparent animate-spin-slow" style="border-right-color: #22c55e; border-bottom-color: #22c55e;"></div>
+            <div class="text-center">
+                <div class="text-5xl font-bold text-green-400">96%</div>
+                <div class="text-xs text-gray-400 uppercase mt-1">Success Rate</div>
+            </div>
+        </div>
+
+        <div class="max-w-md mx-auto mb-10">
+            <div class="h-4 bg-gray-700 rounded-full overflow-hidden border border-gray-600">
+                <div class="h-full bg-green-500 w-[96%] relative">
+                    <div class="absolute right-0 top-0 bottom-0 w-1 bg-white/50"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-cardBg inline-block px-10 py-6 rounded-lg border border-gray-700 text-left mb-10">
+            <ul class="space-y-3 font-mono text-sm">
+                <li class="flex items-center gap-3">
+                    <span class="text-green-500">✔</span> 
+                    <span class="text-gray-300">- Successfully Imported:</span> 
+                    <span class="text-white font-bold ml-auto">480 rows</span>
+                </li>
+                <li class="flex items-center gap-3">
+                    <span class="text-red-500">✖</span> 
+                    <span class="text-gray-300">- Failed / Ignored:</span> 
+                    <span class="text-white font-bold ml-auto">20 rows</span>
+                </li>
+            </ul>
+        </div>
+
+        <div class="flex justify-center gap-6">
+            <button class="bg-gray-800 text-gray-300 border border-gray-600 px-6 py-3 rounded hover:bg-gray-700 transition flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                [ Download Error Log (.csv) ]
+            </button>
+            <div class="flex gap-2">
+                <button class="bg-white text-black font-bold px-6 py-3 rounded hover:bg-gray-200 transition">
+                    [ VIEW CRM CONTACTS ]
+                </button>
+                <button id="btn-restart" class="bg-neonBlue text-black font-bold px-6 py-3 rounded hover:bg-neonBlue/80 transition">
+                    [ BACK TO DASHBOARD ]
+                </button>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script type="text/python">
+from browser import document, window, timer, alert
+
+# --- NAVIGATION MANAGER ---
+def show_view(view_id):
+    # Hide all views
+    for vid in ['view-dashboard', 'view-mapping', 'view-review', 'view-success']:
+        document[vid].classList.add('hidden')
+    
+    # Show target view
+    document[view_id].classList.remove('hidden')
+    window.scrollTo(0, 0)
+
+# --- EVENT HANDLERS ---
+
+def on_file_upload(ev):
+    # Simulate API Upload Delay
+    # In real app: POST to api_upload()
+    file = ev.target.files[0]
+    # alert(f"Uploading {file.name}...") 
+    
+    # Fake loading effect then switch
+    timer.set_timeout(lambda: show_view('view-mapping'), 800)
+
+def on_analyze(ev):
+    # Transition to Review Grid
+    # In real app: GET api_mapping_suggestion() check
+    document['btn-analyze'].text = "Processing..."
+    timer.set_timeout(lambda: show_view('view-review'), 500)
+    # Reset button text for later
+    timer.set_timeout(lambda: setattr(document['btn-analyze'], 'text', '[ ANALYZE DATA > ]'), 600)
+
+def on_commit(ev):
+    # Transition to Success
+    # In real app: POST api_save_data()
+    document['btn-commit'].text = "Saving..."
+    timer.set_timeout(lambda: show_view('view-success'), 1500)
+    timer.set_timeout(lambda: setattr(document['btn-commit'], 'text', '[ COMMIT IMPORT ]'), 1600)
+
+def on_restart(ev):
+    # Reset and go back home
+    show_view('view-dashboard')
+    # Clear file input
+    document['file-upload'].value = ''
+
+# --- BINDINGS (Equivalent to addEventListener) ---
+
+# Dashboard -> Mapping
+document['file-upload'].bind('change', on_file_upload)
+
+# Mapping -> Review
+document['btn-analyze'].bind('click', on_analyze)
+document['btn-back-mapping'].bind('click', lambda ev: show_view('view-dashboard'))
+
+# Review -> Success
+document['btn-commit'].bind('click', on_commit)
+document['btn-back-review'].bind('click', lambda ev: show_view('view-mapping'))
+
+# Success -> Dashboard
+document['btn-restart'].bind('click', on_restart)
+
+</script>
+

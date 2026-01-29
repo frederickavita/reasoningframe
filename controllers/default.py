@@ -9,6 +9,25 @@ def index():
     response.flash = T("Hello World")
     return dict(message=T('Welcome to web2py!'))
 
+def app():
+    """
+    Ceci est le cœur de l'application (SaaS).
+    L'utilisateur doit être connecté pour voir cette page (on gérera l'auth plus tard).
+    """
+    return dict()
+
+
+def api_upload():
+    return dict() 
+
+
+def api_mapping_suggestion():
+    return dict()
+
+def api_save_data():
+    return dict()
+
+
 # ---- API (example) -----
 @auth.requires_login()
 def api_get_user_email():
