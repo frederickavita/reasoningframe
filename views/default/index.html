@@ -1,79 +1,253 @@
-{{extend 'malayout.html'}}
+{{extend "malayout.html"}}
+<nav class="flex justify-between items-center p-6 max-w-6xl mx-auto border-b border-slate-900/50">
+        <div class="text-xl font-bold tracking-tighter text-white flex items-center gap-2">
+            <div class="w-6 h-6 bg-purple-600 rounded-sm"></div>
+            Reasoning<span class="text-purple-400">Frame</span>
+        </div>
+        <div class="hidden md:flex gap-6 text-sm font-medium">
+            <a href="#how" class="text-slate-400 hover:text-white transition">How it works</a>
+            <a href="#pricing" class="text-slate-400 hover:text-white transition">Pricing</a>
+            <a href="#faq" class="text-slate-400 hover:text-white transition">FAQ</a>
+        </div>
+        <a href="#pricing" class="bg-slate-800 hover:bg-slate-700 text-white px-4 py-2 rounded-lg text-sm transition border border-slate-700">
+            Get Access
+        </a>
+    </nav>
 
-<main class="max-w-4xl mx-auto mt-8 text-center px-4">
-    
-    <h1 class="text-5xl md:text-7xl font-extrabold mb-6 glitch-text leading-tight">
-        KILLING <span class="text-transparent bg-clip-text bg-gradient-to-r from-neonBlue to-purple-500">CSV HELL</span>
-    </h1>
-    
-    <p class="text-lg md:text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
-        Do your clients send you horrible Excel files?<br>
-        <span class="text-neonOrange font-bold">Stop wasting hours cleaning data.</span> 
-        AI handles the dirty work so you can import in 3 clicks.
-    </p>
+    <section class="text-center pt-20 pb-24 px-4 relative overflow-hidden">
+        <div class="absolute top-10 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-purple-600/20 rounded-full blur-[100px] -z-10"></div>
 
-    <div class="bg-cardBg border-2 border-dashed border-gray-600 rounded-xl p-10 mt-8 hover:border-neonBlue transition-colors duration-300 relative group shadow-2xl" id="drop-zone">
-        
-        <div class="absolute top-0 right-0 bg-neonOrange text-black text-xs font-bold px-2 py-1 rounded-bl-lg">
-            AI ACTIVE 🧠
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-300 text-xs font-medium mb-6">
+            <span class="relative flex h-2 w-2">
+              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-75"></span>
+              <span class="relative inline-flex rounded-full h-2 w-2 bg-purple-500"></span>
+            </span>
+            New: Cursor & Lovable compatible export
         </div>
 
-        <div class="mb-4 transform group-hover:scale-110 transition-transform duration-300">
-            <svg class="w-16 h-16 mx-auto text-gray-400 group-hover:text-neonBlue transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
-            </svg>
+    <h1 class="text-5xl md:text-7xl font-bold text-white mb-6 tracking-tight leading-tight">
+            Generate a <br>
+            <span class="bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-600">
+                code-ready SaaS
+            </span>
+            in 30 seconds
+        </h1>
+    <p class="text-slate-400 text-lg mb-12 max-w-2xl mx-auto leading-relaxed">
+            Skip 50 hours of product research. Turn Reddit user pain into technical specifications for Cursor.
+        </p>
+
+        <div class="max-w-lg mx-auto bg-slate-900/80 backdrop-blur-sm border border-slate-800 rounded-2xl p-8 glow-strong relative">
+            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-purple-500 via-pink-500 to-purple-500"></div>
+            
+            <form action="#" method="POST" class="space-y-6 text-left">
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
+                        Target / Niche
+                    </label>
+                    <input type="text" placeholder="ex: Airbnb Hosts, Dropshippers, Freelance Writers..." 
+                           class="w-full bg-slate-800 border border-slate-700 text-white rounded-lg px-4 py-3 focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition placeholder-slate-600">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
+                        Analysis Mode
+                    </label>
+                    <div class="grid grid-cols-2 gap-3">
+                        <button type="button" class="bg-slate-800 border border-slate-700 text-slate-400 rounded-lg py-2 text-sm hover:bg-slate-700">Standard</button>
+                        <button type="button" class="bg-purple-600/10 border border-purple-500 text-purple-400 rounded-lg py-2 text-sm font-semibold">Ruthless (Deep Analysis)</button>
+                    </div>
+                </div>
+
+                <button type="button" class="w-full bg-white text-slate-900 font-bold py-3.5 rounded-lg hover:bg-slate-200 transition shadow-lg shadow-purple-500/20 flex items-center justify-center gap-2 group">
+                    <svg class="w-5 h-5 text-purple-600 group-hover:scale-110 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.384-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>
+                    Generate Reasoning Frame (.zip)
+                </button>
+            </form>
         </div>
+    </section>
 
-        <h3 class="text-2xl font-bold mb-2">Drop a "messy" file here</h3>
-        <p class="text-gray-400 text-sm mb-6">Watch AI map columns and fix errors in real-time.</p>
-        
-        <button class="bg-neonBlue text-black font-bold px-8 py-3 rounded-lg hover:bg-white hover:shadow-[0_0_15px_rgba(0,243,255,0.7)] transition-all duration-300">
-            Test the magic now
-        </button>
+    <section id="how" class="max-w-4xl mx-auto px-6 py-20 border-t border-slate-900">
+        <div class="grid md:grid-cols-2 gap-12 relative">
+            <div class="hidden md:block absolute left-1/2 top-0 bottom-0 w-px bg-slate-800/50"></div>
+            
+            <div class="opacity-60 hover:opacity-100 transition duration-500">
+                <h3 class="text-lg font-semibold text-slate-400 mb-6 flex items-center gap-2">
+                    <span class="text-red-500">✕</span> The Slow Way
+                </h3>
+                <ul class="space-y-4 text-slate-500 text-sm">
+                    <li class="flex justify-between border-b border-slate-900 pb-2"><span>Manually scrape Reddit</span> <span>4h</span></li>
+                    <li class="flex justify-between border-b border-slate-900 pb-2"><span>Synthesize pain points</span> <span>3h</span></li>
+                    <li class="flex justify-between border-b border-slate-900 pb-2"><span>Write User Stories</span> <span>5h</span></li>
+                    <li class="flex justify-between border-b border-slate-900 pb-2"><span>Create technical architecture</span> <span>6h</span></li>
+                    <li class="flex justify-between border-b border-slate-900 pb-2"><span>AI prompt success rate</span> <span>Random</span></li>
+                </ul>
+            </div>
 
-        <input type="file" id="file-input" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
-    </div>
+            <div>
+                <h3 class="text-lg font-semibold text-purple-400 mb-6 flex items-center gap-2">
+                    <span class="text-green-500">✓</span> ReasoningFrame
+                </h3>
+                <div class="flex items-center gap-4 mb-6">
+                    <h4 class="text-4xl font-bold text-white">45 Seconds</h4>
+                </div>
+                <p class="text-slate-400 text-sm mb-6 leading-relaxed">
+                    Our semantic engine detects hidden opportunities and writes structural code for you. It's like having a Senior PM and a Tech Lead in your pocket.
+                </p>
+                <div class="bg-slate-900 rounded-lg p-4 border border-slate-800">
+                    <p class="text-xs text-slate-500 font-mono mb-2">OUTPUT_ZIP_CONTENT:</p>
+                    <div class="flex gap-2 flex-wrap">
+                        <span class="text-xs bg-purple-900/30 text-purple-300 px-2 py-1 rounded">01_PERSONAS.json</span>
+                        <span class="text-xs bg-purple-900/30 text-purple-300 px-2 py-1 rounded">02_UI_SPECS.md</span>
+                        <span class="text-xs bg-green-900/30 text-green-300 px-2 py-1 rounded">CURSOR_PROMPT.md</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 
-    <div class="mt-16 grid grid-cols-1 md:grid-cols-3 gap-6 text-left">
-        
-        <div class="p-6 border border-gray-700 rounded-xl bg-gray-900/50 hover:bg-gray-800 transition">
-            <div class="text-neonOrange text-2xl mb-3">⚡</div>
-            <h4 class="font-bold text-white mb-2">Instant Onboarding</h4>
-            <p class="text-sm text-gray-400 leading-relaxed">
-                Stop losing leads because importing is too complicated. Your clients import their data themselves, without friction.
+<section id="pricing" class="py-24 px-4 bg-slate-900/30 border-y border-slate-900">
+        <div class="max-w-6xl mx-auto">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">Pay only for what you generate</h2>
+                <p class="text-slate-400">No hidden monthly subscription. Your credits never expire.</p>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+                
+                <div class="bg-slate-950 border border-slate-800 rounded-2xl p-8 hover:border-slate-700 transition flex flex-col">
+                    <h3 class="text-lg font-bold text-slate-300 mb-2">The Trial</h3>
+                    <div class="text-3xl font-bold text-white mb-1">9€</div>
+                    <div class="text-sm text-slate-500 mb-6">One-time payment</div>
+                    
+                    <div class="flex-grow">
+                        <div class="flex items-center gap-3 mb-4 bg-slate-900 p-3 rounded-lg border border-slate-800">
+                            <span class="text-2xl">🪙</span>
+                            <div>
+                                <div class="font-bold text-white">1 Credit</div>
+                                <div class="text-xs text-slate-500">1 Full Report</div>
+                            </div>
+                        </div>
+                        <ul class="space-y-3 text-slate-400 text-sm">
+                            <li class="flex items-center gap-2"><svg class="w-4 h-4 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg> Standard Analysis</li>
+                            <li class="flex items-center gap-2"><svg class="w-4 h-4 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg> ZIP Export included</li>
+                        </ul>
+                    </div>
+                    
+                    <button class="w-full mt-8 py-3 rounded-lg border border-slate-700 text-white font-semibold hover:bg-slate-800 transition">Buy 1 Credit</button>
+                </div>
+
+                <div class="bg-slate-900 border border-purple-500 rounded-2xl p-8 relative overflow-hidden glow flex flex-col transform md:-translate-y-4">
+                    <div class="absolute top-0 right-0 bg-purple-600 text-white text-[10px] font-bold px-3 py-1 rounded-bl-lg tracking-widest uppercase">Best Seller</div>
+                    
+                    <h3 class="text-lg font-bold text-white mb-2">Founder Pack</h3>
+                    <div class="text-4xl font-bold text-white mb-1">29€</div>
+                    <div class="text-sm text-purple-300 mb-6">That's 5.80€ / report</div>
+
+                    <div class="flex-grow">
+                        <div class="flex items-center gap-3 mb-6 bg-purple-500/10 p-3 rounded-lg border border-purple-500/30">
+                            <span class="text-2xl">💰</span>
+                            <div>
+                                <div class="font-bold text-white">5 Credits</div>
+                                <div class="text-xs text-purple-300">5 Full Reports</div>
+                            </div>
+                        </div>
+                        <ul class="space-y-3 text-slate-300 text-sm">
+                            <li class="flex items-center gap-2"><svg class="w-4 h-4 text-purple-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg> <span class="text-white font-semibold">Ruthless Mode included</span></li>
+                            <li class="flex items-center gap-2"><svg class="w-4 h-4 text-purple-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg> Optimized Cursor Prompt</li>
+                            <li class="flex items-center gap-2"><svg class="w-4 h-4 text-purple-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg> Server Priority</li>
+                        </ul>
+                    </div>
+
+                    <button class="w-full mt-8 py-3 rounded-lg bg-white text-purple-900 font-bold hover:bg-slate-200 transition shadow-lg">Get 5 Credits</button>
+                </div>
+
+                <div class="bg-slate-950 border border-slate-800 rounded-2xl p-8 hover:border-slate-700 transition flex flex-col">
+                    <h3 class="text-lg font-bold text-slate-300 mb-2">Agency</h3>
+                    <div class="text-3xl font-bold text-white mb-1">99€</div>
+                    <div class="text-sm text-slate-500 mb-6">That's 3.96€ / report</div>
+                    
+                    <div class="flex-grow">
+                        <div class="flex items-center gap-3 mb-4 bg-slate-900 p-3 rounded-lg border border-slate-800">
+                            <span class="text-2xl">🚀</span>
+                            <div>
+                                <div class="font-bold text-white">25 Credits</div>
+                                <div class="text-xs text-slate-500">Profitable from client #1</div>
+                            </div>
+                        </div>
+                        <ul class="space-y-3 text-slate-400 text-sm">
+                            <li class="flex items-center gap-2"><svg class="w-4 h-4 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg> Commercial License</li>
+                            <li class="flex items-center gap-2"><svg class="w-4 h-4 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg> Priority Support</li>
+                        </ul>
+                    </div>
+                    
+                    <button class="w-full mt-8 py-3 rounded-lg border border-slate-700 text-white font-semibold hover:bg-slate-800 transition">Buy 25 Credits</button>
+                </div>
+
+            </div>
+            
+            <p class="text-center text-xs text-slate-600 mt-8">
+                Secure payment via Stripe. VAT invoices available for pros.
             </p>
         </div>
+    </section>
 
-        <div class="p-6 border border-gray-700 rounded-xl bg-gray-900/50 hover:bg-gray-800 transition">
-            <div class="text-neonBlue text-2xl mb-3">🧠</div>
-            <h4 class="font-bold text-white mb-2">Semantic Understanding</h4>
-            <p class="text-sm text-gray-400 leading-relaxed">
-                AI understands that "Tel.", "Mob.", and "Cell" are the same thing. No need to create Regex rules for every case.
-            </p>
+
+    <section id="faq" class="max-w-3xl mx-auto px-6 py-20">
+        <h2 class="text-2xl font-bold text-white mb-10 text-center">Frequently Asked Questions</h2>
+        
+        <div class="space-y-4">
+            <div class="border border-slate-800 rounded-lg bg-slate-900/50 p-6">
+                <h4 class="font-semibold text-white mb-2">Do I need to know how to code?</h4>
+                <p class="text-slate-400 text-sm leading-relaxed">No. ReasoningFrame is designed to work with tools like Cursor, Lovable, or Bolt.new. We generate the instructions (the "Prompt") that you feed to the AI. The AI does the coding.</p>
+            </div>
+            
+            <div class="border border-slate-800 rounded-lg bg-slate-900/50 p-6">
+                <h4 class="font-semibold text-white mb-2">How does the Reddit analysis work?</h4>
+                <p class="text-slate-400 text-sm leading-relaxed">We use semantic algorithms to filter out the noise. We specifically look for negative sentiments ("pain points") and unmet feature requests within targeted communities.</p>
+            </div>
+
+            <div class="border border-slate-800 rounded-lg bg-slate-900/50 p-6">
+                <h4 class="font-semibold text-white mb-2">Can I use the results commercially?</h4>
+                <p class="text-slate-400 text-sm leading-relaxed">Yes. Everything ReasoningFrame generates (Personas, Specs, Ideas) belongs 100% to you. You can sell the reports or build the SaaS.</p>
+            </div>
+        </div>
+    </section>
+
+    <footer class="border-t border-slate-900 bg-slate-950 pt-16 pb-8 text-center px-4">
+        <div class="mb-8">
+            <div class="text-lg font-bold text-white mb-2">ReasoningFrame</div>
+            <p class="text-slate-500 text-sm">From Chaos to Code.</p>
+        </div>
+        
+        <div class="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto text-sm text-slate-500 mb-12 text-left md:text-center">
+            <div>
+                <h5 class="text-white font-semibold mb-3">Product</h5>
+                <ul class="space-y-2">
+                    <li><a href="#" class="hover:text-purple-400">Pricing</a></li>
+                    <li><a href="#" class="hover:text-purple-400">Roadmap</a></li>
+                    <li><a href="#" class="hover:text-purple-400">Changelog</a></li>
+                </ul>
+            </div>
+            <div>
+                <h5 class="text-white font-semibold mb-3">Legal</h5>
+                <ul class="space-y-2">
+                    <li><a href="#" class="hover:text-purple-400">Terms of Service</a></li>
+                    <li><a href="#" class="hover:text-purple-400">Privacy Policy</a></li>
+                    <li><a href="#" class="hover:text-purple-400">Legal Notice</a></li>
+                </ul>
+            </div>
+            <div>
+                <h5 class="text-white font-semibold mb-3">Contact</h5>
+                <address class="not-italic">
+                    8 rue Charles Gide<br>
+                    77130 Varennes sur Seine<br>
+                    France<br>
+                    <a href="mailto:hello@reasoningframe.com" class="text-purple-400 mt-2 block hover:underline">hello@reasoningframe.com</a>
+                </address>
+            </div>
         </div>
 
-        <div class="p-6 border border-gray-700 rounded-xl bg-gray-900/50 hover:bg-gray-800 transition">
-            <div class="text-green-400 text-2xl mb-3">💎</div>
-            <h4 class="font-bold text-white mb-2">Zero Subscription</h4>
-            <p class="text-sm text-gray-400 leading-relaxed">
-                Why pay $500/mo for an API? Buy this code once, host it, and it's yours forever.
-            </p>
+        <div class="text-xs text-slate-700 pt-8 border-t border-slate-900">
+            © 2026 ReasoningFrame. All rights reserved.
         </div>
-    </div>
-
-</main>
-
-<script type="text/python">
-from browser import document, alert
-
-def on_file_select(ev):
-    file = ev.target.files[0]
-    
-    alert(f"🚧 WORK IN PROGRESS (H+2) 🚧\n\n"
-          f"File received: {file.name}\n\n"
-          f"The Artificial Intelligence module is being built live right now!\n"
-          f"I am connecting the Python controller at this very moment.\n\n"
-          f"Come back in a few hours to see the magic happen.")
-
-document["file-input"].bind("change", on_file_select)
-</script>
+    </footer>

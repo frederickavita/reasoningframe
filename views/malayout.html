@@ -1,67 +1,20 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reasoning Frame | Stop CSV Nightmares</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧠</text></svg>">
+    <title>ReasoningFrame - From Chaos to Code</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/brython/3.11.3/brython.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/brython/3.11.3/brython_stdlib.js"></script>
-    
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        neonBlue: '#00f3ff',
-                        neonOrange: '#ff9900',
-                        darkBg: '#0f172a',
-                        cardBg: '#1e293b'
-                    },
-                    fontFamily: {
-                        mono: ['Courier New', 'Courier', 'monospace'],
-                    }
-                }
-            }
-        }
-    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
-        .glitch-text:hover { text-shadow: 2px 0 #ff9900, -2px 0 #00f3ff; }
-        .pulse-border { animation: pulse-orange 2s infinite; }
-        @keyframes pulse-orange {
-            0% { box-shadow: 0 0 0 0 rgba(255, 153, 0, 0.4); }
-            70% { box-shadow: 0 0 0 10px rgba(255, 153, 0, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(255, 153, 0, 0); }
-        }
+        body { font-family: 'Inter', sans-serif; }
+        .glow { box-shadow: 0 0 40px rgba(139, 92, 246, 0.15); }
+        .glow-strong { box-shadow: 0 0 30px rgba(139, 92, 246, 0.4); }
     </style>
 </head>
+<body class="bg-slate-950 text-slate-200 antialiased selection:bg-purple-500 selection:text-white">
 
-<body class="bg-darkBg text-white font-sans antialiased" onload="brython()">
+{{include}}
 
-    <div class="bg-gradient-to-r from-neonOrange to-red-600 text-black text-center py-1 font-bold text-sm">
-        🚧 CHALLENGE IN PROGRESS: This product will be sold in less than 24h 🚧
-    </div>
-
-    <nav class="flex justify-between items-center p-6 max-w-6xl mx-auto">
-        <div class="text-2xl font-bold tracking-tighter cursor-pointer">
-            <a href="{{=URL('default', 'index')}}">
-                <span class="text-neonBlue">Reasoning</span>Frame
-            </a>
-        </div>
-        <div class="flex gap-4 items-center">
-            <span class="text-gray-500 text-xs hidden md:inline">v1.0 Ready for Acquisition</span>
-            <a href="https://x.com/frederickavita" target="_blank" class="bg-white text-black px-4 py-2 rounded font-bold hover:bg-neonBlue hover:text-white transition shadow-lg text-sm">
-                Follow the Build
-            </a>
-        </div>
-    </nav>
-
-    {{include}}
-
-    <footer class="mt-20 py-8 border-t border-gray-800 text-center text-gray-600 text-xs font-mono">
-        <p>Built in Public. 100% Python Architecture.</p>
-    </footer>
 
 </body>
-</html>
