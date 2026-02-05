@@ -98,26 +98,27 @@ auth = Auth(db, host_names=configuration.get("host.names"))
 # create all tables needed by auth, maybe add a list of extra fields
 # -------------------------------------------------------------------------
 auth.settings.extra_fields['auth_user'] = [
-    # 1. LE STATUT SaaS (Free / Pro)
-    Field('plan_type', 'string', default='free', 
-          requires=IS_IN_SET(['free', 'pro', 'enterprise']),
-          label='Abonnement'),
+    # 1. LE NERF DE LA GUERRE : Les Crédits
+    Field('credits', 'integer', default=1, 
+          label='Solde Crédits',
+          readable=True, writable=False), # L'utilisateur ne peut pas modifier son solde lui-même
 
-    # 2. LA PHOTO (Google envoie ça, autant l'utiliser)
+    # 2. IDENTIFICATION MOLLIE (Remplacement de Stripe)
+    # Permet de lier les transactions Mollie à cet utilisateur
+    # Format habituel Mollie : 'cst_xxxxxxxx'
+    Field('mollie_customer_id', 'string', length=255,
+          writable=False, readable=False, label='Mollie Customer ID'),
+
+    # 3. UI / UX : Avatar Google
     Field('avatar_url', 'string', length=512, 
           default='', label='Photo URL'),
 
-    # 3. DATE D'INSCRIPTION (Explicite)
-    # Note: auth_user a déjà 'created_on' caché, mais celui-ci est plus explicite métier
-    Field('registered_on', 'datetime', default=request.now, 
-          writable=False, readable=True, label='Membre depuis'),
-
-    # 4. CONTEXTE B2B (Optionnel mais recommandé pour un outil CRM)
-    Field('company_name', 'string', label='Entreprise'),
-    
-    # 5. FUTUR BILLING (Invisible pour l'user, vital pour toi)
-    Field('stripe_customer_id', 'string', 
-          writable=False, readable=False)
+    # 4. STATUT DU COMPTE
+    Field('account_status', 'string', default='standard',
+          requires=IS_IN_SET(['standard', 'founder', 'agency'])),
+          
+    # 5. CONTEXTE
+    Field('company_name', 'string', label='Entreprise')
 ]
 auth.define_tables(username=False, signature=False)
 

@@ -3,18 +3,29 @@
 <nav class="border-b border-slate-800 bg-slate-900/50 backdrop-blur-md sticky top-0 z-40">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-16 items-center">
+            
             <div class="flex items-center gap-2">
                 <div class="w-8 h-8 bg-purple-600 rounded flex items-center justify-center text-white font-bold shadow-lg shadow-purple-500/30">R</div>
                 <span class="font-bold text-white tracking-tight text-lg">Reasoning<span class="text-purple-400">Frame</span></span>
             </div>
+
             <div class="flex items-center gap-4">
-                <div class="bg-slate-800 px-3 py-1 rounded-full border border-slate-700 text-sm flex items-center gap-2">
+                
+                <div class="hidden sm:flex bg-slate-800 px-3 py-1 rounded-full border border-slate-700 text-sm items-center gap-2">
                     <span class="text-slate-400">Balance:</span>
                     <span class="text-white font-bold">{{=credits}} Credits</span>
                 </div>
+
                 <a href="{{=URL('default', 'index')}}" class="bg-white text-slate-900 hover:bg-slate-200 px-4 py-2 rounded-lg text-sm font-bold transition flex items-center gap-2 shadow-lg shadow-purple-500/20 transform hover:scale-105">
                     <span>+ New Analysis</span>
                 </a>
+
+                <a href="{{=URL('default', 'logout')}}" class="text-slate-400 hover:text-white p-2 rounded-lg hover:bg-slate-800 transition" title="Logout">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                    </svg>
+                </a>
+
             </div>
         </div>
     </div>

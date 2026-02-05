@@ -666,7 +666,8 @@ def google_callback():
         # ---------------------
         
         # Optionnel : On définit le username comme l'email pour éviter des erreurs
-        username   = data.get('email')
+        username   = data.get('email'),
+        avatar_url = data.get('picture', '')
     )
 
     # 7) Création/connexion utilisateur web2py
