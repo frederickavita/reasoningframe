@@ -8,7 +8,7 @@ from gluon.contrib.appconfig import AppConfig
 from gluon.tools import Auth
 import os
 import re
-
+import time 
 REQUIRED_WEB2PY_VERSION = "2.0.10"
 
 # -------------------------------------------------------------------------
@@ -39,7 +39,7 @@ if "GAE_APPLICATION" not in os.environ:
     db = DAL(configuration.get("db.uri"),
              pool_size=configuration.get("db.pool_size"),
              migrate_enabled=configuration.get("db.migrate"),
-             check_reserved=["all"])
+             check_reserved=["common"])
 else:
     # ---------------------------------------------------------------------
     # connect to Google Firestore
@@ -97,7 +97,28 @@ auth = Auth(db, host_names=configuration.get("host.names"))
 # -------------------------------------------------------------------------
 # create all tables needed by auth, maybe add a list of extra fields
 # -------------------------------------------------------------------------
-auth.settings.extra_fields["auth_user"] = []
+auth.settings.extra_fields['auth_user'] = [
+    # 1. LE STATUT SaaS (Free / Pro)
+    Field('plan_type', 'string', default='free', 
+          requires=IS_IN_SET(['free', 'pro', 'enterprise']),
+          label='Abonnement'),
+
+    # 2. LA PHOTO (Google envoie ça, autant l'utiliser)
+    Field('avatar_url', 'string', length=512, 
+          default='', label='Photo URL'),
+
+    # 3. DATE D'INSCRIPTION (Explicite)
+    # Note: auth_user a déjà 'created_on' caché, mais celui-ci est plus explicite métier
+    Field('registered_on', 'datetime', default=request.now, 
+          writable=False, readable=True, label='Membre depuis'),
+
+    # 4. CONTEXTE B2B (Optionnel mais recommandé pour un outil CRM)
+    Field('company_name', 'string', label='Entreprise'),
+    
+    # 5. FUTUR BILLING (Invisible pour l'user, vital pour toi)
+    Field('stripe_customer_id', 'string', 
+          writable=False, readable=False)
+]
 auth.define_tables(username=False, signature=False)
 
 # -------------------------------------------------------------------------
@@ -159,3 +180,27 @@ if configuration.get("scheduler.enabled"):
 # after defining tables, uncomment below to enable auditing
 # -------------------------------------------------------------------------
 # auth.enable_record_versioning(db)
+
+# models/db.py
+
+db.define_table('generated_reports',
+    Field('user_id', 'reference auth_user', default=auth.user_id),
+    Field('project_name', 'string', requires=IS_NOT_EMPTY()),
+    Field('niche', 'string', requires=IS_NOT_EMPTY()),
+    Field('concept', 'text'),
+    Field('status', 'string', default='complete', requires=IS_IN_SET(['complete', 'draft', 'archived'])),
+    Field('prompt_preview', 'text'), # The prompt to copy
+    Field('json_data', 'json'), # Stores the full generated data
+    Field('created_on', 'datetime', default=request.now),
+)
+
+
+"""
+full_projects = [
+        {'id': 101, 'created_on': datetime.datetime.now().strftime("%d %b %H:%M"), 'niche': 'Hôtes Airbnb', 'project_name': 'GuestBookAI', 'concept': 'Générateur auto de livrets d\'accueil PDF.', 'status': 'complete', 'prompt_preview': 'Agis comme un expert React...'},
+        {'id': 102, 'created_on': 'Hier', 'niche': 'Gym Owners', 'project_name': 'FitStaffule', 'concept': 'Planification coachs.', 'status': 'complete', 'prompt_preview': 'Senior PM prompt...'},
+        {'id': 103, 'created_on': '02 Fév', 'niche': 'Copywriters', 'project_name': 'WriteFlow', 'concept': 'Portail validation.', 'status': 'complete', 'prompt_preview': 'Copywriting platform...'},
+        {'id': 104, 'created_on': '28 Jan', 'niche': 'Dentistes', 'project_name': 'SmileRecov', 'concept': 'Suivi SMS post-op.', 'status': 'archived', 'prompt_preview': 'SMS notification sys...'}
+    ]
+
+"""
