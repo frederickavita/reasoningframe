@@ -182,26 +182,118 @@ if configuration.get("scheduler.enabled"):
 # -------------------------------------------------------------------------
 # auth.enable_record_versioning(db)
 
-# models/db.py
+import datetime
 
-db.define_table('generated_reports',
-    Field('user_id', 'reference auth_user', default=auth.user_id),
-    Field('project_name', 'string', requires=IS_NOT_EMPTY()),
-    Field('niche', 'string', requires=IS_NOT_EMPTY()),
-    Field('concept', 'text'),
-    Field('status', 'string', default='complete', requires=IS_IN_SET(['complete', 'draft', 'archived'])),
-    Field('prompt_preview', 'text'), # The prompt to copy
-    Field('json_data', 'json'), # Stores the full generated data
-    Field('created_on', 'datetime', default=request.now),
+# --- 1. CONFIGURATION AGENCE (SINGLETON) ---
+# C'est ici que David configure son "White Label" et ses clés API.
+db.define_table('settings',
+    Field('agency_name', 'string', default='AdGuard Agency', label='Nom de votre Agence'),
+    Field('agency_logo', 'upload', label='Votre Logo (White Label)'),
+    Field('alert_email', 'string', requires=IS_EMAIL(), label='Email pour les Alertes'),
+    
+    # Clés API Google Ads (Critiques pour le moteur)
+    Field('developer_token', 'string', comment="Token développeur Google Ads"),
+    Field('client_id', 'string', comment="OAuth2 Client ID"),
+    Field('client_secret', 'password', comment="OAuth2 Client Secret (Masqué)"),
+    Field('refresh_token', 'string', comment="Token de rafraîchissement longue durée"),
+    
+    # Méta-données
+    format='%(agency_name)s'
+)
+
+# Sécurité : On force la création d'une ligne de config vide si elle n'existe pas
+if db(db.settings).count() == 0:
+    db.settings.insert(agency_name="Ma Super Agence", alert_email="admin@example.com")
+
+
+# --- 2. CLIENTS & COMPTES SURVEILLÉS ---
+# Le cœur du Dashboard. 
+db.define_table('clients',
+    Field('client_name', 'string', requires=IS_NOT_EMPTY(), label='Nom du Client (Interne)'),
+    
+    # Validation stricte du format ID Google (xxx-xxx-xxxx) pour éviter les erreurs de saisie
+    Field('google_customer_id', 'string', 
+          requires=IS_MATCH(r'^\d{3}-\d{3}-\d{4}$', error_message='Format requis: 123-456-7890'),
+          label='ID Google Ads'),
+          
+    # Le budget plafond. Decimal pour la précision financière.
+    Field('monthly_budget', 'decimal(10,2)', requires=IS_DECIMAL_IN_RANGE(0, 10000000), label='Budget Mensuel (€)'),
+    
+    # LE KILL SWITCH (ON par défaut pour la sécurité)
+    Field('kill_switch_active', 'boolean', default=True, label="Activer l'Arrêt d'Urgence (Kill Switch)"),
+    
+    # --- Champs mis à jour AUTOMATIQUEMENT par le Script (Lecture seule pour l'humain) ---
+    Field('current_spend', 'decimal(10,2)', default=0, writable=False, readable=False),
+    Field('spend_percent', 'integer', default=0, writable=False, readable=False),
+    
+    # Statut visuel pour le Dashboard (Vert / Orange / Rouge / Gris)
+    Field('status', 'string', default='OK', 
+          requires=IS_IN_SET(['OK', 'WARNING', 'CRITICAL', 'ERROR']), 
+          writable=False),
+          
+    Field('last_check', 'datetime', writable=False),
+    
+    format='%(client_name)s'
 )
 
 
-"""
-full_projects = [
-        {'id': 101, 'created_on': datetime.datetime.now().strftime("%d %b %H:%M"), 'niche': 'Hôtes Airbnb', 'project_name': 'GuestBookAI', 'concept': 'Générateur auto de livrets d\'accueil PDF.', 'status': 'complete', 'prompt_preview': 'Agis comme un expert React...'},
-        {'id': 102, 'created_on': 'Hier', 'niche': 'Gym Owners', 'project_name': 'FitStaffule', 'concept': 'Planification coachs.', 'status': 'complete', 'prompt_preview': 'Senior PM prompt...'},
-        {'id': 103, 'created_on': '02 Fév', 'niche': 'Copywriters', 'project_name': 'WriteFlow', 'concept': 'Portail validation.', 'status': 'complete', 'prompt_preview': 'Copywriting platform...'},
-        {'id': 104, 'created_on': '28 Jan', 'niche': 'Dentistes', 'project_name': 'SmileRecov', 'concept': 'Suivi SMS post-op.', 'status': 'archived', 'prompt_preview': 'SMS notification sys...'}
-    ]
+# --- 3. JOURNAL D'ACTIVITÉ (LOGS & AUDIT) ---
+# La "Boîte Noire". Indispensable pour prouver au client pourquoi on a coupé.
+db.define_table('logs',
+    Field('event_time', 'datetime', default=request.now, label='Date/Heure'),
+    
+    # Lien vers le client (si le client est supprimé, on garde le log -> on_delete='SET NULL')
+    Field('client_id', 'reference clients', on_delete='SET NULL'),
+    
+    # Type d'événement pour le filtrage
+    Field('event_type', 'string', requires=IS_IN_SET(['INFO', 'WARNING', 'CRITICAL', 'ERROR'])),
+    
+    # Le message technique (Ex: "Budget: 5000 / Dépense: 5024.10")
+    Field('message', 'text'),
+    
+    # Snapshot des données au moment du log (Preuve immuable)
+    Field('snapshot_spend', 'decimal(10,2)'),
+    Field('snapshot_budget', 'decimal(10,2)')
+)
 
-"""
+# Les logs sont en lecture seule (Personne ne doit pouvoir effacer ses traces)
+db.logs.event_time.writable = False
+db.logs.client_id.writable = False
+db.logs.event_type.writable = False
+db.logs.message.writable = False
+
+
+
+def detach_logs_before_delete(s):
+    try:
+        print("detach_logs_before_delete")
+        print("delete set:", s)         # ex: <Set ("clients"."id" > 0)>
+        print("query:", s.query)        # utile
+
+        ids_subquery = s._select(db.clients.id)  # nested select
+        q = db.logs.client_id.belongs(ids_subquery)
+
+        matched = db(q).count()
+        updated = db(q).update(client_id=None)
+        remaining = db(q).count()  # après update, devrait être 0
+
+        print("logs matched:", matched)
+        print("logs updated:", updated)
+        print("logs remaining linked:", remaining)
+
+        return False
+    except Exception:
+        import traceback
+        traceback.print_exc()
+        raise
+
+
+
+# Attacher une seule fois
+if detach_logs_before_delete not in db.clients._before_delete:
+    db.clients._before_delete.append(detach_logs_before_delete)
+
+
+# -------------------------------------------------------------------------
+# FIN DU MODÈLE
+# -
