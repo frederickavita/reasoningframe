@@ -1,253 +1,496 @@
-{{extend "malayout.html"}}
-<nav class="flex justify-between items-center p-6 max-w-6xl mx-auto border-b border-slate-900/50">
-        <div class="text-xl font-bold tracking-tighter text-white flex items-center gap-2">
-            <div class="w-6 h-6 bg-purple-600 rounded-sm"></div>
-            Reasoning<span class="text-purple-400">Frame</span>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ReasoningFrame | Google Ads Kill Switch</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --bg-dark: #0a0a0a;
+            --bg-card: #111111;
+            --text-main: #e5e5e5;
+            --text-muted: #888888;
+            --accent-green: #00ff41;
+            --accent-blue: #3b82f6; 
+            --accent-purple: #8b5cf6;
+            --border-color: #222;
+            --font-mono: 'JetBrains Mono', monospace;
+            --font-sans: 'Inter', sans-serif;
+        }
+
+        * { box-sizing: border-box; }
+        body { background-color: var(--bg-dark); color: var(--text-main); font-family: var(--font-sans); margin: 0; line-height: 1.6; }
+        a { text-decoration: none; color: inherit; }
+        
+        .mono { font-family: var(--font-mono); }
+        .text-green { color: var(--accent-green); }
+        .text-blue { color: var(--accent-blue); }
+        .text-purple { color: var(--accent-purple); }
+        
+        h1, h2, h3 { font-weight: 800; letter-spacing: -0.02em; margin-top: 0; }
+        h2 { font-size: 2.2rem; margin-bottom: 20px; text-align: center; }
+        .section-desc { text-align: center; color: var(--text-muted); max-width: 600px; margin: 0 auto 50px; }
+
+        /* NAVBAR */
+        .navbar {
+            padding: 20px 40px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(10, 10, 10, 0.9);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+        }
+        .nav-logo {
+            font-family: var(--font-mono);
+            font-weight: 700;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--text-main);
+        }
+
+        /* HERO */
+        .hero { padding: 80px 20px 80px; text-align: center; max-width: 1000px; margin: 0 auto; }
+        .headline { font-size: 3.5rem; line-height: 1.1; margin-bottom: 20px; }
+        .subheadline { font-size: 1.2rem; color: var(--text-muted); max-width: 700px; margin: 0 auto 50px; }
+        
+        .hero-btns { display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; }
+        .btn { padding: 15px 30px; font-weight: 700; border-radius: 4px; transition: all 0.2s; border: none; cursor: pointer; }
+        .btn-primary { background: var(--text-main); color: var(--bg-dark); }
+        .btn-primary:hover { background: white; transform: scale(1.02); }
+        .btn-outline { border: 1px solid #444; color: var(--text-main); background: transparent; }
+        .btn-outline:hover { border-color: var(--text-main); }
+
+        /* TRUST BAR */
+        .trust-bar { padding: 15px; border-bottom: 1px solid var(--border-color); text-align: center; font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; background: #0f0f0f; }
+        .trust-bar span { margin: 0 15px; }
+
+        /* CONTAINER */
+        .container { max-width: 1200px; margin: 0 auto; padding: 100px 20px; border-bottom: 1px solid var(--border-color); }
+        .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 40px; }
+        
+        .feature-card { background: var(--bg-card); padding: 30px; border: 1px solid var(--border-color); border-radius: 6px; }
+        .feature-card h3 { font-size: 1.1rem; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; }
+        .feature-card p { color: var(--text-muted); font-size: 0.95rem; margin: 0; }
+
+        /* PRICING TABLE */
+        .pricing-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-top: 50px; align-items: center; }
+        
+        .pricing-card { 
+            background: #0f0f0f; border: 1px solid #333; border-radius: 12px; padding: 30px; 
+            display: flex; flex-direction: column; position: relative; overflow: hidden; height: 100%;
+        }
+        
+        .pricing-card.popular { 
+            border: 2px solid var(--accent-blue); 
+            background: linear-gradient(180deg, rgba(59, 130, 246, 0.08), #0f0f0f); 
+            transform: scale(1.05);
+            z-index: 2;
+            box-shadow: 0 0 30px rgba(59, 130, 246, 0.1);
+        }
+
+        .popular-badge { 
+            position: absolute; top: 15px; right: 15px; background: var(--accent-blue); color: white; 
+            padding: 4px 10px; border-radius: 20px; font-size: 0.7rem; font-weight: bold; text-transform: uppercase;
+        }
+
+        .plan-name { font-size: 1rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px;}
+        .price { font-size: 2.5rem; font-weight: 800; margin: 10px 0 5px; font-family: var(--font-mono); }
+        .price span { font-size: 0.9rem; color: var(--text-muted); font-weight: normal; }
+        
+        .features-list { list-style: none; padding: 0; margin: 25px 0; flex-grow: 1; }
+        .features-list li { margin-bottom: 12px; color: #ccc; font-size: 0.9rem; display: flex; gap: 10px; align-items: center; }
+        
+        .btn-buy { width: 100%; padding: 15px; text-align: center; font-weight: bold; border-radius: 6px; margin-top: 20px; cursor: pointer; }
+        .btn-buy-blue { background: var(--accent-blue); color: white; border: none; }
+        .btn-buy-blue:hover { background: #2563eb; box-shadow: 0 0 15px rgba(37, 99, 235, 0.5); }
+        .btn-buy-outline { border: 1px solid #555; color: white; background: transparent; }
+        .btn-buy-outline:hover { border-color: white; background: rgba(255,255,255,0.05); }
+
+        /* BLUEPRINT */
+        .blueprint-box { 
+            background: #0f0f0f; border: 1px dashed #333; padding: 40px; 
+            text-align: center; margin-top: 40px; font-family: var(--font-mono); font-size: 0.8rem; color: var(--text-muted);
+        }
+
+        footer { padding: 60px 20px; text-align: center; font-size: 0.8rem; color: #444; border-top: 1px solid #222; margin-top: 0; background-color: #050505;}
+        
+        @media (max-width: 768px) {
+            .pricing-card.popular { transform: scale(1); }
+            .headline { font-size: 2.5rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="nav-logo">
+            <i class="fa fa-shield-halved text-blue"></i> REASONINGFRAME
         </div>
-        <div class="hidden md:flex gap-6 text-sm font-medium">
-            <a href="#how" class="text-slate-400 hover:text-white transition">How it works</a>
-            <a href="#pricing" class="text-slate-400 hover:text-white transition">Pricing</a>
-            <a href="#faq" class="text-slate-400 hover:text-white transition">FAQ</a>
+        <div style="font-size: 0.9rem;">
+            <a href="#tarifs" style="margin-right: 20px; color: #aaa;">Pricing</a>
+            <a href="mailto:frederickavita@gmail.com" style="color: #aaa;">Contact</a>
         </div>
-        <a href="{{=URL('login')}}" class="bg-slate-800 hover:bg-slate-700 text-white px-4 py-2 rounded-lg text-sm transition border border-slate-700">
-            Get Access
-        </a>
     </nav>
 
-    <section class="text-center pt-20 pb-24 px-4 relative overflow-hidden">
-        <div class="absolute top-10 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-purple-600/20 rounded-full blur-[100px] -z-10"></div>
+    <div class="trust-bar mono">
+        <span><i class="fa fa-robot"></i> 24/7 Monitoring</span>
+        <span><i class="fa fa-shield-halved"></i> Zero Overspend</span>
+        <span><i class="fa fa-check-double"></i> Official API</span>
+    </div>
 
-        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-300 text-xs font-medium mb-6">
-            <span class="relative flex h-2 w-2">
-              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-75"></span>
-              <span class="relative inline-flex rounded-full h-2 w-2 bg-purple-500"></span>
-            </span>
-            New: Cursor & Lovable compatible export
-        </div>
-
-    <h1 class="text-5xl md:text-7xl font-bold text-white mb-6 tracking-tight leading-tight">
-            Generate a <br>
-            <span class="bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-600">
-                code-ready SaaS
-            </span>
-            in 30 seconds
+    <header class="hero">
+        <h1 class="headline">
+            Google allows itself <span class="text-red">200%</span> of your daily budget.<br>
+            ReasoningFrame forces a stop at <span class="text-green">100%</span>.
         </h1>
-    <p class="text-slate-400 text-lg mb-12 max-w-2xl mx-auto leading-relaxed">
-            Skip 50 hours of product research. Turn Reddit user pain into technical specifications for Cursor.
+        
+        <p class="subheadline">
+            The first autonomous <strong>Budget Kill Switch</strong> for Freelancers.<br>
+            Stop checking your accounts on weekends. The system instantly pauses your campaigns if Google exceeds the limit.
         </p>
 
-        <div class="max-w-lg mx-auto bg-slate-900/80 backdrop-blur-sm border border-slate-800 rounded-2xl p-8 glow-strong relative">
-            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-purple-500 via-pink-500 to-purple-500"></div>
-            
-            <form action="#" method="POST" class="space-y-6 text-left">
-                <div>
-                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
-                        Target / Niche
-                    </label>
-                    <input type="text" placeholder="ex: Airbnb Hosts, Dropshippers, Freelance Writers..." 
-                           class="w-full bg-slate-800 border border-slate-700 text-white rounded-lg px-4 py-3 focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition placeholder-slate-600">
-                </div>
-
-                <div>
-                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
-                        Analysis Mode
-                    </label>
-                    <div class="grid grid-cols-2 gap-3">
-                        <button type="button" class="bg-slate-800 border border-slate-700 text-slate-400 rounded-lg py-2 text-sm hover:bg-slate-700">Standard</button>
-                        <button type="button" class="bg-purple-600/10 border border-purple-500 text-purple-400 rounded-lg py-2 text-sm font-semibold">Ruthless (Deep Analysis)</button>
-                    </div>
-                </div>
-
-                <button type="button" class="w-full bg-white text-slate-900 font-bold py-3.5 rounded-lg hover:bg-slate-200 transition shadow-lg shadow-purple-500/20 flex items-center justify-center gap-2 group">
-                    <svg class="w-5 h-5 text-purple-600 group-hover:scale-110 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.384-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>
-                    Generate Reasoning Frame (.zip)
-                </button>
-            </form>
+        <div class="hero-btns">
+            <a href="#tarifs" class="btn btn-primary">
+                View Offers
+            </a>
+            <a href="#features" class="btn btn-outline">
+                How it works?
+            </a>
         </div>
-    </section>
 
-    <section id="how" class="max-w-4xl mx-auto px-6 py-20 border-t border-slate-900">
-        <div class="grid md:grid-cols-2 gap-12 relative">
-            <div class="hidden md:block absolute left-1/2 top-0 bottom-0 w-px bg-slate-800/50"></div>
+        <div style="margin-top: 50px; border-top: 1px solid #222; padding-top: 30px; display: flex; justify-content: center; gap: 40px; flex-wrap: wrap;">
             
-            <div class="opacity-60 hover:opacity-100 transition duration-500">
-                <h3 class="text-lg font-semibold text-slate-400 mb-6 flex items-center gap-2">
-                    <span class="text-red-500">✕</span> The Slow Way
-                </h3>
-                <ul class="space-y-4 text-slate-500 text-sm">
-                    <li class="flex justify-between border-b border-slate-900 pb-2"><span>Manually scrape Reddit</span> <span>4h</span></li>
-                    <li class="flex justify-between border-b border-slate-900 pb-2"><span>Synthesize pain points</span> <span>3h</span></li>
-                    <li class="flex justify-between border-b border-slate-900 pb-2"><span>Write User Stories</span> <span>5h</span></li>
-                    <li class="flex justify-between border-b border-slate-900 pb-2"><span>Create technical architecture</span> <span>6h</span></li>
-                    <li class="flex justify-between border-b border-slate-900 pb-2"><span>AI prompt success rate</span> <span>Random</span></li>
-                </ul>
+            <div style="text-align: center;">
+                <div class="mono text-green" style="font-size: 1.5rem; font-weight: 700;">+€500,000</div>
+                <div style="font-size: 0.75rem; color: #666; text-transform: uppercase; letter-spacing: 1px;">Ad Spend Secured</div>
             </div>
 
-            <div>
-                <h3 class="text-lg font-semibold text-purple-400 mb-6 flex items-center gap-2">
-                    <span class="text-green-500">✓</span> ReasoningFrame
-                </h3>
-                <div class="flex items-center gap-4 mb-6">
-                    <h4 class="text-4xl font-bold text-white">45 Seconds</h4>
-                </div>
-                <p class="text-slate-400 text-sm mb-6 leading-relaxed">
-                    Our semantic engine detects hidden opportunities and writes structural code for you. It's like having a Senior PM and a Tech Lead in your pocket.
-                </p>
-                <div class="bg-slate-900 rounded-lg p-4 border border-slate-800">
-                    <p class="text-xs text-slate-500 font-mono mb-2">OUTPUT_ZIP_CONTENT:</p>
-                    <div class="flex gap-2 flex-wrap">
-                        <span class="text-xs bg-purple-900/30 text-purple-300 px-2 py-1 rounded">01_PERSONAS.json</span>
-                        <span class="text-xs bg-purple-900/30 text-purple-300 px-2 py-1 rounded">02_UI_SPECS.md</span>
-                        <span class="text-xs bg-green-900/30 text-green-300 px-2 py-1 rounded">CURSOR_PROMPT.md</span>
-                    </div>
-                </div>
+            <div style="text-align: center;">
+                <div class="mono text-blue" style="font-size: 1.5rem; font-weight: 700;">0</div>
+                <div style="font-size: 0.75rem; color: #666; text-transform: uppercase; letter-spacing: 1px;">Uncontrolled Incidents</div>
+            </div>
+
+            <div style="text-align: center;">
+                <div class="mono text-main" style="font-size: 1.5rem; font-weight: 700;">100%</div>
+                <div style="font-size: 0.75rem; color: #666; text-transform: uppercase; letter-spacing: 1px;">Compliance Validated</div>
+            </div>
+
+        </div>
+    </header>
+
+    <section id="features" class="container">
+        <h2>No more waking up in a cold sweat on Saturdays</h2>
+        <div class="grid-3">
+            <div class="feature-card">
+                <h3 class="text-red"><i class="fa fa-skull"></i> The Death of Scripts</h3>
+                <p>Free JS scripts crash (Timeout) and don't handle PMax properly. Our robot is an external executable that never sleeps.</p>
+            </div>
+            <div class="feature-card">
+                <h3><i class="fa fa-wallet"></i> Immediate ROI</h3>
+                <p>A single budget error often costs €500+. This software costs €149 for life. Do the math.</p>
+            </div>
+            <div class="feature-card">
+                <h3 class="text-blue"><i class="fa fa-lock"></i> Data Sovereignty</h3>
+                <p>Unlike US SaaS platforms, we don't sell your data. You get a private and secure instance.</p>
             </div>
         </div>
     </section>
 
-<section id="pricing" class="py-24 px-4 bg-slate-900/30 border-y border-slate-900">
-        <div class="max-w-6xl mx-auto">
-            <div class="text-center mb-16">
-                <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">Pay only for what you generate</h2>
-                <p class="text-slate-400">No hidden monthly subscription. Your credits never expire.</p>
-            </div>
-
-            <div class="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+    
+    <section class="container">
+        <h2 style="margin-bottom: 40px;">Kill Switch Architecture</h2>
+        
+        <div class="blueprint-box" style="text-align: left; padding: 0;">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 0; border-radius: 8px; overflow: hidden;">
                 
-                <div class="bg-slate-950 border border-slate-800 rounded-2xl p-8 hover:border-slate-700 transition flex flex-col">
-                    <h3 class="text-lg font-bold text-slate-300 mb-2">The Trial</h3>
-                    <div class="text-3xl font-bold text-white mb-1">9€</div>
-                    <div class="text-sm text-slate-500 mb-6">One-time payment</div>
+                <div style="padding: 40px; border-right: 1px dashed #333; display: flex; flex-direction: column; justify-content: center;">
+                    <h4 style="color: #fff; margin-top: 0; margin-bottom: 30px; text-align: center;">EXECUTION FLOW</h4>
                     
-                    <div class="flex-grow">
-                        <div class="flex items-center gap-3 mb-4 bg-slate-900 p-3 rounded-lg border border-slate-800">
-                            <span class="text-2xl">🪙</span>
-                            <div>
-                                <div class="font-bold text-white">1 Credit</div>
-                                <div class="text-xs text-slate-500">1 Full Report</div>
-                            </div>
+                    <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px;">
+                        <div style="background: #222; padding: 10px; border-radius: 4px; border: 1px solid #444;">
+                            <i class="fa fa-server text-blue"></i>
                         </div>
-                        <ul class="space-y-3 text-slate-400 text-sm">
-                            <li class="flex items-center gap-2"><svg class="w-4 h-4 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg> Standard Analysis</li>
-                            <li class="flex items-center gap-2"><svg class="w-4 h-4 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg> ZIP Export included</li>
-                        </ul>
-                    </div>
-                    
-                    <button class="w-full mt-8 py-3 rounded-lg border border-slate-700 text-white font-semibold hover:bg-slate-800 transition">Buy 1 Credit</button>
-                </div>
-
-                <div class="bg-slate-900 border border-purple-500 rounded-2xl p-8 relative overflow-hidden glow flex flex-col transform md:-translate-y-4">
-                    <div class="absolute top-0 right-0 bg-purple-600 text-white text-[10px] font-bold px-3 py-1 rounded-bl-lg tracking-widest uppercase">Best Seller</div>
-                    
-                    <h3 class="text-lg font-bold text-white mb-2">Founder Pack</h3>
-                    <div class="text-4xl font-bold text-white mb-1">29€</div>
-                    <div class="text-sm text-purple-300 mb-6">That's 5.80€ / report</div>
-
-                    <div class="flex-grow">
-                        <div class="flex items-center gap-3 mb-6 bg-purple-500/10 p-3 rounded-lg border border-purple-500/30">
-                            <span class="text-2xl">💰</span>
-                            <div>
-                                <div class="font-bold text-white">5 Credits</div>
-                                <div class="text-xs text-purple-300">5 Full Reports</div>
-                            </div>
+                        <div>
+                            <div style="font-weight: bold; font-size: 0.9rem;">1. Monitoring (API)</div>
+                            <div style="font-size: 0.75rem; color: #666;">Reads costs every 15 min.</div>
                         </div>
-                        <ul class="space-y-3 text-slate-300 text-sm">
-                            <li class="flex items-center gap-2"><svg class="w-4 h-4 text-purple-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg> <span class="text-white font-semibold">Ruthless Mode included</span></li>
-                            <li class="flex items-center gap-2"><svg class="w-4 h-4 text-purple-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg> Optimized Cursor Prompt</li>
-                            <li class="flex items-center gap-2"><svg class="w-4 h-4 text-purple-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg> Server Priority</li>
-                        </ul>
                     </div>
 
-                    <button class="w-full mt-8 py-3 rounded-lg bg-white text-purple-900 font-bold hover:bg-slate-200 transition shadow-lg">Get 5 Credits</button>
-                </div>
-
-                <div class="bg-slate-950 border border-slate-800 rounded-2xl p-8 hover:border-slate-700 transition flex flex-col">
-                    <h3 class="text-lg font-bold text-slate-300 mb-2">Agency</h3>
-                    <div class="text-3xl font-bold text-white mb-1">99€</div>
-                    <div class="text-sm text-slate-500 mb-6">That's 3.96€ / report</div>
-                    
-                    <div class="flex-grow">
-                        <div class="flex items-center gap-3 mb-4 bg-slate-900 p-3 rounded-lg border border-slate-800">
-                            <span class="text-2xl">🚀</span>
-                            <div>
-                                <div class="font-bold text-white">25 Credits</div>
-                                <div class="text-xs text-slate-500">Profitable from client #1</div>
-                            </div>
-                        </div>
-                        <ul class="space-y-3 text-slate-400 text-sm">
-                            <li class="flex items-center gap-2"><svg class="w-4 h-4 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg> Commercial License</li>
-                            <li class="flex items-center gap-2"><svg class="w-4 h-4 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg> Priority Support</li>
-                        </ul>
+                    <div style="text-align: left; padding-left: 23px; color: #444; margin-bottom: 10px;">
+                        <i class="fa fa-arrow-down"></i>
                     </div>
-                    
-                    <button class="w-full mt-8 py-3 rounded-lg border border-slate-700 text-white font-semibold hover:bg-slate-800 transition">Buy 25 Credits</button>
+
+                    <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px;">
+                        <div style="background: rgba(0, 255, 65, 0.1); padding: 10px; border-radius: 4px; border: 1px solid var(--accent-green);">
+                            <i class="fa fa-microchip text-green"></i>
+                        </div>
+                        <div>
+                            <div style="font-weight: bold; font-size: 0.9rem; color: var(--text-main);">2. Decision Engine</div>
+                            <div style="font-size: 0.75rem; color: #666;">Compare: Actual Spend > Threshold?</div>
+                        </div>
+                    </div>
+
+                    <div style="text-align: left; padding-left: 23px; color: #444; margin-bottom: 10px;">
+                        <i class="fa fa-arrow-down"></i>
+                    </div>
+
+                    <div style="display: flex; align-items: center; gap: 15px;">
+                        <div style="background: rgba(255, 51, 51, 0.1); padding: 10px; border-radius: 4px; border: 1px solid var(--accent-red);">
+                            <i class="fa fa-power-off text-red"></i>
+                        </div>
+                        <div>
+                            <div style="font-weight: bold; font-size: 0.9rem; color: var(--text-main);">3. Kill Switch (Action)</div>
+                            <div style="font-size: 0.75rem; color: #666;">Immediate PAUSE command.</div>
+                        </div>
+                    </div>
                 </div>
 
-            </div>
-            
-            <p class="text-center text-xs text-slate-600 mt-8">
-                Secure payment via Stripe. VAT invoices available for pros.
-            </p>
-        </div>
-    </section>
+                <div style="padding: 40px; background: #050505;">
+                    <h4 style="color: #fff; margin-top: 0; margin-bottom: 30px;">AUDIT LOGS (LIVE)</h4>
+                    
+                    <div class="mono" style="font-size: 0.75rem; color: #888; background: #000; padding: 20px; border-radius: 4px; border: 1px solid #222; line-height: 1.8;">
+                        <div><span style="color: #444;">[14:00:01]</span> CONNECTING TO GOOGLE ADS API... <span style="color:var(--accent-green)">OK</span></div>
+                        <div><span style="color: #444;">[14:00:02]</span> CHECKING ACCOUNT ID: 593-XXX-XXXX</div>
+                        <div><span style="color: #444;">[14:00:02]</span> SPEND DETECTED: €104.50 / LIMIT: €100.00</div>
+                        <div><span style="color: #444;">[14:00:03]</span> <span style="color:var(--accent-red)">ALERT: THRESHOLD EXCEEDED (104.5%)</span></div>
+                        <div><span style="color: #444;">[14:00:03]</span> EXECUTING KILL SWITCH...</div>
+                        <div><span style="color: #444;">[14:00:04]</span> CAMPAIGN "SEARCH_Q1" STATUS SET TO: <span style="color:var(--accent-red); font-weight:bold;">PAUSED</span></div>
+                        <div><span style="color: #444;">[14:00:05]</span> NOTIFICATION SENT TO ADMIN.</div>
+                        <div style="margin-top: 10px; border-top: 1px solid #333; padding-top: 10px; color: #555;">
+                            // This log is archived and serves as legal proof in case of client dispute.
+                        </div>
+                    </div>
+                </div>
 
-
-    <section id="faq" class="max-w-3xl mx-auto px-6 py-20">
-        <h2 class="text-2xl font-bold text-white mb-10 text-center">Frequently Asked Questions</h2>
-        
-        <div class="space-y-4">
-            <div class="border border-slate-800 rounded-lg bg-slate-900/50 p-6">
-                <h4 class="font-semibold text-white mb-2">Do I need to know how to code?</h4>
-                <p class="text-slate-400 text-sm leading-relaxed">No. ReasoningFrame is designed to work with tools like Cursor, Lovable, or Bolt.new. We generate the instructions (the "Prompt") that you feed to the AI. The AI does the coding.</p>
-            </div>
-            
-            <div class="border border-slate-800 rounded-lg bg-slate-900/50 p-6">
-                <h4 class="font-semibold text-white mb-2">How does the Reddit analysis work?</h4>
-                <p class="text-slate-400 text-sm leading-relaxed">We use semantic algorithms to filter out the noise. We specifically look for negative sentiments ("pain points") and unmet feature requests within targeted communities.</p>
-            </div>
-
-            <div class="border border-slate-800 rounded-lg bg-slate-900/50 p-6">
-                <h4 class="font-semibold text-white mb-2">Can I use the results commercially?</h4>
-                <p class="text-slate-400 text-sm leading-relaxed">Yes. Everything ReasoningFrame generates (Personas, Specs, Ideas) belongs 100% to you. You can sell the reports or build the SaaS.</p>
             </div>
         </div>
     </section>
 
-    <footer class="border-t border-slate-900 bg-slate-950 pt-16 pb-8 text-center px-4">
-        <div class="mb-8">
-            <div class="text-lg font-bold text-white mb-2">ReasoningFrame</div>
-            <p class="text-slate-500 text-sm">From Chaos to Code.</p>
+    <section id="tarifs" class="container" style="background-color: #080808;">
+        <h2>Launch Offers</h2>
+        <p class="section-desc">Guarantee your peace of mind today.</p>
+
+        <div class="pricing-grid">
+            
+            <div class="pricing-card">
+                <div class="plan-name">Monthly</div>
+                <div class="price">29 € <span>/ mo</span></div>
+                <p style="color: #666; font-size: 0.85rem;">To test without commitment.</p>
+                
+                <ul class="features-list">
+                    <li><i class="fa fa-user text-main"></i> Up to <strong>2 Accounts</strong></li>
+                    <li><i class="fa fa-infinity text-green"></i> <strong>Unlimited Ad Spend</strong></li>
+                    <li><i class="fa fa-check"></i> Hourly Monitoring</li>
+                    <li><i class="fa fa-check"></i> Secure Cloud</li>
+                </ul>
+
+                <a href="#" class="btn-buy btn-buy-outline">Subscribe</a>
+            </div>
+
+            <div class="pricing-card popular">
+                <span class="popular-badge">Popular</span>
+                <div class="plan-name">Freelance (Lifetime)</div>
+                <div class="price">149 € <span>/ lifetime</span></div>
+                <p style="color: #aaa; font-size: 0.9rem;">Pays for itself in 5 months.</p>
+                
+                <ul class="features-list">
+                    <li><i class="fa fa-check text-blue"></i> <strong>One-time Payment</strong></li>
+                    <li><i class="fa fa-user text-blue"></i> <strong>Up to 5 Accounts</strong></li>
+                    <li><i class="fa fa-infinity text-green"></i> <strong>Unlimited Ad Spend</strong></li>
+                    <li><i class="fa fa-check text-blue"></i> Lifetime Updates</li>
+                    <li><i class="fa fa-check text-blue"></i> Hourly Monitoring</li>
+                    <li><i class="fa fa-check text-blue"></i> Priority Support</li>
+                </ul>
+
+                <a href="https://buy.stripe.com/..." class="btn-buy btn-buy-blue">
+                    Secure for Life (€149)
+                </a>
+                <p style="text-align: center; font-size: 0.7rem; color: #666; margin-top: 10px;">14-day money-back guarantee.</p>
+            </div>
+
+            <div class="pricing-card">
+                <div class="plan-name">Agency / Enterprise</div>
+                <div class="price">3,500 € <span>/ setup</span></div>
+                <p style="color: #666; font-size: 0.85rem;">Dedicated & Sovereign Infrastructure.</p>
+                
+                <ul class="features-list">
+                    <li><i class="fa fa-check text-green"></i> <strong>Unlimited Accounts</strong></li>
+                    <li><i class="fa fa-server text-green"></i> Self-Hosted OR Hosted by us</li>
+                    <li><i class="fa fa-check text-green"></i> Audit, Install & Sandbox Tests</li>
+                    <li><i class="fa fa-check text-green"></i> Training & Handover (Docs)</li>
+                    <li><i class="fa fa-shield-halved text-green"></i> <strong>Maintenance & Updates (12 mo)</strong><br><span style="font-size: 0.75rem; color: #666; margin-left: 24px;">Includes: API Compatibility & Security</span></li>
+                    <li><i class="fa fa-clock text-green"></i> Priority Support (SLA < 4h)</li>
+                </ul>
+
+                <a href="mailto:frederickavita@gmail.com?subject=Audit%20Agence%20ReasoningFrame" class="btn-buy btn-buy-outline">
+                    Request an Audit
+                </a>
+                <p style="text-align: center; font-size: 0.7rem; color: #666; margin-top: 10px;">Custom quote & Invoice.</p>
+            </div>
+
+        </div>
+    </section>
+
+    <section class="container" style="border-top: 1px solid #222;">
+        <h2>Frequently Asked Questions & Objections</h2>
+        <p class="section-desc">Total transparency on our rates and conditions.</p>
+
+        <div style="max-width: 800px; margin: 0 auto; text-align: left;">
+
+            <h3 class="text-muted" style="margin-top: 40px; font-size: 1rem; text-transform: uppercase;">Monthly Subscription (€29)</h3>
+            
+            <details style="margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 15px;">
+                <summary style="cursor: pointer; font-weight: 600;">What does "No commitment" actually mean?</summary>
+                <p style="color: #888; margin-top: 10px; font-size: 0.9rem;">
+                    It means zero constraints. You can unsubscribe in 1 click from your dashboard. Access stops at the end of the paid month. Ideal for testing reliability on 1 or 2 accounts.
+                </p>
+            </details>
+
+            <details style="margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 15px;">
+                <summary style="cursor: pointer; font-weight: 600;">Why am I limited to 2 accounts?</summary>
+                <p style="color: #888; margin-top: 10px; font-size: 0.9rem;">
+                    This offer is an entry point. We want to encourage the Lifetime offer (5 accounts) which is mathematically more profitable for you starting from the 5th month.
+                </p>
+            </details>
+
+            <h3 class="text-blue" style="margin-top: 40px; font-size: 1rem; text-transform: uppercase;">Freelance License (€149)</h3>
+
+            <details style="margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 15px;">
+                <summary style="cursor: pointer; font-weight: 600;">Do I have to pay for future updates?</summary>
+                <p style="color: #888; margin-top: 10px; font-size: 0.9rem;">
+                    <strong class="text-green">NON. It's €0/year.</strong><br>
+                    That's the principle of the "Lifetime" deal. Your €149 payment covers software access AND future Google API compatibility updates. No hidden fees, no renewal.
+                </p>
+            </details>
+
+            <details style="margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 15px;">
+                <summary style="cursor: pointer; font-weight: 600;">Unlimited Budget: Really? Even for €100k spend?</summary>
+                <p style="color: #888; margin-top: 10px; font-size: 0.9rem;">
+                    Absolutely. Unlike Optmyzr or Opteo, we don't apply a "growth tax". Whether you secure €500 or €500,000, the server load is identical for us. So the price remains €149, full stop.
+                </p>
+            </details>
+
+            <details style="margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 15px;">
+                <summary style="cursor: pointer; font-weight: 600;">How does the "Money-Back" guarantee work?</summary>
+                <p style="color: #888; margin-top: 10px; font-size: 0.9rem;">
+                    Simple: If within 14 days, you find that the tool doesn't bring the peace of mind promised, send an email. We refund your €149 in full, no questions asked.
+                </p>
+            </details>
+
+            <h3 class="text-green" style="margin-top: 40px; font-size: 1rem; text-transform: uppercase;">Agency Setup (€3,500)</h3>
+
+            <details style="margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 15px;">
+                <summary style="cursor: pointer; font-weight: 600;">What guarantees longevity after paying €3,500?</summary>
+                <p style="color: #888; margin-top: 10px; font-size: 0.9rem;">
+                    The beauty of Self-Hosting. You pay for the infrastructure installation on YOUR servers. You own the code. Even if ReasoningFrame disappears tomorrow, your system continues to run eternally because you hold the keys.
+                </p>
+            </details>
+
+            <details style="margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 15px;">
+                <summary style="cursor: pointer; font-weight: 600;">How much is maintenance after the 1st year?</summary>
+                <p style="color: #888; margin-top: 10px; font-size: 0.9rem;">
+                    The first year is included. Then, it's optional: you can subscribe to a maintenance contract for <strong class="text-main">€400 / year</strong>.
+                    This covers: security updates, Google Ads API compatibility (which evolves often), and the priority SLA (< 4h).
+                </p>
+            </details>
+            
+            <details style="margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 15px;">
+                <summary style="cursor: pointer; font-weight: 600;">What exactly is the < 4h SLA?</summary>
+                <p style="color: #888; margin-top: 10px; font-size: 0.9rem;">
+                    As an Agency, if you have a critical blocker (e.g., unable to connect a new large client), our engineering team commits to intervening within 4 business hours. This is an "Enterprise" service level essential for your critical operations.
+                </p>
+            </details>
+
+        </div>
+    </section>
+
+    <section class="container" style="border-top: 1px solid #222; background: linear-gradient(180deg, #0a0a0a 0%, #111 100%);">
+        <div style="max-width: 800px; margin: 0 auto; display: flex; flex-direction: column; align-items: center; text-align: center;">
+            
+            <div style="width: 80px; height: 80px; background: #222; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid var(--accent-blue); margin-bottom: 20px;">
+                <span class="mono" style="font-size: 2rem; color: #fff;">F</span>
+                </div>
+
+            <h2 style="font-size: 1.8rem; margin-bottom: 20px;">Why I coded ReasoningFrame.</h2>
+            
+            <div style="text-align: left; color: #ccc; line-height: 1.8; font-size: 1rem;">
+                <p>
+                    Hi, I'm <strong>Frédéric Kavita</strong>.
+                </p>
+                <p>
+                    For years, I lived what you are living. The Friday night stress after launching a campaign. Compulsively checking the Google Ads app on Sunday morning. The fear of having to call a client to say: <em>"Sorry, Google spent 200% of the budget yesterday."</em>
+                </p>
+                <p>
+                    <strong>I hated this insecurity.</strong> And I hated even more the idea of paying €200/month to American software just to have a "stop button". It's an unfair tax on our work.
+                </p>
+                <p>
+                    I created <strong>ReasoningFrame</strong> with a simple vision: give power back to Freelancers.
+                </p>
+                <ul style="list-style: none; padding: 0; margin: 20px 0;">
+                    <li><i class="fa fa-check text-green"></i> I wanted a tool that never sleeps.</li>
+                    <li><i class="fa fa-check text-green"></i> I wanted to pay once, not every month.</li>
+                    <li><i class="fa fa-check text-green"></i> I wanted my weekends back.</li>
+                </ul>
+                <p>
+                    Today, this tool protects my clients and my mental health. I hope it will do the same for you.
+                </p>
+            </div>
+
+            <div style="margin-top: 30px; border-top: 1px dashed #333; padding-top: 20px; width: 100%;">
+                <p class="mono" style="color: var(--text-muted); font-size: 0.9rem;">
+                    Frédéric Kavita <br>
+                    <span style="color: var(--accent-blue);">Indie Maker & Freelance PPC</span>
+                </p>
+                
+                <a href="https://twitter.com/frederickavita" target="_blank" class="btn-outline" style="display: inline-flex; align-items: center; gap: 10px; padding: 10px 20px; margin-top: 10px; border-radius: 50px; font-size: 0.8rem;">
+                    <i class="fa-brands fa-twitter"></i> Follow me @frederickavita
+                </a>
+            </div>
+
+        </div>
+    </section>
+
+    <section class="container" style="border-top: 1px solid #222; text-align: center; padding: 120px 20px;">
+        <h2 style="font-size: 2.5rem; margin-bottom: 20px;">Ready to eliminate overspending risks?</h2>
+        <p class="section-desc" style="margin-bottom: 40px; font-size: 1.1rem;">
+            Don't let Google decide your spending anymore. Take control today.
+        </p>
+        
+        <div style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap;">
+            <a href="https://buy.stripe.com/..." class="btn btn-primary" style="padding: 18px 35px; font-size: 1.1rem;">
+                Activate my License (€149)
+            </a>
+            
+            <a href="mailto:frederickavita@gmail.com?subject=Demande%20de%20Demo%20ReasoningFrame" class="btn btn-outline" style="padding: 18px 35px; font-size: 1.1rem;">
+                Request a Demo
+            </a>
         </div>
         
-        <div class="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto text-sm text-slate-500 mb-12 text-left md:text-center">
-            <div>
-                <h5 class="text-white font-semibold mb-3">Product</h5>
-                <ul class="space-y-2">
-                    <li><a href="#" class="hover:text-purple-400">Pricing</a></li>
-                    <li><a href="#" class="hover:text-purple-400">Roadmap</a></li>
-                    <li><a href="#" class="hover:text-purple-400">Changelog</a></li>
-                </ul>
-            </div>
-            <div>
-                <h5 class="text-white font-semibold mb-3">Legal</h5>
-                <ul class="space-y-2">
-                    <li><a href="#" class="hover:text-purple-400">Terms of Service</a></li>
-                    <li><a href="#" class="hover:text-purple-400">Privacy Policy</a></li>
-                    <li><a href="#" class="hover:text-purple-400">Legal Notice</a></li>
-                </ul>
-            </div>
-            <div>
-                <h5 class="text-white font-semibold mb-3">Contact</h5>
-                <address class="not-italic">
-                    8 rue Charles Gide<br>
-                    77130 Varennes sur Seine<br>
-                    France<br>
-                    <a href="mailto:hello@reasoningframe.com" class="text-purple-400 mt-2 block hover:underline">hello@reasoningframe.com</a>
-                </address>
-            </div>
-        </div>
+        <p style="margin-top: 30px; font-size: 0.8rem; color: #666;">
+            Response within 4 business hours for demo requests.
+        </p>
+    </section>
 
-        <div class="text-xs text-slate-700 pt-8 border-t border-slate-900">
-            © 2026 ReasoningFrame. All rights reserved.
-        </div>
+    <footer>
+        <p class="mono" style="opacity: 0.5; line-height: 1.8;">
+            REASONINGFRAME © 2026.<br>
+            8 rue Charles Gide, 77130 Varennes-sur-Seine.<br>
+            SIRET: 478 310 009 70025<br>
+            Paris, France. | <a href="mailto:frederickavita@gmail.com" style="text-decoration: underline;">Contact Support</a>
+        </p>
     </footer>
+
+</body>
+</html>

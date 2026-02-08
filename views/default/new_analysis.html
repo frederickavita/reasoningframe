@@ -1,0 +1,203 @@
+{{extend "malayout.html"}}
+
+
+<nav class="border-b border-slate-800 bg-slate-900/50 backdrop-blur-md sticky top-0 z-40">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between h-16 items-center">
+            
+            <div class="flex items-center gap-2">
+                <a href="{{=URL('default', 'dashboard')}}" class="flex items-center gap-2 hover:opacity-80 transition">
+                    <div class="w-8 h-8 bg-purple-600 rounded flex items-center justify-center text-white font-bold shadow-lg shadow-purple-500/30">R</div>
+                    <span class="font-bold text-white tracking-tight text-lg">Reasoning<span class="text-purple-400">Frame</span></span>
+                </a>
+            </div>
+
+            <div class="flex items-center gap-4">
+                <div class="hidden sm:flex bg-slate-800 px-3 py-1 rounded-full border border-slate-700 text-sm items-center gap-2">
+                    <span class="text-slate-400">Balance:</span>
+                    <span class="text-white font-bold">{{=auth.user.credits if auth.user else 0}} Credits</span>
+                </div>
+                <a href="{{=URL('default', 'dashboard')}}" class="text-slate-400 hover:text-white text-sm font-medium transition hidden sm:block">Dashboard</a>
+                <a href="{{=URL('default', 'logout')}}" class="text-slate-400 hover:text-white p-2 rounded-lg hover:bg-slate-800 transition" title="Logout">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                    </svg>
+                </a>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<div class="min-h-[calc(100vh-4rem)] flex flex-col items-center justify-center p-4 relative overflow-hidden py-10"> <div class="absolute top-0 left-1/4 w-[500px] h-[500px] bg-purple-900/10 rounded-full blur-[128px] pointer-events-none"></div>
+    
+    <div class="relative z-10 max-w-xl w-full animate-fade-in">
+        
+        <div class="text-center mb-6"> <h1 class="text-3xl font-bold text-white mb-1">New Mission</h1>
+            <p class="text-slate-400 text-xs">Choose your entry point.</p>
+        </div>
+
+        <form action="{{=URL('default', 'process_niche')}}" method="POST" id="missionForm">
+            
+            <input type="hidden" name="analysis_mode" id="modeInput" value="target">
+            <input type="hidden" name="strategy" value="auto">
+
+            <div class="bg-slate-900 p-1 rounded-xl border border-slate-700 flex mb-6 relative z-20"> <button type="button" onclick="switchMode('target')" id="tab-target" class="flex-1 py-2 text-xs font-bold rounded-lg transition-all duration-200 bg-purple-600 text-white shadow-lg uppercase tracking-wide">
+                    🎯 By Target Audience
+                </button>
+                <button type="button" onclick="switchMode('pain')" id="tab-pain" class="flex-1 py-2 text-xs font-bold rounded-lg transition-all duration-200 text-slate-400 hover:text-white uppercase tracking-wide">
+                    💔 By Pain Point
+                </button>
+            </div>
+
+            <div class="relative min-h-[220px]"> <div id="panel-target" class="absolute inset-0 transition-opacity duration-300 opacity-100 z-10">
+                    <div class="bg-slate-900/80 border border-slate-700 rounded-xl p-5 shadow-2xl backdrop-blur-sm space-y-4">
+                        <div>
+                            <label class="block text-slate-500 text-[10px] font-bold uppercase tracking-wider mb-1.5">Who is your target?</label>
+                            <div class="flex items-center bg-slate-800 border border-slate-700 rounded-lg p-3 focus-within:border-purple-500 transition">
+                                <span class="text-xl mr-3">👥</span>
+                                <input type="text" name="niche" id="inputNiche"
+                                       placeholder="e.g. Airbnb Hosts, Dentists..." 
+                                       class="w-full bg-transparent border-none text-white text-lg font-bold focus:ring-0 focus:outline-none placeholder-slate-600">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-slate-500 text-[10px] font-bold uppercase tracking-wider mb-1.5">Specific Source (Optional)</label>
+                            <input type="text" name="specific_url_target" 
+                                   placeholder="e.g. reddit.com/r/RealEstate" 
+                                   class="w-full bg-slate-800 border border-slate-700 text-slate-300 text-xs rounded-lg p-2.5 focus:border-purple-500 outline-none">
+                        </div>
+                    </div>
+                    <p class="text-center text-[10px] text-slate-500 mt-3">The agent will scan the web to find problems for this audience.</p>
+                </div>
+
+                <div id="panel-pain" class="absolute inset-0 transition-opacity duration-300 opacity-0 pointer-events-none z-0">
+                    <div class="bg-slate-900/80 border border-slate-700 rounded-xl p-5 shadow-2xl backdrop-blur-sm space-y-4">
+                        <div>
+                            <label class="block text-slate-500 text-[10px] font-bold uppercase tracking-wider mb-1.5">Describe the problem</label>
+                            <div class="bg-slate-800 border border-slate-700 rounded-lg p-3 focus-within:border-purple-500 transition">
+                                <textarea name="problem_context" id="inputPain" rows="3"
+                                          placeholder="e.g. I hate copying data from PDF invoices to Excel manually every month..."
+                                          class="w-full bg-transparent border-none text-white text-sm focus:ring-0 focus:outline-none placeholder-slate-600 resize-none"></textarea>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-slate-500 text-[10px] font-bold uppercase tracking-wider mb-1.5">Source / Context URL (Optional)</label>
+                            <input type="text" name="specific_url_pain" 
+                                   placeholder="e.g. Link to a forum post or article..." 
+                                   class="w-full bg-slate-800 border border-slate-700 text-slate-300 text-xs rounded-lg p-2.5 focus:border-purple-500 outline-none">
+                        </div>
+                    </div>
+                    <p class="text-center text-[10px] text-slate-500 mt-3">The agent will analyze this pain to identify the market and the solution.</p>
+                </div>
+
+            </div>
+
+            <div class="text-center pt-6 mt-8 relative z-20"> <button type="button" onclick="openConfirmModal()" class="group relative inline-flex items-center justify-center px-8 py-3 font-bold text-white transition-all duration-200 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-sm rounded-full hover:scale-105 shadow-lg shadow-purple-500/30 ring-1 ring-purple-400/50">
+                    <span class="mr-2">LAUNCH MISSION</span>
+                    <svg class="w-4 h-4 group-hover:translate-x-1 transition" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                    
+                 
+                </button>
+            </div>
+
+            <div id="confirmModal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-slate-900/90 backdrop-blur-sm animate-fade-in">
+                <div class="bg-slate-800 border border-slate-700 rounded-xl p-6 max-w-xs w-full shadow-2xl transform scale-100 transition-transform">
+                    <div class="text-center">
+                        <div class="w-12 h-12 bg-purple-600/20 rounded-full flex items-center justify-center mx-auto mb-3">
+                            <span class="text-2xl">🚀</span>
+                        </div>
+                        <h3 class="text-lg font-bold text-white mb-1">Confirm Launch?</h3>
+                        <p class="text-slate-400 text-xs mb-4">
+                            This will start a deep web analysis and deduct <strong class="text-white">1 Credit</strong> from your balance.
+                        </p>
+                        
+                        <div class="flex flex-col gap-2">
+                            <button type="submit" onclick="showLoadingState(this)" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-2.5 px-4 rounded-lg text-sm transition flex items-center justify-center gap-2">
+                                <span>Yes, Start Mission</span>
+                            </button>
+                            
+                            <button type="button" onclick="closeConfirmModal()" class="w-full bg-transparent border border-slate-700 text-slate-400 hover:text-white font-bold py-2.5 px-4 rounded-lg text-sm transition">
+                                Cancel
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </form>
+    </div>
+
+    <script>
+        function switchMode(mode) {
+            const tabTarget = document.getElementById('tab-target');
+            const tabPain = document.getElementById('tab-pain');
+            const panelTarget = document.getElementById('panel-target');
+            const panelPain = document.getElementById('panel-pain');
+            const modeInput = document.getElementById('modeInput');
+            
+            modeInput.value = mode;
+
+            if (mode === 'target') {
+                tabTarget.classList.add('bg-purple-600', 'text-white', 'shadow-lg');
+                tabTarget.classList.remove('text-slate-400', 'hover:text-white');
+                tabPain.classList.remove('bg-purple-600', 'text-white', 'shadow-lg');
+                tabPain.classList.add('text-slate-400', 'hover:text-white');
+
+                panelTarget.classList.remove('opacity-0', 'pointer-events-none', 'z-0');
+                panelTarget.classList.add('opacity-100', 'z-10');
+                panelPain.classList.add('opacity-0', 'pointer-events-none', 'z-0');
+                panelPain.classList.remove('opacity-100', 'z-10');
+                
+                setTimeout(() => document.getElementById('inputNiche').focus(), 100);
+
+            } else {
+                tabPain.classList.add('bg-purple-600', 'text-white', 'shadow-lg');
+                tabPain.classList.remove('text-slate-400', 'hover:text-white');
+                tabTarget.classList.remove('bg-purple-600', 'text-white', 'shadow-lg');
+                tabTarget.classList.add('text-slate-400', 'hover:text-white');
+
+                panelPain.classList.remove('opacity-0', 'pointer-events-none', 'z-0');
+                panelPain.classList.add('opacity-100', 'z-10');
+                panelTarget.classList.add('opacity-0', 'pointer-events-none', 'z-0');
+                panelTarget.classList.remove('opacity-100', 'z-10');
+                
+                setTimeout(() => document.getElementById('inputPain').focus(), 100);
+            }
+        }
+
+        function openConfirmModal() {
+            const mode = document.getElementById('modeInput').value;
+            let isValid = false;
+            
+            if (mode === 'target') {
+                isValid = document.getElementById('inputNiche').value.trim() !== '';
+            } else {
+                isValid = document.getElementById('inputPain').value.trim() !== '';
+            }
+
+            if(isValid) {
+                document.getElementById('confirmModal').classList.remove('hidden');
+            } else {
+                if (mode === 'target') document.getElementById('inputNiche').focus();
+                else document.getElementById('inputPain').focus();
+            }
+        }
+
+        function closeConfirmModal() {
+            document.getElementById('confirmModal').classList.add('hidden');
+        }
+
+        function showLoadingState(btn) {
+            btn.innerHTML = `
+                <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Processing...
+            `;
+            btn.classList.add('cursor-not-allowed', 'opacity-75');
+        }
+    </script>
+</div>
