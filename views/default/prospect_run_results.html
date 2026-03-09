@@ -1,0 +1,227 @@
+{{extend 'layout.html'}}
+
+<h2>Prospect run results</h2>
+
+<style>
+.metric-box {
+    display:inline-block;
+    min-width:180px;
+    margin:8px 12px 8px 0;
+    padding:12px 14px;
+    border:1px solid #ddd;
+    border-radius:8px;
+    background:#fafafa;
+    vertical-align:top;
+}
+.metric-title {
+    font-size:12px;
+    color:#666;
+    text-transform:uppercase;
+}
+.metric-value {
+    font-size:24px;
+    font-weight:bold;
+    margin-top:6px;
+}
+.status-badge {
+    display:inline-block;
+    padding:4px 8px;
+    border-radius:4px;
+    color:#fff;
+    font-weight:bold;
+}
+.status-idle { background:#607d8b; }
+.status-searching { background:#1565c0; }
+.status-inspecting { background:#00838f; }
+.status-extracting_contacts { background:#6a1b9a; }
+.status-qualifying { background:#2e7d32; }
+.status-drafting { background:#ef6c00; }
+.status-locked_preview { background:#5d4037; }
+.status-unlocked { background:#2e7d32; }
+.status-failed { background:#c62828; }
+
+pre {
+    white-space:pre-wrap;
+    word-break:break-word;
+}
+details {
+    margin-top:8px;
+}
+summary {
+    cursor:pointer;
+    font-weight:bold;
+}
+</style>
+
+<h3>Run summary</h3>
+
+<div class="metric-box">
+    <div class="metric-title">Status</div>
+    <div class="metric-value">
+        <span class="status-badge status-{{=run.status}}">{{=run.status}}</span>
+    </div>
+</div>
+
+<div class="metric-box">
+    <div class="metric-title">Discovered</div>
+    <div class="metric-value">{{=run.discovered_count}}</div>
+</div>
+
+<div class="metric-box">
+    <div class="metric-title">Processed</div>
+    <div class="metric-value">{{=run.processed_count}}</div>
+</div>
+
+<div class="metric-box">
+    <div class="metric-title">Errors</div>
+    <div class="metric-value">{{=run.error_count}}</div>
+</div>
+
+<div class="metric-box">
+    <div class="metric-title">Unlocked</div>
+    <div class="metric-value">{{='Yes' if run.is_unlocked else 'No'}}</div>
+</div>
+
+{{if hidden_count > 0:}}
+<div class="w3-panel w3-pale-yellow w3-border">
+    <p>
+        {{=hidden_count}} result(s) are hidden by preview mode.
+    </p>
+</div>
+{{pass}}
+
+{{if run.last_error_message:}}
+<div class="w3-panel w3-pale-red w3-border">
+    <strong>Last error:</strong> {{=run.last_error_message}}
+</div>
+{{pass}}
+
+<h3>Visible prospects</h3>
+
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>Company</th>
+            <th>Website</th>
+            <th>City</th>
+            <th>Qualification</th>
+            <th>Fit confidence</th>
+            <th>Best contact</th>
+            <th>Summary</th>
+        </tr>
+    </thead>
+    <tbody>
+        {{for i, row in enumerate(visible_rows):}}
+            {{p = row['prospect']}}
+            {{artifact = row['artifact']}}
+            {{primary = row['primary_contact']}}
+            <tr>
+                <td>{{=i + 1}}</td>
+                <td>{{=p.company_name}}</td>
+                <td><a href="{{=p.domain}}" target="_blank">{{=p.domain}}</a></td>
+                <td>{{=p.city}}</td>
+                <td>{{=p.qualification_status}}</td>
+                <td>{{=p.fit_confidence}}</td>
+                <td>
+                    {{if primary:}}
+                        <strong>{{=primary.contact_type}}</strong><br>
+                        {{=primary.value}}<br>
+                        {{if primary.contact_name:}}<em>{{=primary.contact_name}}</em><br>{{pass}}
+                        {{if primary.contact_role:}}{{=primary.contact_role}}<br>{{pass}}
+                    {{else:}}
+                        —
+                    {{pass}}
+                </td>
+                <td>
+                    {{if artifact:}}
+                        {{=artifact.business_summary}}
+                    {{else:}}
+                        {{=p.business_summary or '—'}}
+                    {{pass}}
+                </td>
+            </tr>
+            <tr>
+                <td colspan="8">
+                    <details>
+                        <summary>See details</summary>
+
+                        <p><strong>Qualification explanation:</strong><br>
+                            {{=p.qualification_explanation or (artifact.qualification_explanation if artifact else '')}}
+                        </p>
+
+                        <p><strong>Offer fit:</strong><br>
+                            {{=p.llm_offer_fit or '—'}}
+                        </p>
+
+                        <p><strong>Outreach angle:</strong><br>
+                            {{=artifact.outreach_angle if artifact else p.outreach_angle}}
+                        </p>
+
+                        <p><strong>Email subject:</strong><br>
+                            {{=artifact.email_subject if artifact else p.email_subject}}
+                        </p>
+
+                        <p><strong>Email draft:</strong><br>
+                            {{=artifact.email_draft if artifact else p.email_draft}}
+                        </p>
+
+                        <p><strong>Contacts:</strong></p>
+
+                            <p><strong>Visible people mentioned on the site:</strong></p>
+<pre>
+{{for vp in row['visible_people']:}}
+- name={{=vp.full_name}} | role={{=vp.role_text}} | confidence={{=vp.confidence}}
+  source={{=vp.source_url}}
+  evidence={{=vp.evidence_text}}
+{{pass}}
+</pre>
+
+
+
+                        <pre>
+{{for c in row['contacts']:}}
+- type={{=c.contact_type}} | value={{=c.value}} | primary={{=c.is_primary}} | confidence={{=c.confidence}}
+  name={{=c.contact_name}} | role={{=c.contact_role}}
+  address={{=c.address_text}}
+  evidence={{=c.evidence_text}}
+{{pass}}
+                        </pre>
+
+                        <p><strong>Signals:</strong></p>
+                        <pre>
+{{for s in row['signals']:}}
+- {{=s.source_kind}} | {{=s.signal_type}} | {{=s.signal_value}} | {{=s.polarity}} | confidence={{=s.confidence}}
+  reason={{=s.reason}}
+{{pass}}
+                        </pre>
+
+                        <p><strong>Source pages:</strong></p>
+                        <pre>
+{{for src in row['sources']:}}
+- {{=src.page_type}} | loaded={{=src.loaded}} | status={{=src.http_status}} | {{=src.url}}
+{{pass}}
+                        </pre>
+                    </details>
+                </td>
+            </tr>
+        {{pass}}
+    </tbody>
+</table>
+
+
+
+
+<h4>Pre-LLM debug payload</h4>
+
+<p><strong>Business context sent to Gemini:</strong></p>
+<pre>{{=(row['pre_llm_debug']['business_context'])}}</pre>
+
+<p><strong>Deterministic contacts before Gemini:</strong></p>
+<pre>{{=(row['pre_llm_debug']['contacts_payload'])}}</pre>
+
+<p><strong>Visible people before Gemini:</strong></p>
+<pre>{{=(row['pre_llm_debug']['visible_people_payload'])}}</pre>
+
+<p><strong>Combined site text sent to Gemini:</strong></p>
+<pre style="white-space: pre-wrap;">{{=row['pre_llm_debug']['site_text'][:12000]}}</pre>

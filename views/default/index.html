@@ -1,496 +1,538 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ReasoningFrame | Google Ads Kill Switch</title>
+{{extend 'malayout.html'}}
+
+<div class="w3-bar w3-white w3-padding-16" style="max-width:1200px; margin:auto">
+    <a href="#" class="w3-bar-item w3-button w3-hover-none w3-xlarge" style="font-weight:600">ReasoningFrame</a>
     
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-    <style>
-        :root {
-            --bg-dark: #0a0a0a;
-            --bg-card: #111111;
-            --text-main: #e5e5e5;
-            --text-muted: #888888;
-            --accent-green: #00ff41;
-            --accent-blue: #3b82f6; 
-            --accent-purple: #8b5cf6;
-            --border-color: #222;
-            --font-mono: 'JetBrains Mono', monospace;
-            --font-sans: 'Inter', sans-serif;
-        }
-
-        * { box-sizing: border-box; }
-        body { background-color: var(--bg-dark); color: var(--text-main); font-family: var(--font-sans); margin: 0; line-height: 1.6; }
-        a { text-decoration: none; color: inherit; }
-        
-        .mono { font-family: var(--font-mono); }
-        .text-green { color: var(--accent-green); }
-        .text-blue { color: var(--accent-blue); }
-        .text-purple { color: var(--accent-purple); }
-        
-        h1, h2, h3 { font-weight: 800; letter-spacing: -0.02em; margin-top: 0; }
-        h2 { font-size: 2.2rem; margin-bottom: 20px; text-align: center; }
-        .section-desc { text-align: center; color: var(--text-muted); max-width: 600px; margin: 0 auto 50px; }
-
-        /* NAVBAR */
-        .navbar {
-            padding: 20px 40px;
-            border-bottom: 1px solid var(--border-color);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            background: rgba(10, 10, 10, 0.9);
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            backdrop-filter: blur(10px);
-        }
-        .nav-logo {
-            font-family: var(--font-mono);
-            font-weight: 700;
-            font-size: 1.1rem;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            color: var(--text-main);
-        }
-
-        /* HERO */
-        .hero { padding: 80px 20px 80px; text-align: center; max-width: 1000px; margin: 0 auto; }
-        .headline { font-size: 3.5rem; line-height: 1.1; margin-bottom: 20px; }
-        .subheadline { font-size: 1.2rem; color: var(--text-muted); max-width: 700px; margin: 0 auto 50px; }
-        
-        .hero-btns { display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; }
-        .btn { padding: 15px 30px; font-weight: 700; border-radius: 4px; transition: all 0.2s; border: none; cursor: pointer; }
-        .btn-primary { background: var(--text-main); color: var(--bg-dark); }
-        .btn-primary:hover { background: white; transform: scale(1.02); }
-        .btn-outline { border: 1px solid #444; color: var(--text-main); background: transparent; }
-        .btn-outline:hover { border-color: var(--text-main); }
-
-        /* TRUST BAR */
-        .trust-bar { padding: 15px; border-bottom: 1px solid var(--border-color); text-align: center; font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; background: #0f0f0f; }
-        .trust-bar span { margin: 0 15px; }
-
-        /* CONTAINER */
-        .container { max-width: 1200px; margin: 0 auto; padding: 100px 20px; border-bottom: 1px solid var(--border-color); }
-        .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 40px; }
-        
-        .feature-card { background: var(--bg-card); padding: 30px; border: 1px solid var(--border-color); border-radius: 6px; }
-        .feature-card h3 { font-size: 1.1rem; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; }
-        .feature-card p { color: var(--text-muted); font-size: 0.95rem; margin: 0; }
-
-        /* PRICING TABLE */
-        .pricing-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-top: 50px; align-items: center; }
-        
-        .pricing-card { 
-            background: #0f0f0f; border: 1px solid #333; border-radius: 12px; padding: 30px; 
-            display: flex; flex-direction: column; position: relative; overflow: hidden; height: 100%;
-        }
-        
-        .pricing-card.popular { 
-            border: 2px solid var(--accent-blue); 
-            background: linear-gradient(180deg, rgba(59, 130, 246, 0.08), #0f0f0f); 
-            transform: scale(1.05);
-            z-index: 2;
-            box-shadow: 0 0 30px rgba(59, 130, 246, 0.1);
-        }
-
-        .popular-badge { 
-            position: absolute; top: 15px; right: 15px; background: var(--accent-blue); color: white; 
-            padding: 4px 10px; border-radius: 20px; font-size: 0.7rem; font-weight: bold; text-transform: uppercase;
-        }
-
-        .plan-name { font-size: 1rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px;}
-        .price { font-size: 2.5rem; font-weight: 800; margin: 10px 0 5px; font-family: var(--font-mono); }
-        .price span { font-size: 0.9rem; color: var(--text-muted); font-weight: normal; }
-        
-        .features-list { list-style: none; padding: 0; margin: 25px 0; flex-grow: 1; }
-        .features-list li { margin-bottom: 12px; color: #ccc; font-size: 0.9rem; display: flex; gap: 10px; align-items: center; }
-        
-        .btn-buy { width: 100%; padding: 15px; text-align: center; font-weight: bold; border-radius: 6px; margin-top: 20px; cursor: pointer; }
-        .btn-buy-blue { background: var(--accent-blue); color: white; border: none; }
-        .btn-buy-blue:hover { background: #2563eb; box-shadow: 0 0 15px rgba(37, 99, 235, 0.5); }
-        .btn-buy-outline { border: 1px solid #555; color: white; background: transparent; }
-        .btn-buy-outline:hover { border-color: white; background: rgba(255,255,255,0.05); }
-
-        /* BLUEPRINT */
-        .blueprint-box { 
-            background: #0f0f0f; border: 1px dashed #333; padding: 40px; 
-            text-align: center; margin-top: 40px; font-family: var(--font-mono); font-size: 0.8rem; color: var(--text-muted);
-        }
-
-        footer { padding: 60px 20px; text-align: center; font-size: 0.8rem; color: #444; border-top: 1px solid #222; margin-top: 0; background-color: #050505;}
-        
-        @media (max-width: 768px) {
-            .pricing-card.popular { transform: scale(1); }
-            .headline { font-size: 2.5rem; }
-        }
-    </style>
-</head>
-<body>
-
-    <nav class="navbar">
-        <div class="nav-logo">
-            <i class="fa fa-shield-halved text-blue"></i> REASONINGFRAME
-        </div>
-        <div style="font-size: 0.9rem;">
-            <a href="#tarifs" style="margin-right: 20px; color: #aaa;">Pricing</a>
-            <a href="mailto:frederickavita@gmail.com" style="color: #aaa;">Contact</a>
-        </div>
-    </nav>
-
-    <div class="trust-bar mono">
-        <span><i class="fa fa-robot"></i> 24/7 Monitoring</span>
-        <span><i class="fa fa-shield-halved"></i> Zero Overspend</span>
-        <span><i class="fa fa-check-double"></i> Official API</span>
+    <div class="w3-right">
+        <a href="#pricing" class="w3-bar-item w3-button bg-gradient-btn w3-round-xxlarge w3-margin-left">Enroll for €79</a>
     </div>
 
-    <header class="hero">
-        <h1 class="headline">
-            Google allows itself <span class="text-red">200%</span> of your daily budget.<br>
-            ReasoningFrame forces a stop at <span class="text-green">100%</span>.
-        </h1>
+    <div class="w3-hide-small w3-center" style="margin: 0 auto; width: fit-content;">
+        <a href="#" class="w3-bar-item w3-button w3-hover-none">Home</a>
+        <a href="#" class="w3-bar-item w3-button w3-hover-none w3-text-grey">Curriculum</a>
+        <a href="#" class="w3-bar-item w3-button w3-hover-none w3-text-grey">Demo</a>
+        <a href="#pricing" class="w3-bar-item w3-button w3-hover-none w3-text-grey">Pricing</a>
+    </div>
+</div>
+
+<div class="w3-content w3-padding-64" style="max-width:1200px">
+    <div class="w3-row">
         
-        <p class="subheadline">
-            The first autonomous <strong>Budget Kill Switch</strong> for Freelancers.<br>
-            Stop checking your accounts on weekends. The system instantly pauses your campaigns if Google exceeds the limit.
-        </p>
-
-        <div class="hero-btns">
-            <a href="#tarifs" class="btn btn-primary">
-                View Offers
-            </a>
-            <a href="#features" class="btn btn-outline">
-                How it works?
-            </a>
-        </div>
-
-        <div style="margin-top: 50px; border-top: 1px solid #222; padding-top: 30px; display: flex; justify-content: center; gap: 40px; flex-wrap: wrap;">
+        <div class="w3-half w3-padding-32 w3-container">
+            <h1 class="hero-heading w3-margin-bottom">Build an AI Lead Gen Agent in 2 Hours</h1>
+            <p class="w3-text-grey w3-margin-bottom w3-large" style="max-width:85%;">
+             Stop prospecting manually. Learn how to use n8n and Claude to build a No-Code AI agent that browses websites, qualifies leads, and drafts your B2B emails.
+            </p>
+            <br>
+            <a href="#pricing" class="w3-button bg-gradient-btn w3-round-xxlarge w3-padding-large w3-margin-bottom w3-large">Start the Interactive Course</a>
             
-            <div style="text-align: center;">
-                <div class="mono text-green" style="font-size: 1.5rem; font-weight: 700;">+€500,000</div>
-                <div style="font-size: 0.75rem; color: #666; text-transform: uppercase; letter-spacing: 1px;">Ad Spend Secured</div>
-            </div>
-
-            <div style="text-align: center;">
-                <div class="mono text-blue" style="font-size: 1.5rem; font-weight: 700;">0</div>
-                <div style="font-size: 0.75rem; color: #666; text-transform: uppercase; letter-spacing: 1px;">Uncontrolled Incidents</div>
-            </div>
-
-            <div style="text-align: center;">
-                <div class="mono text-main" style="font-size: 1.5rem; font-weight: 700;">100%</div>
-                <div style="font-size: 0.75rem; color: #666; text-transform: uppercase; letter-spacing: 1px;">Compliance Validated</div>
-            </div>
-
-        </div>
-    </header>
-
-    <section id="features" class="container">
-        <h2>No more waking up in a cold sweat on Saturdays</h2>
-        <div class="grid-3">
-            <div class="feature-card">
-                <h3 class="text-red"><i class="fa fa-skull"></i> The Death of Scripts</h3>
-                <p>Free JS scripts crash (Timeout) and don't handle PMax properly. Our robot is an external executable that never sleeps.</p>
-            </div>
-            <div class="feature-card">
-                <h3><i class="fa fa-wallet"></i> Immediate ROI</h3>
-                <p>A single budget error often costs €500+. This software costs €149 for life. Do the math.</p>
-            </div>
-            <div class="feature-card">
-                <h3 class="text-blue"><i class="fa fa-lock"></i> Data Sovereignty</h3>
-                <p>Unlike US SaaS platforms, we don't sell your data. You get a private and secure instance.</p>
+            <div class="w3-margin-top w3-padding-32">
+                <p class="w3-small w3-text-grey">The modern stack for automation agencies</p>
+                <div class="w3-row">
+                    <div class="w3-col s4 w3-large" style="font-weight:600"><i class="fa fa-cogs"></i> n8n</div>
+                    <div class="w3-col s4 w3-large" style="font-weight:600"><i class="fa fa-bolt"></i> LangChain</div>
+                    <div class="w3-col s4 w3-large" style="font-weight:600"><i class="fa fa-commenting-o"></i> Claude API</div>
+                </div>
             </div>
         </div>
-    </section>
 
+        <div class="w3-half w3-container w3-hide-small">
+            <div class="soft-gradient-box">
+                
+                <div class="mockup-card w3-padding w3-margin-bottom">
+                    <div class="w3-small w3-text-dark-grey w3-margin-bottom" style="font-weight:600">
+                        Agent Live Performance <i class="fa fa-magic w3-right w3-text-grey w3-light-grey w3-circle w3-padding-small"></i>
+                    </div>
+                    
+                    <div class="w3-row-padding">
+                        <div class="w3-half w3-margin-bottom">
+                            <div class="w3-border w3-round-large w3-padding-small w3-display-container">
+                                <div class="w3-tiny"><strong><i class="fa fa-search w3-text-blue"></i> Scraped Sites</strong><br><span class="w3-text-grey">Websites Analyzed: 142</span></div>
+                                <div class="w3-display-right w3-padding-small"><span class="badge-green">Live</span></div>
+                            </div>
+                        </div>
+                        <div class="w3-half w3-margin-bottom">
+                            <div class="w3-border w3-round-large w3-padding-small w3-display-container">
+                                <div class="w3-tiny"><strong><i class="fa fa-check-circle w3-text-green"></i> Qualified</strong><br><span class="w3-text-grey">High Intent Leads: 38</span></div>
+                                <div class="w3-display-right w3-padding-small"><span class="badge-green">ROI</span></div>
+                            </div>
+                        </div>
+                        <div class="w3-half">
+                            <div class="w3-border w3-round-large w3-padding-small w3-display-container">
+                                <div class="w3-tiny"><strong><i class="fa fa-envelope w3-text-purple"></i> Drafts Ready</strong><br><span class="w3-text-grey">Emails Generated: 38</span></div>
+                                <div class="w3-display-right w3-padding-small"><span class="badge-green">Done</span></div>
+                            </div>
+                        </div>
+                        <div class="w3-half">
+                            <div class="w3-border w3-round-large w3-padding-small w3-display-container">
+                                <div class="w3-tiny"><strong><i class="fa fa-slack w3-text-black"></i> Human in Loop</strong><br><span class="w3-text-grey">Awaiting Approval: 5</span></div>
+                                <div class="w3-display-right w3-padding-small"><span class="badge-green">Ping!</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mockup-card w3-padding">
+                    <div class="w3-small w3-text-dark-grey w3-margin-bottom" style="font-weight:600">
+                        Course Completion Progress <i class="fa fa-graduation-cap w3-right w3-text-grey w3-light-grey w3-circle w3-padding-small"></i>
+                    </div>
+                    <div class="w3-xlarge w3-margin-bottom">
+                        <strong>Lab 3 / 4</strong> 
+                        <span class="w3-right w3-tiny w3-text-grey w3-border w3-round-xlarge w3-padding-small w3-light-grey" style="margin-top:8px">Build the Brain</span>
+                    </div>
+                    
+                    <div class="w3-row w3-margin-bottom" style="display:flex; gap:4px;">
+                        <div class="w3-green w3-round" style="height:6px; flex:1"></div>
+                        <div class="w3-green w3-round" style="height:6px; flex:1"></div>
+                        <div class="w3-orange w3-round" style="height:6px; flex:1"></div>
+                        <div class="w3-light-grey w3-round" style="height:6px; flex:1"></div>
+                    </div>
+                    
+                    <div class="w3-tiny w3-text-grey w3-margin-bottom" style="display:flex; justify-content:space-between">
+                        <span>Setup</span>
+                        <span>Extraction</span>
+                        <span>Claude AI</span>
+                        <span class="w3-text-light-grey">Final Agent</span>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<div class="w3-white w3-padding-64">
     
-    <section class="container">
-        <h2 style="margin-bottom: 40px;">Kill Switch Architecture</h2>
+    <div class="w3-content w3-center w3-margin-bottom" style="max-width:800px">
+        <p class="w3-small w3-bold text-orange-custom" style="letter-spacing: 1px;">THE CURRICULUM</p>
+        <h2 class="w3-xxxlarge w3-bold" style="line-height: 1.2;">
+            Zero Theory. <span class="text-gradient-brown">100% Practical<br>Building & Validation.</span>
+        </h2>
+        <p class="w3-large w3-text-grey w3-margin-top">
+            You won't just watch videos. You will build your agent live and validate your progress using our interactive Webhook API.
+        </p>
+    </div>
+
+    <div class="w3-content w3-margin-top" style="max-width:1100px">
+        <div class="w3-row-padding">
+
+            <div class="w3-col l4 m4 s12">
+                <div class="feature-card-side w3-margin-bottom">
+                    <div class="icon-wrapper w3-margin-bottom">
+                        <i class="fa fa-sitemap"></i>
+                    </div>
+                    <h3 class="w3-large w3-bold">Visual Orchestration</h3>
+                    <p class="w3-text-grey w3-small">Master n8n to connect tools without writing backend code.</p>
+                </div>
+                <div class="feature-card-side">
+                    <div class="icon-wrapper w3-margin-bottom">
+                        <i class="fa fa-search"></i>
+                    </div>
+                    <h3 class="w3-large w3-bold">Web Browsing</h3>
+                    <p class="w3-text-grey w3-small">Give your agent the ability to scrape and read any website.</p>
+                </div>
+            </div>
+
+            <div class="w3-col l4 m4 s12">
+                <div class="feature-card-center w3-margin-bottom">
+                    <h3 class="w3-large w3-bold w3-margin-bottom">The Final B2B Agent</h3>
+                    <div class="w3-border w3-round-xlarge w3-padding w3-margin-bottom w3-left-align">
+                        <div class="w3-small w3-bold"><i class="fa fa-google w3-text-blue"></i> 1. Search Trigger</div>
+                        <div class="w3-tiny w3-text-grey">Finds companies on Google.</div>
+                    </div>
+                    <div class="w3-border w3-round-xlarge w3-padding w3-margin-bottom w3-left-align">
+                        <div class="w3-small w3-bold"><i class="fa fa-cogs w3-text-black"></i> 2. Scrape & Clean</div>
+                        <div class="w3-tiny w3-text-grey">Extracts "About Us" and Contact info.</div>
+                    </div>
+                    <div class="w3-border w3-round-xlarge w3-padding w3-margin-bottom w3-left-align">
+                        <div class="w3-small w3-bold"><i class="fa fa-commenting-o w3-text-purple"></i> 3. Claude Reasoner</div>
+                        <div class="w3-tiny w3-text-grey">Qualifies the lead & drafts outreach.</div>
+                    </div>
+                    <div class="w3-border w3-round-xlarge w3-padding w3-left-align" style="background-color: #f0fdf4;">
+                        <div class="w3-small w3-bold w3-text-green"><i class="fa fa-check"></i> 4. Slack Approval</div>
+                        <div class="w3-tiny w3-text-dark-grey">Human validates before sending.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="w3-col l4 m4 s12">
+                <div class="feature-card-side w3-margin-bottom">
+                    <div class="icon-wrapper w3-margin-bottom">
+                        <i class="fa fa-bolt"></i>
+                    </div>
+                    <h3 class="w3-large w3-bold">Claude Intelligence</h3>
+                    <p class="w3-text-grey w3-small">Use Anthropic's latest models for superior B2B reasoning.</p>
+                </div>
+                <div class="feature-card-side">
+                    <div class="icon-wrapper w3-margin-bottom">
+                        <i class="fa fa-shield"></i>
+                    </div>
+                    <h3 class="w3-large w3-bold">Human-in-the-Loop</h3>
+                    <p class="w3-text-grey w3-small">Learn how to securely pause agents for human approval.</p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+
+<div class="w3-white w3-padding-64">
+    <div class="w3-content w3-center" style="max-width:900px">
         
-        <div class="blueprint-box" style="text-align: left; padding: 0;">
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 0; border-radius: 8px; overflow: hidden;">
+        <h2 class="w3-xxxlarge" style="font-weight: 600;">
+            From scratch to a <span class="text-gradient-brown">Working Agency Tool.</span>
+        </h2>
+
+        <div class="timeline-wrapper w3-margin-top">
+            <div class="timeline-line"></div>
+            <div class="timeline-steps">
+                <div class="step-node"><i class="fa fa-laptop"></i></div>
+                <div class="step-node"><i class="fa fa-globe"></i></div>
+                <div class="step-node-active"><i class="fa fa-code-fork"></i></div>
+                <div class="step-node"><i class="fa fa-magic"></i></div>
+                <div class="step-node"><i class="fa fa-rocket"></i></div>
+            </div>
+        </div>
+
+        <p class="w3-large w3-text-grey w3-margin-top" style="max-width:700px; margin: 0 auto; line-height: 1.6;">
+            By the end of this 2-hour interactive course, you won't just have a certificate. You will own a customized, fully deployed AI agent that generates leads for your business.
+        </p>
+
+    </div>
+</div>
+
+<div class="w3-white w3-padding-64" style="border-top: 1px solid rgba(0,0,0,0.02); border-bottom: 1px solid rgba(0,0,0,0.02);">
+    <div class="w3-content" style="max-width:1000px">
+        
+        <div class="w3-center w3-margin-bottom w3-padding-32">
+            <h2 class="w3-xxxlarge w3-bold" style="line-height: 1.2; letter-spacing: -0.5px;">
+                Real results. <br><span class="text-gradient-brown">From week one.</span>
+            </h2>
+        </div>
+
+        <div class="soft-ui-card w3-center w3-margin-bottom" style="max-width: 800px; margin: 0 auto; padding: 40px;">
+            <div class="w3-text-orange w3-xlarge w3-margin-bottom"><i class="fa fa-quote-left"></i></div>
+            <p class="w3-large w3-text-dark-grey" style="line-height: 1.7; font-style: italic;">
+                "I originally built this system for myself. Running in the background, it qualified <strong>142 websites in 3 days</strong> and drafted <strong>38 hyper-personalized emails</strong>. I saved about 15 hours of manual prospecting that week alone."
+            </p>
+            <p class="w3-text-grey w3-small w3-bold w3-margin-top w3-uppercase" style="letter-spacing: 1px;">— Frédéric Kavita, Creator of ReasoningFrame</p>
+        </div>
+
+        <div class="w3-row-padding w3-margin-top w3-stretch">
+            
+            <div class="w3-half w3-margin-bottom">
+                <div class="soft-ui-card" style="height: 100%;">
+                    <div class="w3-text-yellow w3-margin-bottom"><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i></div>
+                    <p class="w3-text-dark-grey w3-small" style="line-height: 1.7;">"I used to pay a freelancer to scrape leads. With this course, I brought a n8n agent in-house in 2 hours. The time and money saved for my agency is massive."</p>
+                    <div class="w3-margin-top">
+                        <span class="w3-bold w3-small">Thomas L.</span><br>
+                        <span class="w3-tiny w3-text-grey">Marketing Agency Founder</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="w3-half w3-margin-bottom">
+                <div class="soft-ui-card" style="height: 100%;">
+                    <div class="w3-text-yellow w3-margin-bottom"><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i></div>
+                    <p class="w3-text-dark-grey w3-small" style="line-height: 1.7;">"I don't know how to code in Python, but n8n's visual interface and the course's interactive validation made the process dead simple. My agent runs every single morning."</p>
+                    <div class="w3-margin-top">
+                        <span class="w3-bold w3-small">Sarah M.</span><br>
+                        <span class="w3-tiny w3-text-grey">Freelance SEO Consultant</span>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+
+    </div>
+</div>
+<div class="section-soft-bg w3-padding-64">
+    <div class="w3-content" style="max-width:1200px">
+        <div class="w3-row-padding">
+            
+            <div class="w3-col l5 m12 w3-margin-bottom w3-padding-16">
+                <h3 class="w3-xxlarge w3-bold w3-margin-bottom" style="letter-spacing: -0.5px;">Meet Your Instructor</h3>
                 
-                <div style="padding: 40px; border-right: 1px dashed #333; display: flex; flex-direction: column; justify-content: center;">
-                    <h4 style="color: #fff; margin-top: 0; margin-bottom: 30px; text-align: center;">EXECUTION FLOW</h4>
+                <div class="soft-ui-card" style="background-color: #ffffff;">
+                    <div class="w3-center w3-margin-bottom w3-padding-16">
+                        <div class="w3-circle w3-light-grey" style="width: 96px; height: 96px; margin: 0 auto; display: flex; align-items: center; justify-content: center; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
+                            <img src="{{=URL('static', 'images/frederickavita.jpg')}}" alt="Frédéric Kavita" style="width: 100%; height: 100%; object-fit: cover;">
+                        </div>
+                        <h4 class="w3-xlarge w3-bold w3-margin-top" style="margin-bottom: 4px;">Frédéric Kavita</h4>
+                        <p class="w3-small w3-bold text-orange-custom w3-uppercase" style="letter-spacing: 1px; margin-bottom: 12px;">AI Engineer & PyTorch Developer</p>
+                        
+                        <a href="https://twitter.com/frederickavita" target="_blank" style="text-decoration: none; color: #64748b; font-size: 0.9rem; font-weight: 500; display: inline-flex; align-items: center; gap: 6px; padding: 6px 16px; border-radius: 20px; background-color: #f1f5f9; transition: all 0.2s ease;" onmouseover="this.style.backgroundColor='#eef2ff'; this.style.color='#1da1f2';" onmouseout="this.style.backgroundColor='#f1f5f9'; this.style.color='#64748b';">
+                            <i class="fa fa-twitter"></i> @frederickavita
+                        </a>
+                    </div>
                     
-                    <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px;">
-                        <div style="background: #222; padding: 10px; border-radius: 4px; border: 1px solid #444;">
-                            <i class="fa fa-server text-blue"></i>
-                        </div>
-                        <div>
-                            <div style="font-weight: bold; font-size: 0.9rem;">1. Monitoring (API)</div>
-                            <div style="font-size: 0.75rem; color: #666;">Reads costs every 15 min.</div>
-                        </div>
-                    </div>
-
-                    <div style="text-align: left; padding-left: 23px; color: #444; margin-bottom: 10px;">
-                        <i class="fa fa-arrow-down"></i>
-                    </div>
-
-                    <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px;">
-                        <div style="background: rgba(0, 255, 65, 0.1); padding: 10px; border-radius: 4px; border: 1px solid var(--accent-green);">
-                            <i class="fa fa-microchip text-green"></i>
-                        </div>
-                        <div>
-                            <div style="font-weight: bold; font-size: 0.9rem; color: var(--text-main);">2. Decision Engine</div>
-                            <div style="font-size: 0.75rem; color: #666;">Compare: Actual Spend > Threshold?</div>
-                        </div>
-                    </div>
-
-                    <div style="text-align: left; padding-left: 23px; color: #444; margin-bottom: 10px;">
-                        <i class="fa fa-arrow-down"></i>
-                    </div>
-
-                    <div style="display: flex; align-items: center; gap: 15px;">
-                        <div style="background: rgba(255, 51, 51, 0.1); padding: 10px; border-radius: 4px; border: 1px solid var(--accent-red);">
-                            <i class="fa fa-power-off text-red"></i>
-                        </div>
-                        <div>
-                            <div style="font-weight: bold; font-size: 0.9rem; color: var(--text-main);">3. Kill Switch (Action)</div>
-                            <div style="font-size: 0.75rem; color: #666;">Immediate PAUSE command.</div>
-                        </div>
-                    </div>
+                    <p class="w3-text-dark-grey" style="line-height: 1.7; font-size: 0.95rem;">
+                        I'm a Python developer with over <strong>10 years of experience in PyTorch</strong>. After designing complex AI architectures and building over 20 autonomous workflows for enterprises, I realized one thing: <br><br>
+                        <strong>When it comes to B2B growth, execution speed beats technical complexity.</strong> <br><br>
+                        My mission with ReasoningFrame is to translate a decade of hard-coding experience into visual systems (n8n + Claude) that you can deploy in 2 hours to generate real revenue.
+                    </p>
                 </div>
+            </div>
 
-                <div style="padding: 40px; background: #050505;">
-                    <h4 style="color: #fff; margin-top: 0; margin-bottom: 30px;">AUDIT LOGS (LIVE)</h4>
+            <div class="w3-col l7 m12 w3-padding-16">
+                <h3 class="w3-xxlarge w3-bold w3-margin-bottom" style="letter-spacing: -0.5px;">What You'll Build</h3>
+                
+                <div class="w3-row-padding" style="margin: 0 -16px;">
                     
-                    <div class="mono" style="font-size: 0.75rem; color: #888; background: #000; padding: 20px; border-radius: 4px; border: 1px solid #222; line-height: 1.8;">
-                        <div><span style="color: #444;">[14:00:01]</span> CONNECTING TO GOOGLE ADS API... <span style="color:var(--accent-green)">OK</span></div>
-                        <div><span style="color: #444;">[14:00:02]</span> CHECKING ACCOUNT ID: 593-XXX-XXXX</div>
-                        <div><span style="color: #444;">[14:00:02]</span> SPEND DETECTED: €104.50 / LIMIT: €100.00</div>
-                        <div><span style="color: #444;">[14:00:03]</span> <span style="color:var(--accent-red)">ALERT: THRESHOLD EXCEEDED (104.5%)</span></div>
-                        <div><span style="color: #444;">[14:00:03]</span> EXECUTING KILL SWITCH...</div>
-                        <div><span style="color: #444;">[14:00:04]</span> CAMPAIGN "SEARCH_Q1" STATUS SET TO: <span style="color:var(--accent-red); font-weight:bold;">PAUSED</span></div>
-                        <div><span style="color: #444;">[14:00:05]</span> NOTIFICATION SENT TO ADMIN.</div>
-                        <div style="margin-top: 10px; border-top: 1px solid #333; padding-top: 10px; color: #555;">
-                            // This log is archived and serves as legal proof in case of client dispute.
+                    <div class="w3-col m6 w3-margin-bottom">
+                        <div class="soft-ui-card" style="height: 100%; padding: 24px;">
+                            <div class="module-icon icon-orange">
+                                <i class="fa fa-cogs"></i>
+                            </div>
+                            <h4 class="module-title">1. The Foundation</h4>
+                            <p class="module-desc">Connect your visual n8n environment to the Anthropic (Claude) API in under 15 minutes. The bedrock of your agent.</p>
+                        </div>
+                    </div>
+
+                    <div class="w3-col m6 w3-margin-bottom">
+                        <div class="soft-ui-card" style="height: 100%; padding: 24px;">
+                            <div class="module-icon icon-blue">
+                                <i class="fa fa-search"></i>
+                            </div>
+                            <h4 class="module-title">2. The Agent's Eyes</h4>
+                            <p class="module-desc">Teach your agent how to open any URL (Web Scraping), read the source code, and extract actionable text for outreach.</p>
+                        </div>
+                    </div>
+
+                    <div class="w3-col m6 w3-margin-bottom">
+                        <div class="soft-ui-card" style="height: 100%; padding: 24px;">
+                            <div class="module-icon icon-purple">
+                                <i class="fa fa-bolt"></i>
+                            </div>
+                            <h4 class="module-title">3. The Brain (Claude AI)</h4>
+                            <p class="module-desc">Use advanced prompting so Claude can reason, qualify prospects against your criteria, and draft hyper-personalized emails.</p>
+                        </div>
+                    </div>
+
+                    <div class="w3-col m6 w3-margin-bottom">
+                        <div class="soft-ui-card" style="height: 100%; padding: 24px;">
+                            <div class="module-icon icon-green">
+                                <i class="fa fa-slack"></i>
+                            </div>
+                            <h4 class="module-title">4. The Safety Net</h4>
+                            <p class="module-desc">Connect your agent to Slack to manually approve every generated email before it gets sent. You always stay in control.</p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+<div id="pricing" class="w3-white w3-padding-64">
+    <div class="w3-content" style="max-width:1100px">
+        <div class="w3-row-padding">
+
+            <div class="w3-col l6 m6 w3-margin-bottom">
+                <div class="pricing-card-pro">
+                    <div class="w3-row-padding" style="margin: 0 -16px;">
+                        <div class="w3-col m12 w3-margin-bottom">
+                            <h3 class="w3-xlarge" style="font-weight: 600;">Interactive Course</h3>
+                            <p class="w3-text-grey w3-small" style="line-height: 1.5; margin-bottom: 32px;">
+                                Everything you need to build your first AI Agent.
+                            </p>
+                            
+                            <div class="w3-margin-bottom">
+                                <span class="price-display">€79</span><span class="price-month">/One-time</span>
+                            </div>
+                            
+                            <button class="w3-button bg-gradient-btn w3-round-xxlarge w3-padding-large w3-margin-bottom">Buy the Course</button>
+                            
+                            <ul class="pricing-features">
+                                <li><span class="check-circle"><i class="fa fa-check"></i></span> 4 Interactive Modules</li>
+                                <li><span class="check-circle"><i class="fa fa-check"></i></span> Webhook Validation System</li>
+                                <li><span class="check-circle"><i class="fa fa-check"></i></span> Final Lead Gen Project</li>
+                                <li><span class="check-circle"><i class="fa fa-check"></i></span> Lifetime Access</li>
+                            </ul>
                         </div>
                     </div>
                 </div>
-
-            </div>
-        </div>
-    </section>
-
-    <section id="tarifs" class="container" style="background-color: #080808;">
-        <h2>Launch Offers</h2>
-        <p class="section-desc">Guarantee your peace of mind today.</p>
-
-        <div class="pricing-grid">
-            
-            <div class="pricing-card">
-                <div class="plan-name">Monthly</div>
-                <div class="price">29 € <span>/ mo</span></div>
-                <p style="color: #666; font-size: 0.85rem;">To test without commitment.</p>
-                
-                <ul class="features-list">
-                    <li><i class="fa fa-user text-main"></i> Up to <strong>2 Accounts</strong></li>
-                    <li><i class="fa fa-infinity text-green"></i> <strong>Unlimited Ad Spend</strong></li>
-                    <li><i class="fa fa-check"></i> Hourly Monitoring</li>
-                    <li><i class="fa fa-check"></i> Secure Cloud</li>
-                </ul>
-
-                <a href="#" class="btn-buy btn-buy-outline">Subscribe</a>
             </div>
 
-            <div class="pricing-card popular">
-                <span class="popular-badge">Popular</span>
-                <div class="plan-name">Freelance (Lifetime)</div>
-                <div class="price">149 € <span>/ lifetime</span></div>
-                <p style="color: #aaa; font-size: 0.9rem;">Pays for itself in 5 months.</p>
-                
-                <ul class="features-list">
-                    <li><i class="fa fa-check text-blue"></i> <strong>One-time Payment</strong></li>
-                    <li><i class="fa fa-user text-blue"></i> <strong>Up to 5 Accounts</strong></li>
-                    <li><i class="fa fa-infinity text-green"></i> <strong>Unlimited Ad Spend</strong></li>
-                    <li><i class="fa fa-check text-blue"></i> Lifetime Updates</li>
-                    <li><i class="fa fa-check text-blue"></i> Hourly Monitoring</li>
-                    <li><i class="fa fa-check text-blue"></i> Priority Support</li>
-                </ul>
-
-                <a href="https://buy.stripe.com/..." class="btn-buy btn-buy-blue">
-                    Secure for Life (€149)
-                </a>
-                <p style="text-align: center; font-size: 0.7rem; color: #666; margin-top: 10px;">14-day money-back guarantee.</p>
-            </div>
-
-            <div class="pricing-card">
-                <div class="plan-name">Agency / Enterprise</div>
-                <div class="price">3,500 € <span>/ setup</span></div>
-                <p style="color: #666; font-size: 0.85rem;">Dedicated & Sovereign Infrastructure.</p>
-                
-                <ul class="features-list">
-                    <li><i class="fa fa-check text-green"></i> <strong>Unlimited Accounts</strong></li>
-                    <li><i class="fa fa-server text-green"></i> Self-Hosted OR Hosted by us</li>
-                    <li><i class="fa fa-check text-green"></i> Audit, Install & Sandbox Tests</li>
-                    <li><i class="fa fa-check text-green"></i> Training & Handover (Docs)</li>
-                    <li><i class="fa fa-shield-halved text-green"></i> <strong>Maintenance & Updates (12 mo)</strong><br><span style="font-size: 0.75rem; color: #666; margin-left: 24px;">Includes: API Compatibility & Security</span></li>
-                    <li><i class="fa fa-clock text-green"></i> Priority Support (SLA < 4h)</li>
-                </ul>
-
-                <a href="mailto:frederickavita@gmail.com?subject=Audit%20Agence%20ReasoningFrame" class="btn-buy btn-buy-outline">
-                    Request an Audit
-                </a>
-                <p style="text-align: center; font-size: 0.7rem; color: #666; margin-top: 10px;">Custom quote & Invoice.</p>
-            </div>
-
-        </div>
-    </section>
-
-    <section class="container" style="border-top: 1px solid #222;">
-        <h2>Frequently Asked Questions & Objections</h2>
-        <p class="section-desc">Total transparency on our rates and conditions.</p>
-
-        <div style="max-width: 800px; margin: 0 auto; text-align: left;">
-
-            <h3 class="text-muted" style="margin-top: 40px; font-size: 1rem; text-transform: uppercase;">Monthly Subscription (€29)</h3>
-            
-            <details style="margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 15px;">
-                <summary style="cursor: pointer; font-weight: 600;">What does "No commitment" actually mean?</summary>
-                <p style="color: #888; margin-top: 10px; font-size: 0.9rem;">
-                    It means zero constraints. You can unsubscribe in 1 click from your dashboard. Access stops at the end of the paid month. Ideal for testing reliability on 1 or 2 accounts.
-                </p>
-            </details>
-
-            <details style="margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 15px;">
-                <summary style="cursor: pointer; font-weight: 600;">Why am I limited to 2 accounts?</summary>
-                <p style="color: #888; margin-top: 10px; font-size: 0.9rem;">
-                    This offer is an entry point. We want to encourage the Lifetime offer (5 accounts) which is mathematically more profitable for you starting from the 5th month.
-                </p>
-            </details>
-
-            <h3 class="text-blue" style="margin-top: 40px; font-size: 1rem; text-transform: uppercase;">Freelance License (€149)</h3>
-
-            <details style="margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 15px;">
-                <summary style="cursor: pointer; font-weight: 600;">Do I have to pay for future updates?</summary>
-                <p style="color: #888; margin-top: 10px; font-size: 0.9rem;">
-                    <strong class="text-green">NON. It's €0/year.</strong><br>
-                    That's the principle of the "Lifetime" deal. Your €149 payment covers software access AND future Google API compatibility updates. No hidden fees, no renewal.
-                </p>
-            </details>
-
-            <details style="margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 15px;">
-                <summary style="cursor: pointer; font-weight: 600;">Unlimited Budget: Really? Even for €100k spend?</summary>
-                <p style="color: #888; margin-top: 10px; font-size: 0.9rem;">
-                    Absolutely. Unlike Optmyzr or Opteo, we don't apply a "growth tax". Whether you secure €500 or €500,000, the server load is identical for us. So the price remains €149, full stop.
-                </p>
-            </details>
-
-            <details style="margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 15px;">
-                <summary style="cursor: pointer; font-weight: 600;">How does the "Money-Back" guarantee work?</summary>
-                <p style="color: #888; margin-top: 10px; font-size: 0.9rem;">
-                    Simple: If within 14 days, you find that the tool doesn't bring the peace of mind promised, send an email. We refund your €149 in full, no questions asked.
-                </p>
-            </details>
-
-            <h3 class="text-green" style="margin-top: 40px; font-size: 1rem; text-transform: uppercase;">Agency Setup (€3,500)</h3>
-
-            <details style="margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 15px;">
-                <summary style="cursor: pointer; font-weight: 600;">What guarantees longevity after paying €3,500?</summary>
-                <p style="color: #888; margin-top: 10px; font-size: 0.9rem;">
-                    The beauty of Self-Hosting. You pay for the infrastructure installation on YOUR servers. You own the code. Even if ReasoningFrame disappears tomorrow, your system continues to run eternally because you hold the keys.
-                </p>
-            </details>
-
-            <details style="margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 15px;">
-                <summary style="cursor: pointer; font-weight: 600;">How much is maintenance after the 1st year?</summary>
-                <p style="color: #888; margin-top: 10px; font-size: 0.9rem;">
-                    The first year is included. Then, it's optional: you can subscribe to a maintenance contract for <strong class="text-main">€400 / year</strong>.
-                    This covers: security updates, Google Ads API compatibility (which evolves often), and the priority SLA (< 4h).
-                </p>
-            </details>
-            
-            <details style="margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 15px;">
-                <summary style="cursor: pointer; font-weight: 600;">What exactly is the < 4h SLA?</summary>
-                <p style="color: #888; margin-top: 10px; font-size: 0.9rem;">
-                    As an Agency, if you have a critical blocker (e.g., unable to connect a new large client), our engineering team commits to intervening within 4 business hours. This is an "Enterprise" service level essential for your critical operations.
-                </p>
-            </details>
-
-        </div>
-    </section>
-
-    <section class="container" style="border-top: 1px solid #222; background: linear-gradient(180deg, #0a0a0a 0%, #111 100%);">
-        <div style="max-width: 800px; margin: 0 auto; display: flex; flex-direction: column; align-items: center; text-align: center;">
-            
-            <div style="width: 80px; height: 80px; background: #222; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid var(--accent-blue); margin-bottom: 20px;">
-                <span class="mono" style="font-size: 2rem; color: #fff;">F</span>
+            <div class="w3-col l6 m6 w3-margin-bottom">
+                <div class="pricing-card-ent">
+                    <h3 class="w3-xlarge" style="font-weight: 600;">Agency Bundle</h3>
+                    <p class="w3-text-grey w3-small" style="line-height: 1.5; margin-bottom: 32px;">
+                        Course + Ready-to-use n8n Blueprints for your clients.
+                    </p>
+                    
+                    <div class="w3-margin-bottom">
+                        <span class="price-display">€149</span><span class="price-month">/One-time</span>
+                    </div>
+                    
+                    <button class="w3-button w3-black w3-round-xxlarge w3-padding-large w3-margin-bottom">Get the Agency Bundle</button>
+                    
+                    <ul class="pricing-features">
+                        <li><span class="check-circle"><i class="fa fa-check"></i></span> <strong>Everything in the Course</strong></li>
+                        <li><span class="check-circle"><i class="fa fa-check"></i></span> 5 Premium n8n AI Templates</li>
+                        <li><span class="check-circle"><i class="fa fa-check"></i></span> Advanced Prompt Library</li>
+                        <li><span class="check-circle"><i class="fa fa-check"></i></span> Priority Email Support</li>
+                    </ul>
                 </div>
+            </div>
 
-            <h2 style="font-size: 1.8rem; margin-bottom: 20px;">Why I coded ReasoningFrame.</h2>
+            <div class="w3-col m12 w3-margin-top">
+                <div class="soft-ui-card w3-center" style="max-width: 600px; margin: 32px auto 0 auto; padding: 24px; border: 1px solid #bbf7d0; background-color: #f0fdf4;">
+                    <div class="w3-text-green w3-large w3-margin-bottom"><i class="fa fa-shield"></i></div>
+                    <h4 class="w3-medium w3-bold w3-text-green" style="margin-bottom: 8px;">14-Day Action-Based Guarantee</h4>
+                    <p class="w3-tiny w3-text-dark-grey" style="line-height: 1.5; margin:0;">
+                        Complete the 4 modules and build your agent. If it doesn't save you time or generate leads, show me your n8n workflow and I'll refund your €79. <strong>Zero risk to start.</strong>
+                    </p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+<div class="w3-white w3-padding-64" id="faq">
+    <div class="w3-content" style="max-width:1200px">
+        <div class="w3-row-padding">
             
-            <div style="text-align: left; color: #ccc; line-height: 1.8; font-size: 1rem;">
-                <p>
-                    Hi, I'm <strong>Frédéric Kavita</strong>.
+            <div class="w3-col l5 m12 w3-margin-bottom w3-padding-32">
+                <p class="w3-small w3-bold text-orange-custom w3-uppercase" style="letter-spacing: 1px;">Frequently Asked Questions</p>
+                <h2 class="w3-xxxlarge w3-bold w3-margin-bottom" style="line-height: 1.2; letter-spacing: -1px;">
+                    Your questions, <br>answered.
+                </h2>
+                <p class="w3-text-grey w3-large w3-margin-bottom" style="max-width: 85%; line-height: 1.6;">
+                    Find clear answers to common questions about how the course works and the tools we use (n8n & Claude).
                 </p>
-                <p>
-                    For years, I lived what you are living. The Friday night stress after launching a campaign. Compulsively checking the Google Ads app on Sunday morning. The fear of having to call a client to say: <em>"Sorry, Google spent 200% of the budget yesterday."</em>
-                </p>
-                <p>
-                    <strong>I hated this insecurity.</strong> And I hated even more the idea of paying €200/month to American software just to have a "stop button". It's an unfair tax on our work.
-                </p>
-                <p>
-                    I created <strong>ReasoningFrame</strong> with a simple vision: give power back to Freelancers.
-                </p>
-                <ul style="list-style: none; padding: 0; margin: 20px 0;">
-                    <li><i class="fa fa-check text-green"></i> I wanted a tool that never sleeps.</li>
-                    <li><i class="fa fa-check text-green"></i> I wanted to pay once, not every month.</li>
-                    <li><i class="fa fa-check text-green"></i> I wanted my weekends back.</li>
-                </ul>
-                <p>
-                    Today, this tool protects my clients and my mental health. I hope it will do the same for you.
+                <a href="#pricing" class="w3-button bg-gradient-btn w3-round-xxlarge w3-padding-large w3-margin-top">Start the Course</a>
+            </div>
+
+            <div class="w3-col l7 m12 w3-padding-16">
+                <div class="faq-container">
+                    
+                    <div class="faq-item active" onclick="toggleFaq(this)">
+                        <div class="faq-question">
+                            Do I need to know how to code (Python, JS) to take this course?
+                            <div class="faq-icon"><i class="fa fa-minus"></i></div>
+                        </div>
+                        <div class="faq-answer">
+                            Absolutely not. That's the beauty of n8n: it's visual orchestration (drag-and-drop). If you understand basic logic (If A happens, then do B), you will succeed in this course. Zero lines of code required.
+                        </div>
+                    </div>
+
+                    <div class="faq-item" onclick="toggleFaq(this)">
+                        <div class="faq-question">
+                            Will n8n and Claude be expensive to run on top of the course?
+                            <div class="faq-icon"><i class="fa fa-plus"></i></div>
+                        </div>
+                        <div class="faq-answer">
+                            No. You can self-host n8n for free on your machine (or use their free cloud trial). As for the Claude API, it costs fractions of a cent. Running this agent to qualify 100 prospects will cost you less than $1 in API fees.
+                        </div>
+                    </div>
+
+                    <div class="faq-item" onclick="toggleFaq(this)">
+                        <div class="faq-question">
+                            Does this agent work for all B2B industries?
+                            <div class="faq-icon"><i class="fa fa-plus"></i></div>
+                        </div>
+                        <div class="faq-answer">
+                            Yes! The agent is industry-agnostic. Whether you sell SaaS, design services, or consulting, you simply need to modify the instructions (the prompt) in Module 3 so Claude looks for your specific ideal criteria.
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+<div class="section-soft-bg w3-padding-64">
+    <div class="w3-content w3-center" style="max-width:800px">
+        <h2 class="w3-xxlarge w3-bold w3-margin-bottom" style="letter-spacing: -0.5px;">Ready to put your prospecting on autopilot?</h2>
+        <p class="w3-large w3-text-grey w3-margin-bottom">Join other agency founders and build your first AI agent today.</p>
+        <a href="#pricing" class="w3-button bg-gradient-btn w3-round-xxlarge w3-padding-large w3-large w3-margin-top" style="box-shadow: 0 10px 25px rgba(234, 88, 12, 0.2);">
+            Get Instant Access for €79
+        </a>
+    </div>
+</div>
+
+
+<div class="w3-white w3-padding-64" style="border-top: 1px solid #f9fafb;">
+    <div class="w3-content" style="max-width:1100px">
+        
+        <div class="w3-row-padding">
+            
+            <div class="w3-col l4 m12 w3-margin-bottom">
+                <h2 class="w3-xlarge w3-bold" style="letter-spacing: -0.5px;">ReasoningFrame</h2>
+                <p class="w3-text-grey" style="line-height: 1.6; padding-right: 20px; max-width: 350px;">
+                    Practical, interactive education for the next generation of AI automation builders.
                 </p>
             </div>
 
-            <div style="margin-top: 30px; border-top: 1px dashed #333; padding-top: 20px; width: 100%;">
-                <p class="mono" style="color: var(--text-muted); font-size: 0.9rem;">
-                    Frédéric Kavita <br>
-                    <span style="color: var(--accent-blue);">Indie Maker & Freelance PPC</span>
-                </p>
-                
-                <a href="https://twitter.com/frederickavita" target="_blank" class="btn-outline" style="display: inline-flex; align-items: center; gap: 10px; padding: 10px 20px; margin-top: 10px; border-radius: 50px; font-size: 0.8rem;">
-                    <i class="fa-brands fa-twitter"></i> Follow me @frederickavita
+            <div class="w3-col l3 m4 s6 w3-margin-bottom">
+                <h4 class="w3-medium w3-bold w3-margin-bottom" style="color: #111827;">Platform</h4>
+                <div class="footer-links">
+                    <a href="#" class="w3-text-grey w3-hover-text-black">The Course</a>
+                    <a href="#pricing" class="w3-text-grey w3-hover-text-black">Pricing</a>
+                    <a href="#" class="w3-text-grey w3-hover-text-black">Login to Dashboard</a>
+                </div>
+            </div>
+
+            <div class="w3-col l3 m4 s6 w3-margin-bottom">
+                <h4 class="w3-medium w3-bold w3-margin-bottom" style="color: #111827;">Legal & Support</h4>
+                <div class="footer-links">
+                    <a href="#" class="w3-text-grey w3-hover-text-black">Contact Us</a>
+                    <a href="#" class="w3-text-grey w3-hover-text-black">Terms of Service</a>
+                    <a href="#" class="w3-text-grey w3-hover-text-black">Privacy Policy</a>
+                </div>
+            </div>
+
+        </div>
+
+        <br><br>
+
+        <div class="w3-row w3-margin-top w3-padding-16">
+            <div class="w3-half w3-text-grey w3-small" style="font-weight: 500;">
+                © 2026 ReasoningFrame. All Rights Reserved.
+            </div>
+            
+            <div class="w3-half w3-right-align">
+                <a href="#" class="back-to-top-container w3-text-black" style="text-decoration: none; display: inline-flex; align-items: center; gap: 12px; font-weight: 500;">
+                    <span class="back-to-top-btn"><i class="fa fa-arrow-up"></i></span> Back to Top
                 </a>
             </div>
-
         </div>
-    </section>
 
-    <section class="container" style="border-top: 1px solid #222; text-align: center; padding: 120px 20px;">
-        <h2 style="font-size: 2.5rem; margin-bottom: 20px;">Ready to eliminate overspending risks?</h2>
-        <p class="section-desc" style="margin-bottom: 40px; font-size: 1.1rem;">
-            Don't let Google decide your spending anymore. Take control today.
-        </p>
+    </div>
+</div>
+
+
+
+<script>
+    function toggleFaq(element) {
+        // Optionnel : fermer automatiquement les autres questions quand on en ouvre une
+        const allFaqs = document.querySelectorAll('.faq-item');
+        allFaqs.forEach(faq => {
+            if (faq !== element && faq.classList.contains('active')) {
+                faq.classList.remove('active');
+                faq.querySelector('.fa').classList.replace('fa-minus', 'fa-plus');
+            }
+        });
+
+        // Toggle l'état de la question cliquée
+        element.classList.toggle('active');
         
-        <div style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap;">
-            <a href="https://buy.stripe.com/..." class="btn btn-primary" style="padding: 18px 35px; font-size: 1.1rem;">
-                Activate my License (€149)
-            </a>
-            
-            <a href="mailto:frederickavita@gmail.com?subject=Demande%20de%20Demo%20ReasoningFrame" class="btn btn-outline" style="padding: 18px 35px; font-size: 1.1rem;">
-                Request a Demo
-            </a>
-        </div>
-        
-        <p style="margin-top: 30px; font-size: 0.8rem; color: #666;">
-            Response within 4 business hours for demo requests.
-        </p>
-    </section>
-
-    <footer>
-        <p class="mono" style="opacity: 0.5; line-height: 1.8;">
-            REASONINGFRAME © 2026.<br>
-            8 rue Charles Gide, 77130 Varennes-sur-Seine.<br>
-            SIRET: 478 310 009 70025<br>
-            Paris, France. | <a href="mailto:frederickavita@gmail.com" style="text-decoration: underline;">Contact Support</a>
-        </p>
-    </footer>
-
-</body>
-</html>
+        // Changer l'icône + / -
+        const icon = element.querySelector('.fa');
+        if (element.classList.contains('active')) {
+            icon.classList.replace('fa-plus', 'fa-minus');
+        } else {
+            icon.classList.replace('fa-minus', 'fa-plus');
+        }
+    }
+</script>

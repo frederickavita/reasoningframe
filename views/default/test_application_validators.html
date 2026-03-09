@@ -1,0 +1,30 @@
+{{extend 'layout.html'}}
+
+<h2>Application Validators Test Results</h2>
+
+<table class="w3-table-all w3-small">
+    <thead>
+        <tr>
+            <th>Test</th>
+            <th>Status</th>
+            <th>Details</th>
+        </tr>
+    </thead>
+    <tbody>
+        {{for item in results:}}
+        <tr>
+            <td>{{=item["test"]}}</td>
+            <td>
+                {{if item["status"] == "PASS":}}
+                    <span class="w3-tag w3-green">PASS</span>
+                {{else:}}
+                    <span class="w3-tag w3-red">FAIL</span>
+                {{pass}}
+            </td>
+            <td>
+                <pre style="white-space: pre-wrap;">{{=item["details"]}}</pre>
+            </td>
+        </tr>
+        {{pass}}
+    </tbody>
+</table>

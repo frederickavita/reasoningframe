@@ -1,20 +1,470 @@
 <!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
+<!--[if (gt IE 9)|!(IE)]><!--> <html class="no-js" lang="{{=T.accepted_language or 'en'}}"> <!--<![endif]-->
+  <head>
+    <meta charset="utf-8">
+    <!-- www.phpied.com/conditional-comments-block-downloads/ -->
+    <!-- Always force latest IE rendering engine
+         (even in intranet) & Chrome Frame
+         Remove this if you use the .htaccess -->
+    <meta http-equiv="X-UA-Compatible" content="IE=edge{{=not request.is_local and ',chrome=1' or ''}}">
+    <!--  Mobile Viewport Fix
+          j.mp/mobileviewport & davidbcalhoun.com/2010/viewport-metatag
+          device-width: Occupy full width of the screen in its current orientation
+          initial-scale = 1.0 retains dimensions instead of zooming out if page height > device height
+          user-scalable = yes allows the user to zoom in -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ReasoningFrame - From Chaos to Code</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <style>
-        body { font-family: 'Inter', sans-serif; }
-        .glow { box-shadow: 0 0 40px rgba(139, 92, 246, 0.15); }
-        .glow-strong { box-shadow: 0 0 30px rgba(139, 92, 246, 0.4); }
-    </style>
-</head>
-<body class="bg-slate-950 text-slate-200 antialiased selection:bg-purple-500 selection:text-white">
+    <title>{{=response.title or request.application}}</title>
+    <!-- http://dev.w3.org/html5/markup/meta.name.html -->
+    <meta name="application-name" content="{{=request.application}}">
+    <!-- Speaking of Google, don't forget to set your site up:
+         http://google.com/webmasters -->
+    <meta name="google-site-verification" content="">
+    <!-- include stylesheets -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"/>
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/5/w3.css">
 
-{{include}}
+    <link rel="shortcut icon" href="{{=URL('static','images/favicon.ico')}}" type="image/x-icon">
+    <link rel="apple-touch-icon" href="{{=URL('static','images/favicon.png')}}">
+    <!-- All JavaScript at the bottom, except for Modernizr which enables
+         HTML5 elements & feature detects -->
+    <script src="{{=URL('static','js/modernizr-2.8.3.min.js')}}"></script>
+    <!-- Favicons -->
+    {{include 'web2py_ajax.html'}} <!-- this includes jquery.js, calendar.js/.css and web2py.js -->
+
+<style>
+/* Dégradés personnalisés inspirés de l'image */
+.bg-gradient-btn {
+    background: linear-gradient(90deg, #60a5fa, #fb923c);
+    color: white !important;
+    border: none;
+    transition: opacity 0.3s ease;
+}
+.bg-gradient-btn:hover {
+    opacity: 0.9;
+}
+
+.soft-gradient-box {
+    background: linear-gradient(135deg, #f1f5f9, #fed7aa);
+    border-radius: 24px;
+    padding: 40px;
+}
+
+.hero-heading {
+    font-weight: 700;
+    line-height: 1.2;
+    font-size: 3.5rem;
+}
+
+/* Style des cartes "mockup" internes */
+.mockup-card {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+.badge-green { 
+    background-color: #dcfce7; 
+    color: #16a34a; 
+    padding: 2px 8px; 
+    border-radius: 12px; 
+}
 
 
-</body>
+/* Styles spécifiques pour la section Features */
+.text-orange-custom {
+    color: #ea580c;
+}
+
+.text-gradient-brown {
+    background: linear-gradient(90deg, #431407, #b45309);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* Cartes latérales (gris très clair) */
+.feature-card-side {
+    background-color: #f9fafb;
+    border-radius: 24px;
+    padding: 32px;
+    height: 100%;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.02);
+}
+
+/* Carte centrale (tons chauds/crème) */
+.feature-card-center {
+    background-color: #fffaf0;
+    border-radius: 24px;
+    padding: 32px;
+    height: 100%;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.02);
+}
+
+/* Icônes oranges avec fond blanc */
+.icon-wrapper {
+    background-color: white;
+    color: #ea580c;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+
+/* Fausse interface UI pour la carte centrale */
+.mockup-ui-box {
+    background-color: white;
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+}
+
+
+/* Titre en dégradé */
+.text-gradient-brown {
+    background: linear-gradient(90deg, #431407, #b45309);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* Frise du processus (Timeline) */
+.timeline-wrapper {
+    position: relative;
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 60px 0; /* Espace pour le halo lumineux */
+}
+
+/* Ligne continue en arrière-plan */
+.timeline-line {
+    position: absolute;
+    top: 50%;
+    left: 2%;
+    right: 2%;
+    height: 2px;
+    background: linear-gradient(90deg, #fed7aa, #ea580c, #fed7aa);
+    transform: translateY(-50%);
+    z-index: 1;
+}
+
+/* Conteneur flex pour aligner les icônes */
+.timeline-steps {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+    z-index: 2;
+}
+
+/* Petits nœuds standards */
+.step-node {
+    width: 44px;
+    height: 44px;
+    background-color: #fffaf0; /* Fond crème */
+    color: #ea580c; /* Icône orange */
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 0 0 6px white; /* Masque la ligne derrière l'icône */
+}
+
+/* Gros nœud central actif avec effet de halo */
+.step-node-active {
+    width: 72px;
+    height: 72px;
+    background-color: #ea580c; /* Fond orange plein */
+    color: white; /* Icône blanche */
+    font-size: 1.5rem;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    /* Création du halo lumineux orange avec de multiples ombres */
+    box-shadow: 0 0 0 8px white, 0 0 0 20px rgba(234, 88, 12, 0.1), 0 0 0 35px rgba(234, 88, 12, 0.05);
+}
+
+
+/* Alignement vertical pour l'en-tête (Titre + Bouton) */
+.header-flex-align {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: space-between;
+}
+
+/* Style des cartes "How it works" */
+.how-card {
+    background-color: #f9fafb; /* Gris très clair */
+    border-radius: 24px;
+    padding: 40px;
+    height: 100%;
+    transition: transform 0.3s ease;
+}
+
+.how-card:hover {
+    transform: translateY(-5px); /* Petit effet sympa au survol */
+}
+
+/* Style spécifique des icônes (cercle avec bordure) */
+.icon-outline-wrapper {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ea580c;
+    background-color: white;
+    border: 1px solid #fed7aa; /* Bordure orange très claire */
+    font-size: 1.2rem;
+}
+
+
+/* Fonds et formes des cartes de prix */
+.pricing-card-pro {
+    background-color: #fffaf0; /* Fond crème */
+    border-radius: 24px;
+    padding: 40px;
+    height: 100%;
+}
+
+.pricing-card-ent {
+    background-color: #f9fafb; /* Fond gris très clair */
+    border-radius: 24px;
+    padding: 40px;
+    height: 100%;
+}
+
+/* Typographie spécifique des prix */
+.price-display {
+    font-size: 3.5rem;
+    font-weight: 500;
+    line-height: 1;
+    color: #111827;
+}
+
+.price-month {
+    font-size: 1rem;
+    color: #6b7280;
+    margin-left: 4px;
+}
+
+/* Liste des fonctionnalités (Checkmarks) */
+.pricing-features {
+    list-style: none;
+    padding: 0;
+    margin: 24px 0 0 0;
+}
+
+.pricing-features li {
+    display: flex;
+    align-items: center;
+    margin-bottom: 16px;
+    font-size: 0.95rem;
+    color: #374151;
+}
+
+/* Puce ronde noire avec icône blanche */
+.check-circle {
+    background-color: #111827;
+    color: white;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    margin-right: 12px;
+    flex-shrink: 0;
+}
+
+/* Conteneur pour l'image du téléphone */
+.phone-mockup-img {
+    border-radius: 20px;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+}
+
+
+/* Style des liens du footer */
+.footer-links a {
+    display: block;
+    text-decoration: none;
+    margin-bottom: 16px;
+    font-size: 0.95rem;
+    transition: color 0.3s ease;
+}
+
+/* Badge vert fluo "News" */
+.badge-news {
+    background-color: #22c55e; /* Vert vif */
+    color: white;
+    font-size: 0.7rem;
+    padding: 3px 8px;
+    border-radius: 12px;
+    margin-left: 8px;
+    vertical-align: middle;
+    font-weight: normal;
+}
+
+/* Bouton rond "Back to Top" */
+.back-to-top-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border: 1px solid #d1d5db;
+    border-radius: 50%;
+    font-size: 0.8rem;
+    color: #374151;
+    transition: all 0.3s ease;
+}
+
+.back-to-top-container:hover .back-to-top-btn {
+    background-color: #f3f4f6;
+    color: #111827;
+}
+
+
+
+/* ========================================= */
+/* SECTION FAQ (Inspirée de la maquette)     */
+/* ========================================= */
+.faq-container {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.faq-item {
+    background-color: #f9fafb; /* Gris très clair pour état fermé */
+    border-radius: 16px;
+    padding: 24px 32px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+/* État Actif (Ouvert) = Fond crème comme dans l'image */
+.faq-item.active {
+    background-color: #fffaf0; 
+}
+
+.faq-question {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: 600;
+    font-size: 1.15rem;
+    color: #111827;
+}
+
+/* Le cercle pour l'icône + / - */
+.faq-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 1px solid #e5e7eb;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #374151;
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+    margin-left: 16px;
+}
+
+/* Style du cercle quand la FAQ est ouverte (Orange plein) */
+.faq-item.active .faq-icon {
+    background-color: #ea580c; /* Orange custom */
+    border-color: #ea580c;
+    color: white;
+}
+
+.faq-answer {
+    display: none; /* Caché par défaut */
+    margin-top: 16px;
+    color: #4b5563;
+    line-height: 1.6;
+    font-size: 0.95rem;
+    padding-right: 40px; /* Pour ne pas passer sous l'icône */
+}
+
+/* Afficher la réponse quand actif */
+.faq-item.active .faq-answer {
+    display: block;
+    animation: fadeIn 0.4s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-5px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+
+/* ========================================= */
+/* SOFT SAAS DESIGN (Instructor & Modules)   */
+/* ========================================= */
+
+.section-soft-bg {
+    background-color: #faf8f6; /* Very subtle warm off-white from the reference */
+}
+
+.soft-ui-card {
+    background: #ffffff;
+    border-radius: 24px;
+    padding: 32px;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.03);
+    border: 1px solid rgba(0,0,0,0.02);
+    transition: transform 0.3s ease;
+}
+
+.soft-ui-card:hover {
+    transform: translateY(-3px);
+}
+
+/* Icon Wrappers for Modules */
+.module-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    margin-bottom: 16px;
+}
+
+.icon-orange { background-color: #fff7ed; color: #ea580c; }
+.icon-blue { background-color: #eff6ff; color: #3b82f6; }
+.icon-purple { background-color: #faf5ff; color: #a855f7; }
+.icon-green { background-color: #f0fdf4; color: #22c55e; }
+
+.module-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #111827;
+    margin-bottom: 8px;
+}
+
+.module-desc {
+    font-size: 0.9rem;
+    color: #6b7280;
+    line-height: 1.6;
+}
+
+</style>
+
+    
+  
+  </head>
+  <body>
+    {{include}}
+  </body>
+</html>

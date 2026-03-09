@@ -1,0 +1,109 @@
+
+{{extend 'malayout.html'}}
+
+
+<div class="row justify-content-center align-items-center" style="min-height: 80vh;">
+    <div class="col-md-6 col-lg-5">
+        
+        <div class="text-center mb-4">
+            <h2 class="fw-bold text-white mb-1">Add New Client</h2>
+            <p class="text-secondary">Configure monitoring & protection parameters.</p>
+        </div>
+
+        <div class="card bg-dark border-secondary shadow-lg">
+            <div class="card-body p-4">
+                
+                {{=form.custom.begin}}
+                
+                <div class="mb-4">
+                    <label class="form-label text-uppercase small fw-bold text-secondary">1. Google Ads ID</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-black border-secondary text-secondary">
+                            <i class="fa fa-fingerprint"></i>
+                        </span>
+                        {{=form.custom.widget.google_customer_id}}
+                    </div>
+                    <div class="form-text text-secondary small">Format: 123-456-7890</div>
+                    {{if form.errors.google_customer_id:}}
+                        <div class="text-danger small mt-1">
+                            <i class="fa fa-exclamation-circle"></i> {{=form.errors.google_customer_id}}
+                        </div>
+                    {{pass}}
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label text-uppercase small fw-bold text-secondary">2. Client Name</label>
+                    {{=form.custom.widget.name}}
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label text-uppercase small fw-bold text-white">3. Monthly Budget Limit</label>
+                    <div class="input-group input-group-lg">
+                        {{=form.custom.widget.monthly_budget}}
+                        <span class="input-group-text bg-black border-secondary text-white fw-bold">€</span>
+                    </div>
+                    {{if form.errors.monthly_budget:}}
+                        <div class="text-danger small mt-1">{{=form.errors.monthly_budget}}</div>
+                    {{pass}}
+                </div>
+
+                <div class="mb-4 p-3 rounded border border-secondary bg-black bg-opacity-25">
+                    <div class="form-check form-switch d-flex align-items-center justify-content-between ps-0">
+                        <div>
+                            <label class="form-check-label text-white fw-bold mb-0" for="clients_kill_switch_active">
+                                <i class="fa fa-shield-halved text-success me-2"></i> Active Kill Switch
+                            </label>
+                            <div class="small text-secondary mt-1" style="font-size: 0.8rem; line-height: 1.3;">
+                                Automatically pauses campaigns if budget is exceeded.<br>
+                                <span class="text-success">Recommended for safety.</span>
+                            </div>
+                        </div>
+                        {{=form.custom.widget.kill_switch_active}}
+                    </div>
+                </div>
+
+                <div class="d-grid gap-2 mt-4">
+                    <button type="submit" class="btn btn-primary btn-lg fw-bold">
+                        <i class="fa fa-check-circle me-2"></i> Start Monitoring
+                    </button>
+                    <a href="{{=URL('dashboard')}}" class="btn btn-outline-secondary">
+                        Cancel
+                    </a>
+                </div>
+
+                {{=form.custom.end}}
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<style>
+    /* Force le style sur les inputs générés */
+    input[type="text"], input[type="number"] {
+        background-color: #000 !important;
+        border: 1px solid #444 !important;
+        color: #fff !important;
+        padding: 12px;
+        border-radius: 6px;
+        width: 100%;
+    }
+    input[type="text"]:focus, input[type="number"]:focus {
+        border-color: var(--accent-blue) !important;
+        outline: none;
+        box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+    }
+    
+    /* Style du Switch */
+    input[type="checkbox"] {
+        width: 3rem !important;
+        height: 1.5rem !important;
+        cursor: pointer;
+        background-color: #333;
+        border-color: #555;
+    }
+    input[type="checkbox"]:checked {
+        background-color: var(--accent-green) !important;
+        border-color: var(--accent-green) !important;
+    }
+</style>

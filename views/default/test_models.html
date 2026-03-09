@@ -1,0 +1,8 @@
+{{extend 'layout.html'}}
+
+<h2>Model test results</h2>
+<ul>
+{{for item in results:}}
+    <li>{{=item}}</li>
+{{pass}}
+</ul>
