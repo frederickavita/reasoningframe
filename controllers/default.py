@@ -22,10 +22,8 @@ def tableau():
     runs = db(db.prospect_run.id > 0).select(orderby=~db.prospect_run.id)
     return dict(runs=runs)
 
-
 def _build_run_execution_dependencies():
     import importlib
-
     from gluon.contrib.appconfig import AppConfig
 
     import applications.reasoningframe.modules.application.validators as validators_module
@@ -64,6 +62,7 @@ def _build_run_execution_dependencies():
     RequestsWebPageFetcher = fetcher_module.RequestsWebPageFetcher
     RegexContactExtractor = contact_module.RegexContactExtractor
     GeminiLLMClient = gemini_module.GeminiLLMClient
+
     VisiblePeopleCandidateExtractor = visible_people_candidate_module.VisiblePeopleCandidateExtractor
     GeminiVisiblePeopleValidator = visible_people_validator_module.GeminiVisiblePeopleValidator
 
@@ -83,7 +82,6 @@ def _build_run_execution_dependencies():
     )
 
     web_page_fetcher = RequestsWebPageFetcher()
-
     contact_extractor = RegexContactExtractor()
 
     llm_client = GeminiLLMClient(
@@ -116,6 +114,192 @@ def _build_run_execution_dependencies():
         execution_service=execution_service,
     )
 
+
+def _infer_debug_output_language(run_row):
+    sample = " ".join([
+        str(run_row.niche or ""),
+        str(run_row.city or ""),
+        str(run_row.offer or ""),
+    ]).lower()
+
+    if re.search(r"[éèêàùçôîïâ]", sample):
+        return "fr"
+
+    french_markers = (
+        " refonte ", " optimisation ", " rendez-vous ", " site web ",
+        " agence ", " entreprise ", " génération ", " local ",
+    )
+
+    padded = " %s " % sample
+    for marker in french_markers:
+        if marker in padded:
+            return "fr"
+
+    return "en"
+
+
+def _build_pre_llm_debug_payload(run_row, prospect_row):
+    source_pages = db(
+        db.prospect_source_page.prospect_id == prospect_row.id
+    ).select(orderby=db.prospect_source_page.id)
+
+    contacts = db(
+        db.prospect_contact.prospect_id == prospect_row.id
+    ).select(orderby=~db.prospect_contact.is_primary | ~db.prospect_contact.confidence)
+
+    signals = db(
+        db.prospect_signal.prospect_id == prospect_row.id
+    ).select(orderby=db.prospect_signal.id)
+
+    visible_people = []
+    if "prospect_visible_person" in db.tables:
+        visible_people = db(
+            db.prospect_visible_person.prospect_id == prospect_row.id
+        ).select(orderby=~db.prospect_visible_person.confidence)
+
+    page_chunks = []
+    for page in source_pages:
+        text = (page.extracted_text or "").strip()
+        if text:
+            page_chunks.append(text)
+
+    site_text = "\n\n".join(page_chunks).strip()
+
+    rule_signals_payload = []
+    for sig in signals:
+        if (sig.source_kind or "") == "rule":
+            rule_signals_payload.append({
+                "signal_type": sig.signal_type,
+                "signal_value": sig.signal_value,
+                "polarity": sig.polarity,
+                "source_kind": sig.source_kind,
+                "confidence": sig.confidence,
+                "reason": sig.reason,
+            })
+
+    contacts_payload = []
+    for c in contacts:
+        contacts_payload.append({
+            "contact_type": c.contact_type,
+            "value": c.value,
+            "contact_name": c.contact_name,
+            "contact_role": c.contact_role,
+            "address_text": c.address_text,
+            "evidence_text": c.evidence_text,
+            "source_url": c.source_url,
+            "confidence": c.confidence,
+            "is_primary": c.is_primary,
+        })
+
+    visible_people_payload = []
+    for p in visible_people:
+        visible_people_payload.append({
+            "full_name": p.full_name,
+            "role_text": p.role_text,
+            "source_url": p.source_url,
+            "evidence_text": p.evidence_text,
+            "confidence": p.confidence,
+        })
+
+    debug_store = getattr(session, "visible_people_debug_by_prospect", {}) or {}
+    debug_entry = debug_store.get(str(prospect_row.id), {}) or {}
+
+    visible_people_candidates_payload = debug_entry.get("candidates", []) or []
+    visible_people_validations_payload = debug_entry.get("validations", []) or []
+
+    business_context = {
+        "niche": run_row.niche,
+        "city": run_row.city,
+        "offer": run_row.offer,
+        "output_language": _infer_debug_output_language(run_row),
+        "signals": rule_signals_payload,
+    }
+
+    return {
+        "business_context": business_context,
+        "site_text": site_text,
+        "contacts_payload": contacts_payload,
+        "visible_people_payload": visible_people_payload,
+        "visible_people_candidates_payload": visible_people_candidates_payload,
+        "visible_people_validations_payload": visible_people_validations_payload,
+    }
+
+
+def prospect_run_results():
+    run_id = request.args(0, cast=int)
+    if not run_id:
+        session.flash = "Missing run_id."
+        redirect(URL("prospect_run_new"))
+
+    run = db.prospect_run(run_id)
+    if not run:
+        session.flash = "Run not found."
+        redirect(URL("prospect_run_new"))
+
+    prospects = db(
+        db.prospect.run_id == run.id
+    ).select(orderby=db.prospect.render_order)
+
+    rows = []
+
+    for prospect in prospects:
+        contacts = db(
+            db.prospect_contact.prospect_id == prospect.id
+        ).select(orderby=~db.prospect_contact.is_primary | ~db.prospect_contact.confidence)
+
+        signals = db(
+            db.prospect_signal.prospect_id == prospect.id
+        ).select(orderby=~db.prospect_signal.confidence)
+
+        artifact = db(
+            db.prospect_artifact.prospect_id == prospect.id
+        ).select().first()
+
+        sources = db(
+            db.prospect_source_page.prospect_id == prospect.id
+        ).select(orderby=db.prospect_source_page.id)
+
+        primary_contact = None
+        for c in contacts:
+            if c.is_primary:
+                primary_contact = c
+                break
+
+        if not primary_contact and contacts:
+            primary_contact = contacts.first()
+
+        visible_people = []
+        if "prospect_visible_person" in db.tables:
+            visible_people = db(
+                db.prospect_visible_person.prospect_id == prospect.id
+            ).select(orderby=~db.prospect_visible_person.confidence)
+
+        pre_llm_debug = _build_pre_llm_debug_payload(run, prospect)
+
+        rows.append(dict(
+            prospect=prospect,
+            primary_contact=primary_contact,
+            contacts=contacts,
+            signals=signals,
+            artifact=artifact,
+            sources=sources,
+            visible_people=visible_people,
+            pre_llm_debug=pre_llm_debug,
+        ))
+
+    if run.is_unlocked:
+        visible_rows = rows
+        hidden_count = 0
+    else:
+        visible_rows = rows[:run.preview_count]
+        hidden_count = max(0, len(rows) - len(visible_rows))
+
+    return dict(
+        run=run,
+        rows=rows,
+        visible_rows=visible_rows,
+        hidden_count=hidden_count,
+    )
 
     
 def prospect_run_new():
@@ -220,6 +404,27 @@ def prospect_run_status():
         "last_error_message": run.last_error_message,
     })
 
+def _infer_debug_output_language(run_row):
+    sample = " ".join([
+        str(run_row.niche or ""),
+        str(run_row.city or ""),
+        str(run_row.offer or ""),
+    ]).lower()
+
+    if re.search(r"[éèêàùçôîïâ]", sample):
+        return "fr"
+
+    french_markers = (
+        " refonte ", " optimisation ", " rendez-vous ", " site web ",
+        " agence ", " entreprise ", " génération ", " local ",
+    )
+
+    padded = " %s " % sample
+    for marker in french_markers:
+        if marker in padded:
+            return "fr"
+
+    return "en"
 
 
 def _build_pre_llm_debug_payload(run_row, prospect_row):
@@ -295,7 +500,7 @@ def _build_pre_llm_debug_payload(run_row, prospect_row):
         "niche": run_row.niche,
         "city": run_row.city,
         "offer": run_row.offer,
-        "output_language": "fr",
+        "output_language": _infer_debug_output_language(run_row),
         "signals": rule_signals_payload,
     }
 
@@ -309,7 +514,6 @@ def _build_pre_llm_debug_payload(run_row, prospect_row):
     }
 
 
-
 def prospect_run_results():
     run_id = request.args(0, cast=int)
     if not run_id:
@@ -321,9 +525,12 @@ def prospect_run_results():
         session.flash = "Run not found."
         redirect(URL("prospect_run_new"))
 
-    prospects = db(db.prospect.run_id == run.id).select(orderby=db.prospect.render_order)
+    prospects = db(
+        db.prospect.run_id == run.id
+    ).select(orderby=db.prospect.render_order)
 
     rows = []
+
     for prospect in prospects:
         contacts = db(
             db.prospect_contact.prospect_id == prospect.id
@@ -339,13 +546,14 @@ def prospect_run_results():
 
         sources = db(
             db.prospect_source_page.prospect_id == prospect.id
-        ).select()
+        ).select(orderby=db.prospect_source_page.id)
 
         primary_contact = None
         for c in contacts:
             if c.is_primary:
                 primary_contact = c
                 break
+
         if not primary_contact and contacts:
             primary_contact = contacts.first()
 
@@ -367,73 +575,6 @@ def prospect_run_results():
             visible_people=visible_people,
             pre_llm_debug=pre_llm_debug,
         ))
-
-    if run.is_unlocked:
-        visible_rows = rows
-        hidden_count = 0
-    else:
-        visible_rows = rows[:run.preview_count]
-        hidden_count = max(0, len(rows) - len(visible_rows))
-
-    return dict(
-        run=run,
-        rows=rows,
-        visible_rows=visible_rows,
-        hidden_count=hidden_count,
-    )
-
-
-def prospect_run_results():
-    run_id = request.args(0, cast=int)
-    if not run_id:
-        session.flash = "Missing run_id."
-        redirect(URL("prospect_run_new"))
-
-    run = db.prospect_run(run_id)
-    if not run:
-        session.flash = "Run not found."
-        redirect(URL("prospect_run_new"))
-
-    prospects = db(db.prospect.run_id == run.id).select(orderby=db.prospect.render_order)
-
-    rows = []
-    for prospect in prospects:
-        contacts = db(
-            db.prospect_contact.prospect_id == prospect.id
-        ).select(orderby=~db.prospect_contact.is_primary | ~db.prospect_contact.confidence)
-
-        signals = db(
-            db.prospect_signal.prospect_id == prospect.id
-        ).select(orderby=~db.prospect_signal.confidence)
-
-        artifact = db(
-            db.prospect_artifact.prospect_id == prospect.id
-        ).select().first()
-
-        sources = db(
-            db.prospect_source_page.prospect_id == prospect.id
-        ).select()
-
-        primary_contact = None
-        for c in contacts:
-            if c.is_primary:
-                primary_contact = c
-                break
-        if not primary_contact and contacts:
-            primary_contact = contacts.first()
-
-        visible_people = db(db.prospect_visible_person.prospect_id == prospect.id).select(orderby=~db.prospect_visible_person.confidence)
-        pre_llm_debug = _build_pre_llm_debug_payload(run, prospect)
-        rows.append(dict(
-        prospect=prospect,
-        primary_contact=primary_contact,
-        contacts=contacts,
-        signals=signals,
-        artifact=artifact,
-        sources=sources,
-        visible_people=visible_people,
-        pre_llm_debug=pre_llm_debug,
-    ))
 
     if run.is_unlocked:
         visible_rows = rows
