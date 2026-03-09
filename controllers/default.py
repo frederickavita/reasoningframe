@@ -9,7 +9,7 @@
 
 import json, time, uuid, random, hashlib, io
 from gluon.http import HTTP
-import traceback  # <--- IL MANQUAIT CELUI-CI
+import traceback
 
 GOOGLE_AUTH_URL      = 'https://accounts.google.com/o/oauth2/v2/auth'
 GOOGLE_TOKEN_URL     = 'https://oauth2.googleapis.com/token'
@@ -33,21 +33,24 @@ def _build_run_execution_dependencies():
     import applications.reasoningframe.modules.application.prospect_service as prospect_service_module
     import applications.reasoningframe.modules.application.run_execution_service as run_execution_service_module
 
-    import applications.reasoningframe.modules.infrastructure.brave_search_provider as brave_search_provider_module
-    import applications.reasoningframe.modules.infrastructure.requests_fetcher as requests_fetcher_module
-    import applications.reasoningframe.modules.infrastructure.contact_extractor as contact_extractor_module
-    import applications.reasoningframe.modules.infrastructure.gemini_llm_client as gemini_llm_client_module
-    import applications.reasoningframe.modules.infrastructure.visible_people_extractor as visible_people_extractor_module
+    import applications.reasoningframe.modules.infrastructure.brave_search_provider as brave_module
+    import applications.reasoningframe.modules.infrastructure.requests_fetcher as fetcher_module
+    import applications.reasoningframe.modules.infrastructure.contact_extractor as contact_module
+    import applications.reasoningframe.modules.infrastructure.gemini_llm_client as gemini_module
+    import applications.reasoningframe.modules.infrastructure.visible_people_candidate_extractor as visible_people_candidate_module
+    import applications.reasoningframe.modules.infrastructure.gemini_visible_people_validator as visible_people_validator_module
 
     importlib.reload(validators_module)
     importlib.reload(run_service_module)
     importlib.reload(prospect_service_module)
     importlib.reload(run_execution_service_module)
-    importlib.reload(brave_search_provider_module)
-    importlib.reload(requests_fetcher_module)
-    importlib.reload(contact_extractor_module)
-    importlib.reload(gemini_llm_client_module)
-    importlib.reload(visible_people_extractor_module)
+
+    importlib.reload(brave_module)
+    importlib.reload(fetcher_module)
+    importlib.reload(contact_module)
+    importlib.reload(gemini_module)
+    importlib.reload(visible_people_candidate_module)
+    importlib.reload(visible_people_validator_module)
 
     SearchRequestValidator = validators_module.SearchRequestValidator
     QualificationCriteriaValidator = validators_module.QualificationCriteriaValidator
@@ -57,11 +60,12 @@ def _build_run_execution_dependencies():
     ProspectService = prospect_service_module.ProspectService
     RunExecutionService = run_execution_service_module.RunExecutionService
 
-    BraveSearchProvider = brave_search_provider_module.BraveSearchProvider
-    RequestsWebPageFetcher = requests_fetcher_module.RequestsWebPageFetcher
-    RegexContactExtractor = contact_extractor_module.RegexContactExtractor
-    GeminiLLMClient = gemini_llm_client_module.GeminiLLMClient
-    VisiblePeopleExtractor = visible_people_extractor_module.VisiblePeopleExtractor
+    BraveSearchProvider = brave_module.BraveSearchProvider
+    RequestsWebPageFetcher = fetcher_module.RequestsWebPageFetcher
+    RegexContactExtractor = contact_module.RegexContactExtractor
+    GeminiLLMClient = gemini_module.GeminiLLMClient
+    VisiblePeopleCandidateExtractor = visible_people_candidate_module.VisiblePeopleCandidateExtractor
+    GeminiVisiblePeopleValidator = visible_people_validator_module.GeminiVisiblePeopleValidator
 
     myconf = AppConfig(reload=True)
 
@@ -79,22 +83,30 @@ def _build_run_execution_dependencies():
     )
 
     web_page_fetcher = RequestsWebPageFetcher()
+
     contact_extractor = RegexContactExtractor()
-    visible_people_extractor = VisiblePeopleExtractor()
 
     llm_client = GeminiLLMClient(
         api_key=myconf.get("gemini.api_key")
     )
 
+    visible_people_candidate_extractor = VisiblePeopleCandidateExtractor()
+
+    visible_people_validator = GeminiVisiblePeopleValidator(
+        api_key=myconf.get("gemini.api_key")
+    )
+
     execution_service = RunExecutionService(
         db=db,
+        session=session,
         run_service=run_service,
         prospect_service=prospect_service,
         search_provider=search_provider,
         web_page_fetcher=web_page_fetcher,
         contact_extractor=contact_extractor,
         llm_client=llm_client,
-        visible_people_extractor=visible_people_extractor,
+        visible_people_candidate_extractor=visible_people_candidate_extractor,
+        visible_people_validator=visible_people_validator,
         default_phone_region="FR",
     )
 
@@ -209,6 +221,7 @@ def prospect_run_status():
     })
 
 
+
 def _build_pre_llm_debug_payload(run_row, prospect_row):
     source_pages = db(
         db.prospect_source_page.prospect_id == prospect_row.id
@@ -272,6 +285,12 @@ def _build_pre_llm_debug_payload(run_row, prospect_row):
             "confidence": p.confidence,
         })
 
+    debug_store = getattr(session, "visible_people_debug_by_prospect", {}) or {}
+    debug_entry = debug_store.get(str(prospect_row.id), {}) or {}
+
+    visible_people_candidates_payload = debug_entry.get("candidates", []) or []
+    visible_people_validations_payload = debug_entry.get("validations", []) or []
+
     business_context = {
         "niche": run_row.niche,
         "city": run_row.city,
@@ -285,7 +304,10 @@ def _build_pre_llm_debug_payload(run_row, prospect_row):
         "site_text": site_text,
         "contacts_payload": contacts_payload,
         "visible_people_payload": visible_people_payload,
+        "visible_people_candidates_payload": visible_people_candidates_payload,
+        "visible_people_validations_payload": visible_people_validations_payload,
     }
+
 
 
 def prospect_run_results():
@@ -359,7 +381,6 @@ def prospect_run_results():
         visible_rows=visible_rows,
         hidden_count=hidden_count,
     )
-
 
 
 def prospect_run_results():

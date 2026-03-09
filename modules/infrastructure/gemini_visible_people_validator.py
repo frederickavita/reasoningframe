@@ -67,8 +67,8 @@ class GeminiVisiblePeopleValidator(object):
         schema = self._build_response_schema()
         system_instruction = self._build_system_instruction()
 
-        raw_text = ""
         parsed = None
+        raw_text = ""
 
         try:
             response = self.client.models.generate_content(
@@ -81,8 +81,12 @@ class GeminiVisiblePeopleValidator(object):
                     "response_json_schema": schema,
                 },
             )
-            raw_text = self._extract_response_text(response)
-            parsed = self._parse_json_response(raw_text)
+
+            parsed = getattr(response, "parsed", None)
+            if parsed is None:
+                raw_text = self._extract_response_text(response)
+                parsed = self._parse_json_response(raw_text)
+
         except Exception as e:
             try:
                 fallback_response = self.client.models.generate_content(
@@ -92,10 +96,15 @@ class GeminiVisiblePeopleValidator(object):
                         "temperature": self.temperature,
                         "system_instruction": system_instruction,
                         "response_mime_type": "application/json",
+                        "response_json_schema": schema,
                     },
                 )
-                raw_text = self._extract_response_text(fallback_response)
-                parsed = self._parse_json_response(raw_text)
+
+                parsed = getattr(fallback_response, "parsed", None)
+                if parsed is None:
+                    raw_text = self._extract_response_text(fallback_response)
+                    parsed = self._parse_json_response(raw_text)
+
             except Exception as fallback_e:
                 raise GeminiVisiblePeopleValidatorError(
                     "Gemini visible people validation failed. "
@@ -135,7 +144,8 @@ Decide whether a candidate refers to:
 Accept only if the text explicitly supports that:
 - this is a real person, and
 - this person is presented as part of the business/team/staff/practice/company/site
-Examples:
+
+Examples of acceptable explicit business links:
 - team member
 - practitioner
 - dentist
@@ -164,6 +174,7 @@ Reject if the candidate appears to be:
 - a legal mention
 - a copyright block
 - a generic phrase
+- a real person mentioned without explicit evidence of working for the business
 </rejection_rules>
 
 <normalization_rules>
@@ -188,17 +199,13 @@ candidate_name: Dr. Ralph BADAOUI
 candidate_role_hint:
 context_line: Dr. Ralph BADAOUI | Dental surgeon & Cosmetic dentist
 </input>
-<output>
-{
-  "is_real_person": true,
-  "is_presented_as_working_for_business": true,
-  "normalized_full_name": "Dr Ralph Badaoui",
-  "role_text": "Dental surgeon & Cosmetic dentist",
-  "evidence_text": "Dr. Ralph BADAOUI | Dental surgeon & Cosmetic dentist",
-  "confidence": 0.98,
-  "rejection_reason": ""
-}
-</output>
+<output_summary>
+Decision: accept
+Reason: explicit person with explicit practitioner role on the page
+Normalized name: Dr Ralph Badaoui
+Role: Dental surgeon & Cosmetic dentist
+Evidence: Dr. Ralph BADAOUI | Dental surgeon & Cosmetic dentist
+</output_summary>
 </example>
 
 <example>
@@ -207,17 +214,11 @@ candidate_name: Université Paris Descartes
 candidate_role_hint: 2020
 context_line: Diplôme de formation approfondie en sciences odontologiques - Université Paris Descartes
 </input>
-<output>
-{
-  "is_real_person": false,
-  "is_presented_as_working_for_business": false,
-  "normalized_full_name": "",
-  "role_text": "",
-  "evidence_text": "Diplôme de formation approfondie en sciences odontologiques - Université Paris Descartes",
-  "confidence": 0.99,
-  "rejection_reason": "Organization or institution, not a person."
-}
-</output>
+<output_summary>
+Decision: reject
+Reason: organization or institution, not a person
+Evidence: Diplôme de formation approfondie en sciences odontologiques - Université Paris Descartes
+</output_summary>
 </example>
 
 <example>
@@ -226,17 +227,24 @@ candidate_name: Victor Hugo
 candidate_role_hint: Aix en Provence
 context_line: Aix en Provence | 22 avenue Victor Hugo, 13100 AIX EN PROVENCE
 </input>
-<output>
-{
-  "is_real_person": false,
-  "is_presented_as_working_for_business": false,
-  "normalized_full_name": "",
-  "role_text": "",
-  "evidence_text": "Aix en Provence | 22 avenue Victor Hugo, 13100 AIX EN PROVENCE",
-  "confidence": 0.99,
-  "rejection_reason": "Address or location fragment, not a person."
-}
-</output>
+<output_summary>
+Decision: reject
+Reason: address or location fragment, not a person
+Evidence: Aix en Provence | 22 avenue Victor Hugo, 13100 AIX EN PROVENCE
+</output_summary>
+</example>
+
+<example>
+<input>
+candidate_name: Jean Dupont
+candidate_role_hint:
+context_line: Merci à Jean Dupont pour son intervention lors de notre conférence annuelle.
+</input>
+<output_summary>
+Decision: reject
+Reason: real person mentioned, but not explicitly presented as working for the business
+Evidence: Merci à Jean Dupont pour son intervention lors de notre conférence annuelle.
+</output_summary>
 </example>
 </examples>
 """.strip()
@@ -246,9 +254,12 @@ context_line: Aix en Provence | 22 avenue Victor Hugo, 13100 AIX EN PROVENCE
         candidate_role_hint = self._normalize_text(candidate.get("candidate_role_hint", ""))[:300]
         source_url = self._normalize_text(candidate.get("source_url", ""))[:500]
         page_title = self._normalize_text(candidate.get("page_title", ""))[:500]
-        context_before = self._normalize_text(candidate.get("context_before", ""))[:self.max_context_chars]
-        context_line = self._normalize_text(candidate.get("context_line", ""))[:self.max_context_chars]
-        context_after = self._normalize_text(candidate.get("context_after", ""))[:self.max_context_chars]
+
+        local_context = self._build_local_context(
+            candidate.get("context_before", ""),
+            candidate.get("context_line", ""),
+            candidate.get("context_after", ""),
+        )
 
         business_type = self._normalize_text(business_context.get("business_type", ""))[:200]
         niche = self._normalize_text(business_context.get("niche", ""))[:200]
@@ -291,10 +302,35 @@ Return only the JSON object matching the schema.
             "candidate_role_hint": candidate_role_hint,
             "source_url": source_url,
             "page_title": page_title,
-            "context_before": context_before,
-            "context_line": context_line,
-            "context_after": context_after,
+            "context_before": local_context["context_before"],
+            "context_line": local_context["context_line"],
+            "context_after": local_context["context_after"],
         }
+
+    def _build_local_context(self, context_before, context_line, context_after):
+        parts = [
+            ("context_before", self._normalize_text(context_before)),
+            ("context_line", self._normalize_text(context_line)),
+            ("context_after", self._normalize_text(context_after)),
+        ]
+
+        remaining = self.max_context_chars
+        out = {
+            "context_before": "",
+            "context_line": "",
+            "context_after": "",
+        }
+
+        for key, value in parts:
+            if remaining <= 0:
+                out[key] = ""
+                continue
+
+            clipped = value[:remaining]
+            out[key] = clipped
+            remaining -= len(clipped)
+
+        return out
 
     def _build_response_schema(self):
         return {
@@ -423,9 +459,17 @@ Return only the JSON object matching the schema.
             return 1.0
         return value
 
+    def _has_name_overlap(self, a, b):
+        a_tokens = set(re.findall(r"[A-Za-zÀ-ÿ]+", self._normalize_text(a).lower()))
+        b_tokens = set(re.findall(r"[A-Za-zÀ-ÿ]+", self._normalize_text(b).lower()))
+        return bool(a_tokens & b_tokens)
+
     def _normalize_output(self, parsed, candidate=None):
         if not isinstance(parsed, dict):
             raise GeminiVisiblePeopleValidatorError("Parsed response must be a dictionary.")
+
+        candidate = candidate or {}
+        candidate_name = self._normalize_text(candidate.get("candidate_name", ""))
 
         is_real_person = bool(parsed.get("is_real_person", False))
         is_presented = bool(parsed.get("is_presented_as_working_for_business", False))
@@ -438,6 +482,19 @@ Return only the JSON object matching the schema.
 
         if not is_real_person:
             is_presented = False
+
+        if is_presented:
+            if not evidence_text or not normalized_full_name:
+                is_presented = False
+                normalized_full_name = ""
+                role_text = ""
+                if not rejection_reason:
+                    rejection_reason = "Accepted output lacks sufficient explicit evidence."
+            elif candidate_name and not self._has_name_overlap(candidate_name, normalized_full_name):
+                is_presented = False
+                normalized_full_name = ""
+                role_text = ""
+                rejection_reason = "Normalized name does not sufficiently match the candidate."
 
         if not is_presented:
             normalized_full_name = ""

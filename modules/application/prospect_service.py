@@ -238,3 +238,35 @@ class ProspectService(object):
 
         self.db.commit()
         return inserted
+    
+    def replace_visible_people(self, prospect_id, visible_people):
+        if "prospect_visible_person" not in self.db.tables:
+            raise ProspectServiceError("Table prospect_visible_person is not defined.")
+
+        prospect = self.db.prospect(prospect_id)
+        if not prospect:
+            raise ProspectServiceError("Prospect not found: %s" % prospect_id)
+
+        self.db(self.db.prospect_visible_person.prospect_id == prospect.id).delete()
+
+        inserted_rows = []
+
+        for item in visible_people or []:
+            ret = self.db.prospect_visible_person.validate_and_insert(
+                prospect_id=prospect.id,
+                full_name=(item.get("full_name") or "").strip(),
+                role_text=(item.get("role_text") or "").strip(),
+                source_url=(item.get("source_url") or "").strip(),
+                evidence_text=(item.get("evidence_text") or "").strip(),
+                confidence=float(item.get("confidence") or 0.0),
+            )
+
+            if ret.get("errors"):
+                raise ProspectServiceError(
+                    "Failed to insert visible person: %s" % ret.get("errors")
+                )
+
+            inserted_rows.append(self.db.prospect_visible_person(ret.get("id")))
+
+        self.db.commit()
+        return inserted_rows

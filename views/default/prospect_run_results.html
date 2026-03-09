@@ -212,16 +212,30 @@ summary {
 
 
 
-<h4>Pre-LLM debug payload</h4>
 
-<p><strong>Business context sent to Gemini:</strong></p>
-<pre>{{=(row['pre_llm_debug']['business_context'])}}</pre>
 
-<p><strong>Deterministic contacts before Gemini:</strong></p>
-<pre>{{=(row['pre_llm_debug']['contacts_payload'])}}</pre>
 
-<p><strong>Visible people before Gemini:</strong></p>
-<pre>{{=(row['pre_llm_debug']['visible_people_payload'])}}</pre>
 
-<p><strong>Combined site text sent to Gemini:</strong></p>
-<pre style="white-space: pre-wrap;">{{=row['pre_llm_debug']['site_text'][:12000]}}</pre>
+{{if row.get('pre_llm_debug'):}}
+<div class="w3-margin-top w3-small">
+    <h4>Pre-LLM debug payload</h4>
+
+    <p><strong>Business context sent to Gemini:</strong></p>
+    <pre>{{=row['pre_llm_debug']['business_context']}}</pre>
+
+    <p><strong>Deterministic contacts before Gemini:</strong></p>
+    <pre>{{=row['pre_llm_debug']['contacts_payload']}}</pre>
+
+    <p><strong>Visible people candidates before Gemini validation:</strong></p>
+    <pre>{{=row['pre_llm_debug']['visible_people_candidates_payload']}}</pre>
+
+    <p><strong>Gemini validation decisions for visible people:</strong></p>
+    <pre>{{=row['pre_llm_debug']['visible_people_validations_payload']}}</pre>
+
+    <p><strong>Visible people persisted after validation:</strong></p>
+    <pre>{{=row['pre_llm_debug']['visible_people_payload']}}</pre>
+
+    <p><strong>Combined site text sent to Gemini:</strong></p>
+    <pre style="white-space: pre-wrap;">{{=row['pre_llm_debug']['site_text']}}</pre>
+</div>
+{{pass}}

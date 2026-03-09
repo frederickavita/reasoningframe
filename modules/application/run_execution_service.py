@@ -101,27 +101,19 @@ class RunExecutionService(object):
         ],
     }
 
-    def __init__(
-    self,
-    db,
-    run_service,
-    prospect_service,
-    search_provider,
-    web_page_fetcher,
-    contact_extractor,
-    llm_client,
-    visible_people_extractor=None,
-    default_phone_region="FR",
-):
-        self.db = db
-        self.run_service = run_service
-        self.prospect_service = prospect_service
-        self.search_provider = search_provider
-        self.web_page_fetcher = web_page_fetcher
-        self.contact_extractor = contact_extractor
-        self.llm_client = llm_client
-        self.visible_people_extractor = visible_people_extractor
-        self.default_phone_region = default_phone_region
+    class RunExecutionService(object):
+        def __init__(self,db,run_service,prospect_service,search_provider,web_page_fetcher,contact_extractor,llm_client,visible_people_candidate_extractor=None,visible_people_validator=None,default_phone_region="FR",session=None):
+            self.db = db
+            self.session = session
+            self.run_service = run_service
+            self.prospect_service = prospect_service
+            self.search_provider = search_provider
+            self.web_page_fetcher = web_page_fetcher
+            self.contact_extractor = contact_extractor
+            self.llm_client = llm_client
+            self.visible_people_candidate_extractor = visible_people_candidate_extractor
+            self.visible_people_validator = visible_people_validator
+            self.default_phone_region = default_phone_region
 
     # --------------------------------------------------
     # Public API
@@ -189,6 +181,120 @@ class RunExecutionService(object):
     # --------------------------------------------------
     # Search phase
     # --------------------------------------------------
+    def _build_visible_people_business_context(self, run_row, prospect_row):
+        return {
+        "business_type": (prospect_row.llm_business_type or "").strip(),
+        "niche": (run_row.niche or "").strip(),
+        "city": (run_row.city or "").strip(),
+    }
+
+    def _store_visible_people_debug(self, prospect_id, candidates, validations):
+        if not self.session:
+            return
+
+        debug_store = getattr(self.session, "visible_people_debug_by_prospect", {}) or {}
+        debug_store[str(prospect_id)] = {
+            "candidates": candidates or [],
+            "validations": validations or [],
+        }
+        self.session.visible_people_debug_by_prospect = debug_store
+
+    def _extract_validate_and_persist_visible_people(self, run_row, prospect_row, pages):
+        raw_candidates = []
+        validation_results = []
+        accepted_visible_people = []
+
+        if not self.visible_people_candidate_extractor:
+            self._store_visible_people_debug(
+                prospect_id=prospect_row.id,
+                candidates=[],
+                validations=[],
+            )
+            return []
+
+        raw_candidates = self.visible_people_candidate_extractor.extract_candidates(pages=pages) or []
+
+        if not raw_candidates or not self.visible_people_validator:
+            self._store_visible_people_debug(
+                prospect_id=prospect_row.id,
+                candidates=raw_candidates,
+                validations=[],
+            )
+            return []
+
+        business_context = self._build_visible_people_business_context(
+            run_row=run_row,
+            prospect_row=prospect_row,
+        )
+
+        for candidate in raw_candidates:
+            try:
+                result = self.visible_people_validator.validate_candidate(
+                    candidate=candidate,
+                    business_context=business_context,
+                )
+                validation_results.append({
+                    "candidate": candidate,
+                    "result": result,
+                    "status": "ok",
+                })
+
+                if (
+                    result.get("is_real_person") is True
+                    and result.get("is_presented_as_working_for_business") is True
+                    and float(result.get("confidence") or 0.0) >= 0.85
+                ):
+                    accepted_visible_people.append({
+                        "full_name": result.get("normalized_full_name", ""),
+                        "role_text": result.get("role_text", ""),
+                        "source_url": candidate.get("source_url", ""),
+                        "evidence_text": result.get("evidence_text", ""),
+                        "confidence": float(result.get("confidence") or 0.0),
+                    })
+
+            except Exception as e:
+                validation_results.append({
+                    "candidate": candidate,
+                    "result": {
+                        "is_real_person": False,
+                        "is_presented_as_working_for_business": False,
+                        "normalized_full_name": "",
+                        "role_text": "",
+                        "evidence_text": "",
+                        "confidence": 0.0,
+                        "rejection_reason": str(e),
+                    },
+                    "status": "error",
+                })
+
+        # déduplication légère
+        deduped = []
+        seen = set()
+        for item in accepted_visible_people:
+            key = (
+                (item.get("full_name") or "").strip().lower(),
+                (item.get("role_text") or "").strip().lower(),
+                (item.get("source_url") or "").strip().lower(),
+            )
+            if not key[0]:
+                continue
+            if key in seen:
+                continue
+            seen.add(key)
+            deduped.append(item)
+
+        self.prospect_service.replace_visible_people(
+            prospect_id=prospect_row.id,
+            visible_people=deduped,
+        )
+
+        self._store_visible_people_debug(
+            prospect_id=prospect_row.id,
+            candidates=raw_candidates,
+            validations=validation_results,
+        )
+
+        return deduped
 
     def _build_search_query(self, run):
         parts = [
@@ -564,6 +670,13 @@ class RunExecutionService(object):
                 contact_role="",
                 address_text="",
                 evidence_text="",
+            )
+
+                # AJOUTER ICI
+            self._extract_validate_and_persist_visible_people(
+                run_row=run_row,
+                prospect_row=prospect_row,
+                pages=pages,
             )
 
             current_score = float(contact.get("confidence") or 0.0)
