@@ -17,8 +17,8 @@ class CronTriggerNode(nodes_base.NodeExecutor):
     Représente le point d'entrée d'un workflow déclenché par une horloge.
 
     RÔLE RUNTIME :
-    Valide et relaie le signal temporel injecté par le scheduler externe.
-    Harmonisé avec le WorkflowContext réel (input_items > current_items).
+    Valide et relaie le signal temporel injecté par le scheduler.
+    Harmonisé strictement avec le WorkflowContext (input_items > current_items).
     """
 
     def execute(
@@ -41,8 +41,8 @@ class CronTriggerNode(nodes_base.NodeExecutor):
             )
 
         # -----------------------------------------------------------------
-        # 2. Résolution du payload (Contrat harmonisé)
-        #    On supprime le fallback trigger_items qui n'existe pas en runtime.
+        # 2. Résolution du payload (Contrat Réel)
+        #    On dégage le fallback trigger_items qui n'existe pas dans l'objet context.
         # -----------------------------------------------------------------
         source_items = input_items if input_items else getattr(context, "current_items", [])
 
@@ -57,10 +57,10 @@ class CronTriggerNode(nodes_base.NodeExecutor):
             )
 
         # -----------------------------------------------------------------
-        # 4. Validation du contrat Item & du Payload métier
+        # 4. Validation métier du signal reçu
         # -----------------------------------------------------------------
         for i, item in enumerate(source_items):
-            # Validation structurelle Item
+            # On s'assure que c'est un Item valide
             if not isinstance(item, engine_context.Item):
                 raise engine_errors.NodeExecutionError(
                     node_id=node_def.id,
@@ -68,33 +68,24 @@ class CronTriggerNode(nodes_base.NodeExecutor):
                     error_code="ERR_INVALID_ITEM_TYPE"
                 )
 
-            # Validation du contenu JSON
+            # On vérifie la présence de 'triggered_at' pour le traçage
             payload = item.json or {}
-            if not isinstance(payload, dict):
+            if not isinstance(payload, dict) or not payload.get("triggered_at"):
                 raise engine_errors.NodeExecutionError(
                     node_id=node_def.id,
-                    message=f"Payload cron invalide : dictionnaire attendu.",
-                    error_code="ERR_INVALID_TRIGGER_PAYLOAD"
-                )
-
-            # Champ critique : triggered_at (ISO 8601 attendu)
-            if not payload.get("triggered_at"):
-                raise engine_errors.NodeExecutionError(
-                    node_id=node_def.id,
-                    message=f"Payload cron invalide : champ 'triggered_at' requis.",
+                    message=f"Payload cron invalide à l'index {i} : champ 'triggered_at' requis.",
                     error_code="ERR_CRON_MISSING_TRIGGERED_AT"
                 )
 
-            # Validation de la source pour le déterminisme
-            source = payload.get("source")
-            if source and source != "cron":
+            # On vérifie la source pour éviter toute collision sémantique
+            if payload.get("source") and payload.get("source") != "cron":
                 raise engine_errors.NodeExecutionError(
                     node_id=node_def.id,
-                    message=f"Source incohérente pour un trigger cron : '{source}'.",
+                    message=f"Source incohérente pour un trigger cron : '{payload.get('source')}'.",
                     error_code="ERR_CRON_INVALID_SOURCE"
                 )
 
         # -----------------------------------------------------------------
-        # 5. Transmission au reste du DAG
+        # 5. Transmission au DAG
         # -----------------------------------------------------------------
         return source_items
