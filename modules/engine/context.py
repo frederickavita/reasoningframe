@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# applications/n8n_life/modules/engine/context.py
+# applications/reasoningframe/modules/engine/context.py
 
 from enum import Enum
 from typing import List, Dict, Any, Optional
@@ -28,18 +28,13 @@ class Item:
     Règle absolue : Toute entrée ou sortie de nœud DOIT être une List[Item].
     """
     def __init__(self, 
-                 json: Dict[str, Any], # CORRECTION 1 : Contrat uniforme ('json' partout)
+                 json: Dict[str, Any], 
                  paired_item: Optional[Dict[str, Any]] = None, 
                  binary: Optional[Dict[str, Any]] = None):
         
-        self.json = json
-        
-        # CORRECTION 3 : Le binaire est explicitement géré (vide par défaut)
+        self.json = json or {}
         self.binary = binary or {}
-        
-        # CORRECTION 2 : paired_item structuré (ex: {"node_id": "trigger", "index": 0})
         self.paired_item = paired_item or {} 
-        
         self.meta: Dict[str, Any] = {}
 
     def to_dict(self) -> Dict[str, Any]:
@@ -71,19 +66,25 @@ class WorkflowContext:
     Conserve l'état complet et traçable d'un Run en mémoire. 
     """
     def __init__(self, trigger_items: List[Item]):
-        # CORRECTION 4 : current_items est un cache pratique, pas la vérité du DAG
-        self.current_items: List[Item] = trigger_items
+        # =====================================================================
+        # LE VERROU DU CONTRAT EST ICI
+        # La source de vérité immuable du déclenchement du workflow.
+        # =====================================================================
+        self.trigger_items: List[Item] = trigger_items or []
         
-        # CORRECTION 5 : Nommage explicite. La vraie source de vérité du DAG.
+        # current_items est un cache pratique initialisé avec la vérité de départ
+        self.current_items: List[Item] = self.trigger_items
+        
+        # La vraie source de vérité du DAG
         self.node_outputs: Dict[str, List[Item]] = {}  
         
-        # CORRECTION 7 : Création de l'historique de step exigé par le Runner
+        # Création de l'historique de step exigé par le Runner
         self.step_history: List[Dict[str, Any]] = []
         
-        # CORRECTION 9 : Alignement total sur les Enums
+        # Alignement total sur les Enums
         self.run_state: str = RunState.RUNNING.value           
         
-        # CORRECTION 8 : Contrat strict pour les erreurs
+        # Contrat strict pour les erreurs
         self.errors: List[Dict[str, Any]] = []    
 
     def update_node_output(self, node_id: str, items: List[Item]):
@@ -93,25 +94,28 @@ class WorkflowContext:
 
     def get_node_output(self, node_id: str) -> List[Item]:
         """
-        CORRECTION 6 : Fail-Fast si le nœud n'existe pas.
+        Fail-Fast si le nœud n'existe pas.
         Renvoie la liste des items SI ET SEULEMENT SI le nœud a été exécuté.
         """
         if node_id not in self.node_outputs:
             raise KeyError(f"Impossible de récupérer l'output : Le nœud '{node_id}' n'a pas été exécuté.")
         return self.node_outputs[node_id]
 
-    def record_step(self, node_id: str, node_type: str, execution_order: int, 
-                    status: str, execution_time_ms: int, input_count: int, 
-                    output_count: int, error_code: Optional[str] = None, 
-                    error_message: Optional[str] = None):
+    def record_step(self, node_id: str, node_type: str, status: str, 
+                    execution_time_ms: int, input_count: int, output_count: int, 
+                    error_code: Optional[str] = None, error_message: Optional[str] = None,
+                    execution_order: Optional[int] = None):
         """
-        CORRECTION 7 & 8 : Implémente le contrat exact attendu par le Runner (Point 8).
+        Implémente le contrat exact attendu par le Runner.
         Prépare les données pour la table SQL `workflow_run_step`.
         """
+        # Auto-calcul de l'ordre d'exécution si non fourni par le Runner
+        order = execution_order if execution_order is not None else len(self.step_history) + 1
+
         self.step_history.append({
             "node_id": node_id,
             "node_type": node_type,
-            "execution_order": execution_order,
+            "execution_order": order,
             "status": status,
             "execution_time_ms": execution_time_ms,
             "input_count": input_count,
@@ -131,7 +135,7 @@ class WorkflowContext:
 
     def to_snapshot(self) -> Dict[str, Any]:
         """
-        CORRECTION 10 : Snapshot enrichi pour la DB et le débogage.
+        Snapshot enrichi pour la DB et le débogage.
         """
         return {
             "run_state": self.run_state,
