@@ -8,6 +8,7 @@ from applications.reasoningframe.modules.nodes.registry import NodeRegistry
 from applications.reasoningframe.modules.nodes.triggers.webhook import WebhookTriggerNode
 from applications.reasoningframe.modules.nodes.triggers.cron import CronTriggerNode
 from applications.reasoningframe.modules.nodes.transforms.set_fields import SetFieldsNode
+from applications.reasoningframe.modules.nodes.transforms.filter import FilterNode
 
 # (Ajoute tes futurs nœuds ici au fur et à mesure)
 # from applications.reasoningframe.modules.nodes.actions.http_request import HttpRequestNode
@@ -25,6 +26,7 @@ NodeRegistry.register("trigger.cron", CronTriggerNode)
 
 # Enregistrement des Transformateurs (Transforms)
 NodeRegistry.register("transform.set_fields", SetFieldsNode)
+NodeRegistry.register("transform.filter", FilterNode)
 
 # Enregistrement des Actions
 # NodeRegistry.register("core.http", HttpRequestNode)
