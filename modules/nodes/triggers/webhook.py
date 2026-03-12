@@ -15,8 +15,10 @@ importlib.reload(engine_errors)
 class WebhookTriggerNode(nodes_base.NodeExecutor):
     """
     Représente le point d'entrée d'un workflow déclenché par un Webhook.
-    Note : La sécurité (HMAC) et le parsing sont gérés en amont par le WebhookService.
-    Ce node valide simplement que le payload est disponible pour la suite du graphe.
+    
+    RÔLE RUNTIME :
+    Ce node ne traite pas l'HTTP. Il agit comme un validateur de contrat 
+    entre le WebhookService (amont) et le reste du DAG (aval).
     """
 
     def execute(self, 
@@ -26,34 +28,44 @@ class WebhookTriggerNode(nodes_base.NodeExecutor):
                 security_provider=None, 
                 http_helper=None) -> List[engine_context.Item]:
         
-        # 1. Vérification du type de node
-        if node_def.type != "trigger.webhook":
+        # 1. Validation de l'identité du node
+        if not node_def.type.startswith("trigger."):
             raise engine_errors.NodeExecutionError(
                 node_id=node_def.id,
-                message=f"Le WebhookTriggerNode ne peut pas exécuter un node de type '{node_def.type}'.",
+                message=f"Type invalide pour un exécuteur de trigger : {node_def.type}",
                 error_code="ERR_INVALID_TRIGGER_TYPE"
             )
 
-        # 2. Résolution du payload (Priorité : input_items > context.current_items)
-        # Dans le flux standard, le Runner injecte le payload dans input_items au démarrage.
-        source_items = input_items if input_items else context.current_items
+        # 2. Résolution du payload avec priorité sémantique :
+        # A. input_items : Fourni explicitement par le Runner (cas standard)
+        # B. context.trigger_items : La source de vérité immuable du démarrage
+        # C. context.current_items : Fallback de dernier recours (cache courant)
+        
+        source_items = input_items
+        
+        if not source_items and hasattr(context, 'trigger_items'):
+            source_items = context.trigger_items
+            
+        if not source_items:
+            source_items = context.current_items
 
+        # 3. Fail-Fast si aucune donnée n'est disponible
         if not source_items:
             raise engine_errors.NodeExecutionError(
                 node_id=node_def.id,
-                message="Aucun payload webhook exploitable trouvé (le point d'entrée est vide).",
+                message="Déclencheur Webhook vide : aucun payload n'a été injecté au démarrage.",
                 error_code="ERR_TRIGGER_NO_PAYLOAD"
             )
 
-        # 3. Validation du contrat Item
-        for item in source_items:
+        # 4. Validation du type Item (Contrat strict du moteur)
+        for i, item in enumerate(source_items):
             if not isinstance(item, engine_context.Item):
                 raise engine_errors.NodeExecutionError(
                     node_id=node_def.id,
-                    message="Données d'entrée corrompues : les éléments doivent être de type Item.",
+                    message=f"Élément d'index {i} invalide : type Item attendu.",
                     error_code="ERR_INVALID_ITEM_TYPE"
                 )
 
-        # 4. Retourne les items tels quels pour le prochain node
-        # Le payload normalisé par le WebhookService est déjà prêt à l'emploi.
+        # 5. Transmission au reste du graphe
+        # Le payload est déjà normalisé par le WebhookService.
         return source_items
