@@ -1,195 +1,166 @@
 # -*- coding: utf-8 -*-
 # applications/n8n_life/modules/engine/runner.py
 
-import time
 import importlib
-from enum import Enum
-from typing import Dict, Any, List, Set
-
-# =========================================================================
-# IMPORTS WEB2PY (Avec mode DEV / Reload explicite)
-# =========================================================================
-import applications.reasoningframe.modules.engine.errors as engine_errors
-importlib.reload(engine_errors)
+import datetime
+from typing import Dict, Any, List, Optional
 
 import applications.reasoningframe.modules.engine.context as engine_context
-importlib.reload(engine_context)
-
-import applications.reasoningframe.modules.engine.item_manager as engine_item_manager
-importlib.reload(engine_item_manager)
-
-import applications.reasoningframe.modules.engine.planner as engine_planner
-importlib.reload(engine_planner)
-
-# CORRECTION 1 : Le chemin exact selon notre arborescence validée
+import applications.reasoningframe.modules.engine.errors as engine_errors
 import applications.reasoningframe.modules.nodes.base as nodes_base
+
+# Rechargement pour garantir la fraîcheur en environnement web2py
+importlib.reload(engine_context)
+importlib.reload(engine_errors)
 importlib.reload(nodes_base)
 
-
-# =========================================================================
-# CONSTANTES D'ÉTAT (Enums robustes)
-# =========================================================================
-class RunState(str, Enum):
-    RUNNING = "running"
-    SUCCESS = "success"
-    FAILED = "failed"
-
-class StepState(str, Enum):
-    RUNNING = "running"
-    SUCCESS = "success"
-    FAILED = "failed"
-    SKIPPED = "skipped" # Anticipation pour les branches mortes du DAG
-
-
-# =========================================================================
-# LE MOTEUR D'EXÉCUTION
-# =========================================================================
 class ExecutionEngine:
     """
-    Orchestrateur central du workflow (DAG-Ready).
+    Le moteur d'exécution (Runner).
+    Il parcourt le graphe, instancie les nœuds via le Registry et gère le cycle de vie du Run.
     """
+
     def __init__(self, node_registry: Any, security_provider: Any, http_helper: Any):
-        self.registry = node_registry
-        self.security_provider = security_provider 
+        """
+        Injection des dépendances cœur.
+        :param node_registry: La classe ou instance NodeRegistry (doit accepter NodeDefinition).
+        :param security_provider: Service capable de fournir des credentials (ex: CredentialService).
+        :param http_helper: Helper pour les requêtes sortantes.
+        """
+        self.node_registry = node_registry
+        self.security_provider = security_provider
         self.http_helper = http_helper
 
     def run(self, 
             wf_def: nodes_base.WorkflowDefinition, 
             trigger_node_id: str, 
             trigger_payload: Dict[str, Any]) -> engine_context.WorkflowContext:
-        
-        # ---------------------------------------------------------------------
-        # 1. VALIDATION STRICTE DU TRIGGER
-        # ---------------------------------------------------------------------
-        trigger_def = wf_def.nodes.get(trigger_node_id)
-        if not trigger_def:
-            raise engine_errors.GraphValidationError(f"Le nœud trigger '{trigger_node_id}' n'existe pas dans le workflow.")
-        
-        # Vérification explicite du contrat
-        if not trigger_def.type.startswith('trigger.'):
-            raise engine_errors.GraphValidationError(f"Le nœud '{trigger_node_id}' (type: {trigger_def.type}) n'est pas un trigger valide.")
-
-        # ---------------------------------------------------------------------
-        # 2. INITIALISATION DU CONTEXTE
-        # ---------------------------------------------------------------------
-        # CORRECTION 2 : Alignement du contrat Item
+        """
+        Déclenche l'exécution d'un workflow à partir d'un trigger.
+        """
+        # 1. Initialisation de l'Item de départ (Payload normalisé par le WebhookService)
         start_item = engine_context.Item(json=trigger_payload)
-        context = engine_context.WorkflowContext(trigger_items=[start_item])
-        context.run_state = RunState.RUNNING.value
         
+        # 2. Création du contexte de run (La mémoire du workflow)
+        context = engine_context.WorkflowContext(trigger_items=[start_item])
+        
+        # 3. Préparation de la file d'exécution (Traversal)
+        # On commence par le trigger.
+        queue = [trigger_node_id]
+        
+        # Le trigger_payload est injecté comme "donnée entrante" du premier nœud
         context.update_node_output(trigger_node_id, [start_item])
 
-        # CORRECTION 3 & 5 : Le trigger est officiellement le Step 1
-        step_order = 1
-        context.record_step(
-            node_id=trigger_node_id,
-            node_type=trigger_def.type,
-            execution_order=step_order,
-            status=StepState.SUCCESS.value,
-            execution_time_ms=0,
-            input_count=0,
-            output_count=1,
-            error_code=None,
-            error_message=None
-        )
-        step_order += 1
-
-        # ---------------------------------------------------------------------
-        # 3. INITIALISATION DE LA FILE D'ATTENTE DAG
-        # ---------------------------------------------------------------------
-        executed_nodes: Set[str] = {trigger_node_id}
-        queued_nodes: Set[str] = set()
-        queue: List[str] = []
-
-        initial_next_nodes = engine_planner.ExecutionPlanner.get_ready_successors(wf_def, trigger_node_id, executed_nodes)
-        for n in initial_next_nodes:
-            queue.append(n)
-            queued_nodes.add(n)
-
-        # ---------------------------------------------------------------------
-        # 4. BOUCLE D'EXÉCUTION (State Machine)
-        # ---------------------------------------------------------------------
-        while queue and context.run_state == RunState.RUNNING.value:
-            current_node_id = queue.pop(0)
-            queued_nodes.remove(current_node_id)
-            node_def = wf_def.nodes.get(current_node_id)
-            
-            step_start_time = time.time()
-            step_error = None
-            step_error_code = None
-            outputs = []
-            input_items = []
-
-            try:
-                # A. Résolution
-                node_executor = self.registry.get_executor(node_def)
-
-                # B. Reconstruction DAG des inputs
-               # NOUVEAU CODE (Robuste)
-                upstream_node_ids = engine_planner.ExecutionPlanner.get_upstream_nodes(wf_def, current_node_id)
-                # On construit un dictionnaire couplé : { "node_1": [Item, Item], "node_2": [Item] }
-                branches_data = {pid: context.get_node_output(pid) for pid in upstream_node_ids}
-                # Le merge_inputs gère le Flatten et le Pairing en toute sécurité
-                input_items = engine_item_manager.ItemManager.merge_inputs(branches_data)
-
-            
-
-                # C. Exécution
-                outputs = node_executor.execute(
-                    node_def=node_def,
-                    input_items=input_items,
-                    context=context, 
-                    security_provider=self.security_provider, 
-                    http_helper=self.http_helper
-                )
-
-                # D. CORRECTION 4 : Validation blindée du type de retour
-                if not isinstance(outputs, list) or not all(isinstance(out, engine_context.Item) for out in outputs):
-                    raise engine_errors.NodeExecutionError(current_node_id, "Contrat violé : Le nœud DOIT retourner une List[Item] valide.")
-
-                # E. Mise à jour de l'état
-                context.update_node_output(current_node_id, outputs)
-                executed_nodes.add(current_node_id)
-
-                # F. Planification DAG
-                next_ready = engine_planner.ExecutionPlanner.get_ready_successors(wf_def, current_node_id, executed_nodes)
-                for n in next_ready:
-                    if n not in queued_nodes and n not in executed_nodes:
-                        queue.append(n)
-                        queued_nodes.add(n)
-
-            except engine_errors.N8nLifeEngineError as e:
-                step_error_code = getattr(e, 'error_code', 'ERR_ENGINE_KNOWN')
-                step_error = str(e)
-                context.halt_with_error(current_node_id, step_error_code, step_error)
+        try:
+            while queue:
+                current_node_id = queue.pop(0)
                 
-            except Exception as e:
-                step_error_code = 'ERR_INTERNAL_SYSTEM'
-                step_error = f"Erreur système inattendue : {str(e)}"
-                context.halt_with_error(current_node_id, step_error_code, step_error)
-
-            finally:
-                # G. Enregistrement systématique du Step (avec Error Code et Node Type)
-                exec_time_ms = int((time.time() - step_start_time) * 1000)
-                step_status = StepState.FAILED.value if step_error else StepState.SUCCESS.value
+                # Exécution du nœud actuel
+                output_items = self._execute_node(current_node_id, context, wf_def)
                 
-                context.record_step(
-                    node_id=current_node_id,
-                    node_type=node_def.type,
-                    execution_order=step_order,
-                    status=step_status,
-                    execution_time_ms=exec_time_ms,
-                    input_count=len(input_items),
-                    output_count=len(outputs),
-                    error_code=step_error_code,
-                    error_message=step_error
-                )
-                step_order += 1
+                # Mise à jour du contexte
+                context.update_node_output(current_node_id, output_items)
+                
+                # Identification des successeurs
+                connections = wf_def.connections.get(current_node_id, [])
+                for conn in connections:
+                    target_id = conn.get('target_id')
+                    if target_id and target_id not in queue:
+                        # On injecte les données de sortie pour le nœud suivant
+                        # Note : Dans un DAG simple, le nœud suivant recevra les outputs du précédent
+                        queue.append(target_id)
 
-        # ---------------------------------------------------------------------
-        # 5. CLÔTURE DU RUN
-        # ---------------------------------------------------------------------
-        if context.run_state == RunState.RUNNING.value:
-            context.run_state = RunState.SUCCESS.value
+            context.run_state = "success"
+
+        except engine_errors.N8nLifeEngineError as e:
+            context.run_state = "failed"
+            context.errors.append({
+                "error_code": e.error_code,
+                "message": str(e),
+                "details": getattr(e, 'details', {})
+            })
+        except Exception as e:
+            context.run_state = "failed"
+            context.errors.append({
+                "error_code": "ERR_INTERNAL_RUNNER",
+                "message": f"Erreur critique du Runner : {str(e)}"
+            })
 
         return context
+
+    def _execute_node(self, node_id: str, context: engine_context.WorkflowContext, wf_def: nodes_base.WorkflowDefinition) -> List[engine_context.Item]:
+        """
+        Résout, instancie et exécute un nœud spécifique.
+        """
+        node_def = wf_def.nodes.get(node_id)
+        if not node_def:
+            raise engine_errors.N8nLifeEngineError(f"Nœud {node_id} introuvable dans la définition.", "ERR_NODE_NOT_FOUND")
+
+        # --- ALIGNEMENT RÉSOLU ---
+        # On passe l'objet node_def complet au Registry. 
+        # Le Registry est maintenant polymorphe et gère le .type en interne.
+        executor = self.node_registry.get_executor(node_def)
+        # -------------------------
+
+        # Récupération des items entrants (provenant des nœuds parents)
+        # Pour le MVP, on simplifie : on prend les outputs des nœuds connectés
+        input_items = self._resolve_inputs(node_id, context, wf_def)
+
+        # Enregistrement du début de step
+        start_time = datetime.datetime.now()
+
+        try:
+            # Appel de l'exécuteur concret
+            output_items = executor.execute(
+                node_def=node_def,
+                input_items=input_items,
+                context=context,
+                security_provider=self.security_provider,
+                http_helper=self.http_helper
+            )
+
+            # Log de télémétrie dans le contexte
+            execution_time = (datetime.datetime.now() - start_time).total_seconds() * 1000
+            context.record_step(
+                node_id=node_id,
+                node_type=node_def.type,
+                status="success",
+                input_count=len(input_items),
+                output_count=len(output_items),
+                execution_time_ms=int(execution_time)
+            )
+
+            return output_items
+
+        except engine_errors.N8nLifeEngineError as e:
+            # On enrichit l'erreur avec l'ID du nœud fautif
+            e.details = getattr(e, 'details', {})
+            e.details['node_id'] = node_id
+            
+            context.record_step(
+                node_id=node_id,
+                node_type=node_def.type,
+                status="failed",
+                error_code=e.error_code,
+                error_message=str(e)
+            )
+            raise e
+
+    def _resolve_inputs(self, node_id: str, context: engine_context.WorkflowContext, wf_def: nodes_base.WorkflowDefinition) -> List[engine_context.Item]:
+        """
+        Collecte les items produits par les nœuds parents.
+        """
+        # Dans un DAG, on cherche qui pointe vers node_id
+        inputs = []
+        for source_id, conns in wf_def.connections.items():
+            for c in conns:
+                if c.get('target_id') == node_id:
+                    parent_outputs = context.node_outputs.get(source_id, [])
+                    inputs.extend(parent_outputs)
+        
+        # Si c'est le trigger ou un nœud orphelin, on peut avoir des données dans trigger_items
+        if not inputs and node_id in wf_def.nodes:
+            if node_id == context.step_history[0]['node_id'] if context.step_history else None:
+                return getattr(context, 'trigger_items', [])
+                
+        return inputs
