@@ -302,8 +302,58 @@ class RunExecutionService(object):
         return created
 
     # --------------------------------------------------
-    # Visible people
+    # Visible people / page scoping
     # --------------------------------------------------
+
+    def _normalize_host(self, url):
+        url = self._clean_text(url)
+        if not url:
+            return ""
+
+        if not re.match(r"^https?://", url, flags=re.I):
+            url = "https://" + url
+
+        try:
+            parsed = urlparse(url)
+        except Exception:
+            return ""
+
+        host = (parsed.netloc or "").lower().strip()
+        host = host.replace("www.", "")
+        return host
+
+    def _is_same_host(self, base_url, candidate_url):
+        base_host = self._normalize_host(base_url)
+        candidate_host = self._normalize_host(candidate_url)
+
+        if not base_host or not candidate_host:
+            return False
+
+        return base_host == candidate_host
+
+    def _select_business_pages(self, homepage_url, pages):
+        """
+        Only keep same-host pages for:
+        - visible people extraction
+        - site text sent to Gemini
+        - rule text evaluation
+        """
+        selected = []
+
+        for page in pages or []:
+            page_url = self._clean_text(page.get("url") or "")
+            loaded = bool(page.get("loaded"))
+
+            if not loaded:
+                continue
+
+            if not page_url:
+                continue
+
+            if self._is_same_host(homepage_url, page_url):
+                selected.append(page)
+
+        return selected
 
     def _build_visible_people_business_context(self, run_row, prospect_row):
         llm_business_type = self._clean_text(getattr(prospect_row, "llm_business_type", "") or "")
@@ -437,11 +487,6 @@ class RunExecutionService(object):
     # --------------------------------------------------
 
     def _expand_criterion_needles(self, criterion_value):
-        """
-        Expand a user criterion to a small synonym set.
-        Example:
-        booking -> booking, appointment, rendez-vous, doctolib...
-        """
         criterion_value = self._clean_text(criterion_value).lower()
         if not criterion_value:
             return []
@@ -560,7 +605,7 @@ class RunExecutionService(object):
                 self.db.prospect(prospect.id).update_record(inspection_failed=True)
                 self.db.commit()
 
-            # 1. Persist source pages
+            # Persist all fetched pages for debug
             for page in pages:
                 self.prospect_service.add_source_page(
                     prospect_id=prospect.id,
@@ -586,14 +631,16 @@ class RunExecutionService(object):
                 has_public_contact=bool(best_contact.get("value")),
             )
 
-            # 2. Extract visible people candidates -> validate with Gemini -> persist only accepted
+            # Use only same-host business pages for text analysis and visible people
+            analysis_pages = self._select_business_pages(prospect.domain, pages)
+
             self._extract_validate_and_persist_visible_people(
                 run_row=run,
                 prospect_row=prospect,
-                pages=pages,
+                pages=analysis_pages,
             )
 
-            site_text = self._combine_page_text(pages)
+            site_text = self._combine_page_text(analysis_pages)
 
             run_language = self._infer_output_language(run)
 
@@ -601,7 +648,7 @@ class RunExecutionService(object):
                 site_text=site_text,
                 parsed_criteria=parsed_criteria,
                 contacts=extracted_contacts,
-                pages=pages,
+                pages=analysis_pages,
                 output_language=run_language,
             )
             self._persist_rule_signals(prospect.id, rule_signals)
@@ -626,6 +673,11 @@ class RunExecutionService(object):
                 site_text=site_text,
                 business_context=llm_context,
             )
+
+            if not isinstance(llm_payload, dict):
+                raise RunExecutionServiceError(
+                    "GeminiLLMClient returned invalid payload type: %s" % type(llm_payload).__name__
+                )
 
             self.run_service.update_status(run.id, "drafting")
             self.db.commit()
@@ -685,6 +737,9 @@ class RunExecutionService(object):
         }
 
         for contact in contacts or []:
+            if not isinstance(contact, dict):
+                continue
+
             row = self.prospect_service.add_contact(
                 prospect_id=prospect_id,
                 contact_type=contact.get("contact_type") or "none",
@@ -738,6 +793,9 @@ class RunExecutionService(object):
         output_language = (output_language or "en").lower()
 
         for criterion in parsed_criteria or []:
+            if not isinstance(criterion, dict):
+                continue
+
             kind = self._clean_text(criterion.get("kind") or "")
             value = self._clean_text(criterion.get("value") or "")
             if not kind or not value:
@@ -809,6 +867,8 @@ class RunExecutionService(object):
 
         visible_contact = False
         for contact in contacts or []:
+            if not isinstance(contact, dict):
+                continue
             if (contact.get("contact_type") or "none") != "none" and self._clean_text(contact.get("value") or ""):
                 visible_contact = True
                 break
@@ -844,6 +904,9 @@ class RunExecutionService(object):
 
     def _persist_rule_signals(self, prospect_id, rule_signals):
         for signal in rule_signals or []:
+            if not isinstance(signal, dict):
+                continue
+
             self.prospect_service.add_signal(
                 prospect_id=prospect_id,
                 signal_type=signal.get("signal_type") or "rule_signal",
@@ -856,6 +919,9 @@ class RunExecutionService(object):
 
     def _persist_llm_derived_signals(self, prospect_id, derived_signals):
         for signal in derived_signals or []:
+            if not isinstance(signal, dict):
+                continue
+
             self.prospect_service.add_signal(
                 prospect_id=prospect_id,
                 signal_type=signal.get("signal_type") or "llm_signal",

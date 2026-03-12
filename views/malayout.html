@@ -20,7 +20,7 @@
          http://google.com/webmasters -->
     <meta name="google-site-verification" content="">
     <!-- include stylesheets -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://www.w3schools.com/w3css/5/w3.css">
 
     <link rel="shortcut icon" href="{{=URL('static','images/favicon.ico')}}" type="image/x-icon">
@@ -31,6 +31,9 @@
     <!-- Favicons -->
     {{include 'web2py_ajax.html'}} <!-- this includes jquery.js, calendar.js/.css and web2py.js -->
 
+
+
+{{if request.function == "index":}}    
 <style>
 /* Dégradés personnalisés inspirés de l'image */
 .bg-gradient-btn {
@@ -460,7 +463,7 @@
 }
 
 </style>
-
+{{pass}}
     
   
   </head>

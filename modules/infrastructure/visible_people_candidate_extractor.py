@@ -33,13 +33,9 @@ class VisiblePeopleCandidateExtractor(object):
     }
     """
 
-    MAX_CANDIDATES = 20
-    MAX_BLOCK_LENGTH = 500
-    MAX_LINE_LENGTH = 220
-
-    # --------------------------------------------------
-    # Person / role anchors
-    # --------------------------------------------------
+    MAX_CANDIDATES = 25
+    MAX_BLOCK_LENGTH = 700
+    MAX_LINE_LENGTH = 260
 
     PERSON_PREFIXES = (
         "dr", "dr.", "docteur", "doctor", "dott.", "dottore",
@@ -48,18 +44,17 @@ class VisiblePeopleCandidateExtractor(object):
     )
 
     ROLE_KEYWORDS = (
-        # generic EN
+        # EN
         "founder", "co-founder", "cofounder", "owner", "manager", "director",
         "head", "lead", "specialist", "consultant", "advisor", "partner",
         "engineer", "developer", "designer", "technician", "mechanic",
         "sales", "account manager", "curator", "conservator", "guide",
         "archivist", "receptionist", "assistant", "coordinator", "operator",
-        "practitioner", "staff", "team", "member", "expert", "surgeon",
+        "practitioner", "staff", "member", "expert", "surgeon",
         "dentist", "doctor", "dr", "professor", "prof", "lawyer", "attorney",
         "notary", "architect", "veterinarian", "therapist", "clinician",
-        "director of", "head of",
 
-        # generic FR
+        # FR
         "fondateur", "fondatrice", "cofondateur", "cofondatrice", "gérant",
         "gérante", "responsable", "directeur", "directrice", "chef",
         "consultant", "consultante", "conseiller", "conseillère", "associé",
@@ -67,38 +62,36 @@ class VisiblePeopleCandidateExtractor(object):
         "technicien", "technicienne", "commercial", "commerciale", "curateur",
         "conservateur", "conservatrice", "guide", "archiviste", "assistante",
         "assistant", "coordinateur", "coordinatrice", "opérateur", "opératrice",
-        "équipe", "membre", "expert", "experte", "chirurgien", "chirurgienne",
+        "membre", "expert", "experte", "chirurgien", "chirurgienne",
         "dentiste", "docteur", "dr", "professeur", "avocat", "avocate",
         "notaire", "architecte", "vétérinaire", "thérapeute", "clinicien",
         "clinicienne", "secrétariat", "praticien", "praticienne",
 
-        # generic IT
+        # IT
         "fondatore", "fondatrice", "responsabile", "direttore", "direttrice",
         "capo", "consulente", "partner", "ingegnere", "sviluppatore",
         "designer", "tecnico", "commerciale", "curatore", "conservatore",
         "guida", "archivista", "assistente", "coordinatore", "operatore",
-        "team", "membro", "esperto", "chirurgo", "dentista", "dottore",
+        "membro", "esperto", "chirurgo", "dentista", "dottore",
         "dr", "professore", "avvocato", "notaio", "architetto", "veterinario",
     )
 
     TEAM_CONTEXT_KEYWORDS = (
         "our team", "meet the team", "meet our team", "team of experts",
-        "our experts", "our practitioners", "our staff",
+        "our experts", "our practitioners", "our staff", "discover the team",
         "notre équipe", "notre equipe", "rencontrez l'équipe",
         "rencontrez notre équipe", "nos experts", "nos praticiens",
+        "découvrir l'équipe", "decouvrir l'equipe", "l'équipe du cabinet",
         "il nostro team", "incontra il team", "i nostri esperti",
     )
-
-    # --------------------------------------------------
-    # Negative categories
-    # --------------------------------------------------
 
     UI_NOISE_KEYWORDS = (
         "menu", "blog", "search", "rechercher", "home", "accueil",
         "contact us", "follow us", "instagram", "facebook", "linkedin",
         "privacy", "cookies", "faq", "about us", "about", "book", "booking",
         "prendre rendez-vous", "rendez-vous", "appointment", "appointments",
-        "find out more", "learn more", "en savoir plus",
+        "find out more", "learn more", "en savoir plus", "gérer le consentement",
+        "gerer le consentement",
     )
 
     LEGAL_NOISE_KEYWORDS = (
@@ -109,25 +102,22 @@ class VisiblePeopleCandidateExtractor(object):
     LOCATION_NOISE_KEYWORDS = (
         "avenue", "boulevard", "street", "road", "rue", "place",
         "gare", "station", "métro", "metro", "line", "ligne",
-        "paris", "lyon", "marseille", "nice", "aix",
     )
 
     INSTITUTION_NOISE_KEYWORDS = (
         "hospital", "hôpital", "hopital", "university", "université",
         "universite", "ordre national", "national order", "museum",
-        "musée", "musee", "center", "centre",
+        "musée", "musee",
     )
 
     EDUCATION_NOISE_KEYWORDS = (
         "certification", "certificate", "diplôme", "diplome", "degree",
         "award", "thèse", "these", "lauréat", "laureat", "formation",
-        "experience", "expérience",
     )
 
     GENERIC_HEADING_NOISE_KEYWORDS = (
-        "services", "soins", "care", "team", "équipe", "equipe", "staff",
-        "experts", "practitioners", "our team", "meet our team",
-        "rencontrez", "selection", "choisir", "sélectionnez", "selectionnez",
+        "services", "soins", "care", "staff", "experts", "practitioners",
+        "selection", "choisir", "sélectionnez", "selectionnez",
     )
 
     ADDRESS_TERMS = (
@@ -141,10 +131,6 @@ class VisiblePeopleCandidateExtractor(object):
         "cookie", "newsletter", "legal", "copyright", "social",
     )
 
-    # --------------------------------------------------
-    # Regexes
-    # --------------------------------------------------
-
     MULTISPACE_RE = re.compile(r"\s+")
     EMAIL_RE = re.compile(r"\b[A-Z0-9._%+\-]+@[A-Z0-9.\-]+\.[A-Z]{2,}\b", re.I)
     PHONE_RE = re.compile(r"(?:\+?\d[\d\s().\-]{6,}\d)")
@@ -155,10 +141,6 @@ class VisiblePeopleCandidateExtractor(object):
     NAME_PATTERN = re.compile(
         r"\b(" + NAME_TOKEN + r"(?:\s+" + NAME_TOKEN + r"){1,3})\b"
     )
-
-    # --------------------------------------------------
-    # Public API
-    # --------------------------------------------------
 
     def extract_candidates(self, pages):
         pages = pages or []
@@ -172,13 +154,13 @@ class VisiblePeopleCandidateExtractor(object):
             page_candidates = self.extract_candidates_from_page(page)
 
             for item in page_candidates:
-                dedupe_key = self._candidate_key(item)
-                if not dedupe_key[0]:
+                key = self._candidate_key(item)
+                if not key[0]:
                     continue
-                if dedupe_key in seen:
+                if key in seen:
                     continue
 
-                seen.add(dedupe_key)
+                seen.add(key)
                 candidates.append(item)
 
                 if len(candidates) >= self.MAX_CANDIDATES:
@@ -348,9 +330,7 @@ class VisiblePeopleCandidateExtractor(object):
         text = text.replace(" | ", "\n")
         text = text.replace(" • ", "\n")
         text = text.replace(" · ", "\n")
-        text = text.replace(" - ", "\n")
         text = text.replace(" — ", "\n")
-        text = text.replace(" / ", "\n")
         text = re.sub(r"\s*\|\s*", "\n", text)
         text = re.sub(r"\s{2,}", " ", text)
 
@@ -378,21 +358,26 @@ class VisiblePeopleCandidateExtractor(object):
         seen = set()
 
         for idx, line in enumerate(lines):
-            if len(line) < 8 or len(line) > self.MAX_LINE_LENGTH:
-                continue
-
-            if not self._segment_has_people_anchor(line):
+            if len(line) < 4 or len(line) > self.MAX_LINE_LENGTH:
                 continue
 
             prev_line = lines[idx - 1] if idx > 0 else ""
             next_line = lines[idx + 1] if idx + 1 < len(lines) else ""
+            next_next_line = lines[idx + 2] if idx + 2 < len(lines) else ""
+
+            window_text = " | ".join([prev_line, line, next_line, next_next_line])
+
+            if not self._segment_has_people_anchor(window_text):
+                continue
 
             names = self.NAME_PATTERN.findall(line) or []
             prefixed_names = self._extract_prefixed_names(line)
-
             for name in prefixed_names:
                 if name not in names:
                     names.append(name)
+
+            if not names and self._has_strong_person_identity(line):
+                names = self.NAME_PATTERN.findall(line) or []
 
             role_hint = self._extract_role_hint_from_window(lines, idx)
 
@@ -409,7 +394,7 @@ class VisiblePeopleCandidateExtractor(object):
                     candidate_name=cleaned,
                     context_before=prev_line,
                     context_line=line,
-                    context_after=next_line,
+                    context_after=" | ".join([next_line, next_next_line]).strip(" |"),
                     role_hint=role_hint,
                     page_title=page_title,
                 ):
@@ -422,7 +407,7 @@ class VisiblePeopleCandidateExtractor(object):
                     "page_title": page_title,
                     "context_before": prev_line[:300],
                     "context_line": line[:500],
-                    "context_after": next_line[:300],
+                    "context_after": " | ".join([x for x in [next_line, next_next_line] if x])[:300],
                 }
 
                 item_key = self._candidate_key(item)
@@ -501,27 +486,40 @@ class VisiblePeopleCandidateExtractor(object):
         return found
 
     def _extract_role_hint_from_window(self, lines, idx):
-        line = self._normalize_text(lines[idx])
+        window_lines = []
 
-        role_hint = self._extract_role_hint(line)
-        if role_hint:
-            return role_hint
-
-        around = []
-        if idx - 1 >= 0:
-            around.append(lines[idx - 1])
-        around.append(lines[idx])
-        if idx + 1 < len(lines):
-            around.append(lines[idx + 1])
-
-        for nearby in around:
-            nearby = self._normalize_text(nearby)
-            if nearby == line:
+        for offset in (-1, 0, 1, 2):
+            line_idx = idx + offset
+            if line_idx < 0 or line_idx >= len(lines):
                 continue
+            window_lines.append(self._normalize_text(lines[line_idx]))
 
+        # First, look for explicit role lines around the name line.
+        for nearby in window_lines:
             role_hint = self._extract_role_hint(nearby)
             if role_hint:
                 return role_hint
+
+        # Then, combine adjacent short non-name lines after the name.
+        combined = []
+        for offset in (1, 2):
+            line_idx = idx + offset
+            if line_idx < 0 or line_idx >= len(lines):
+                continue
+            candidate = self._normalize_text(lines[line_idx])
+            if not candidate:
+                continue
+            if self.NAME_PATTERN.search(candidate):
+                continue
+            if len(candidate) > 80:
+                continue
+            if self._looks_like_role_text(candidate) or not self._is_noise_segment(candidate):
+                combined.append(candidate)
+
+        if combined:
+            combined_text = " | ".join(combined[:2])
+            if len(combined_text) <= 160:
+                return combined_text
 
         return ""
 
@@ -570,7 +568,7 @@ class VisiblePeopleCandidateExtractor(object):
                 return True
 
         if self.NAME_PATTERN.search(segment):
-            if len(segment) <= 180 and self._looks_like_name_plus_role_line(segment):
+            if len(segment) <= 220 and self._looks_like_name_context(segment):
                 return True
 
         return False
@@ -603,7 +601,7 @@ class VisiblePeopleCandidateExtractor(object):
         if self._has_team_context(joined):
             positive_signals += 1
 
-        if self._looks_like_name_plus_role_line(context_line):
+        if self._looks_like_name_context(" | ".join([context_line or "", context_after or ""])):
             positive_signals += 1
 
         return positive_signals > 0
@@ -625,7 +623,7 @@ class VisiblePeopleCandidateExtractor(object):
         if "http" in sl or "www." in sl:
             return True
 
-        if s.count("|") >= 4:
+        if s.count("|") >= 6:
             return True
 
         if self._contains_strong_negative_context(sl):
@@ -683,21 +681,29 @@ class VisiblePeopleCandidateExtractor(object):
 
         return False
 
-    def _looks_like_name_plus_role_line(self, line):
+    def _looks_like_name_context(self, line):
         line = self._normalize_text(line)
         if not line:
             return False
 
-        if not self.NAME_PATTERN.search(line):
-            return False
+        if self.NAME_PATTERN.search(line) and (
+            " | " in line or
+            " - " in line or
+            " – " in line or
+            ", " in line or
+            ":" in line
+        ):
+            return True
 
-        return (
-            " | " in line
-            or " - " in line
-            or " – " in line
-            or ", " in line
-            or ":" in line
-        )
+        if self.NAME_PATTERN.search(line) and self._has_team_context(line.lower()):
+            return True
+
+        if self.NAME_PATTERN.search(line):
+            for keyword in self.ROLE_KEYWORDS:
+                if keyword in line.lower():
+                    return True
+
+        return False
 
     def _looks_like_noise_name(self, name):
         nl = (name or "").strip().lower()
@@ -717,7 +723,6 @@ class VisiblePeopleCandidateExtractor(object):
             self.LOCATION_NOISE_KEYWORDS,
             self.INSTITUTION_NOISE_KEYWORDS,
             self.EDUCATION_NOISE_KEYWORDS,
-            self.GENERIC_HEADING_NOISE_KEYWORDS,
         ):
             for noise in bucket:
                 if noise in nl:
@@ -763,9 +768,9 @@ class VisiblePeopleCandidateExtractor(object):
         if not lines:
             return True
 
-        if len(lines) >= 6:
+        if len(lines) >= 8:
             short_count = len([x for x in lines if len(x) <= 24])
-            if short_count >= 4:
+            if short_count >= 5:
                 return True
 
         return False
@@ -780,7 +785,8 @@ class VisiblePeopleCandidateExtractor(object):
 
         parts = []
         for token in value.split():
-            if token.lower() in self.PERSON_PREFIXES:
+            token_low = token.lower()
+            if token_low in self.PERSON_PREFIXES:
                 parts.append(token)
             elif token.isupper() and len(token) > 2:
                 parts.append(token.title())

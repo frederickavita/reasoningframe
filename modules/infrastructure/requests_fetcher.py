@@ -43,9 +43,23 @@ class RequestsWebPageFetcher(WebPageFetcherPort):
         "appointment",
         "rendez-vous",
         "rdv",
+        "doctolib",
     )
 
-    SKIP_TAGS = {"script", "style", "noscript", "svg", "canvas"}
+    SKIP_TAGS = {
+        "script", "style", "noscript", "svg", "canvas",
+        "iframe", "header", "footer", "nav", "aside"
+    }
+
+    META_CHARSET_RE = re.compile(
+        br'<meta[^>]+charset=["\']?\s*([a-zA-Z0-9_\-]+)',
+        re.I
+    )
+
+    META_HTTP_EQUIV_RE = re.compile(
+        br'<meta[^>]+content=["\'][^"\']*charset=([a-zA-Z0-9_\-]+)',
+        re.I
+    )
 
     def __init__(self, requests_session=None, timeout=None, user_agent=None):
         self.requests_session = requests_session or requests.Session()
@@ -177,14 +191,26 @@ class RequestsWebPageFetcher(WebPageFetcherPort):
 
     def _decode_response_html(self, response):
         """
-        Decode HTML from raw bytes with a more robust fallback strategy.
+        Decode HTML from raw bytes with a robust strategy.
 
-        This avoids relying blindly on response.text when server-declared
-        encoding is wrong or incomplete.
+        Important:
+        - prefer real byte decoding over response.text
+        - try meta charset early
+        - prefer utf-8 before legacy encodings
+        - choose the least mojibake-looking decoding
         """
         content = response.content or b""
+        if not content:
+            return ""
 
         encodings_to_try = []
+
+        meta_charset = self._extract_meta_charset(content[:4096])
+        if meta_charset:
+            encodings_to_try.append(meta_charset)
+
+        # Prefer utf-8 early because many bad pages lie about encoding.
+        encodings_to_try.append("utf-8")
 
         if response.encoding:
             encodings_to_try.append(response.encoding)
@@ -193,9 +219,12 @@ class RequestsWebPageFetcher(WebPageFetcherPort):
         if apparent:
             encodings_to_try.append(apparent)
 
-        encodings_to_try.extend(["utf-8", "cp1252", "latin-1"])
+        encodings_to_try.extend(["cp1252", "latin-1"])
 
         tried = set()
+        best_text = None
+        best_score = None
+
         for enc in encodings_to_try:
             if not enc:
                 continue
@@ -210,11 +239,62 @@ class RequestsWebPageFetcher(WebPageFetcherPort):
             tried.add(enc_key)
 
             try:
-                return content.decode(enc, errors="strict")
+                decoded = content.decode(enc, errors="strict")
             except Exception:
                 continue
 
-        return content.decode("utf-8", errors="replace")
+            score = self._mojibake_score(decoded)
+
+            if best_text is None or score < best_score:
+                best_text = decoded
+                best_score = score
+
+            if score == 0:
+                break
+
+        if best_text is None:
+            best_text = content.decode("utf-8", errors="replace")
+
+        return self._normalize_unicode_text(best_text)
+
+    def _extract_meta_charset(self, sample_bytes):
+        if not sample_bytes:
+            return ""
+
+        match = self.META_CHARSET_RE.search(sample_bytes)
+        if match:
+            try:
+                return match.group(1).decode("ascii", errors="ignore").strip()
+            except Exception:
+                pass
+
+        match = self.META_HTTP_EQUIV_RE.search(sample_bytes)
+        if match:
+            try:
+                return match.group(1).decode("ascii", errors="ignore").strip()
+            except Exception:
+                pass
+
+        return ""
+
+    def _mojibake_score(self, text):
+        if not text:
+            return 999999
+
+        bad_patterns = (
+            "Ã", "Â", "â€", "â€™", "â€œ", "â€", "â€“", "â€”",
+            "Å", "œ", "�", "Ã©", "Ã¨", "Ãª", "Ã ", "Ã§",
+            "Â ", "Â°", "Â©", "ðŸ", "â"
+        )
+
+        score = 0
+        for pattern in bad_patterns:
+            score += text.count(pattern)
+
+        replacement_count = text.count("\ufffd")
+        score += replacement_count * 3
+
+        return score
 
     def _extract_visible_text(self, html):
         soup = BeautifulSoup(html, "html.parser")
@@ -228,7 +308,7 @@ class RequestsWebPageFetcher(WebPageFetcherPort):
         text = self._normalize_unicode_text(text)
         text = self._normalize_space(text)
 
-        return text[:20000]
+        return text[:25000]
 
     def _normalize_unicode_text(self, value):
         value = value or ""
