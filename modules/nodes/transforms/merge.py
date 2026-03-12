@@ -17,6 +17,15 @@ importlib.reload(engine_errors)
 class MergeNode(nodes_base.NodeExecutor):
     """
     Transform node MVP de recomposition.
+
+    Ce node NE FAIT PAS un vrai join inter-branches intelligent.
+    Avec le runner actuel, il reçoit déjà une liste plate de Item.
+
+    Rôle MVP :
+    - concaténer / relayer les items entrants
+    - dédupliquer si demandé
+    - garder le premier / dernier si demandé
+    - rester déterministe et fail-fast
     """
 
     def execute(
@@ -28,7 +37,9 @@ class MergeNode(nodes_base.NodeExecutor):
         http_helper: Any
     ) -> List[engine_context.Item]:
 
-        # 1. Validation identité
+        # ==============================================================
+        # 1. Validation stricte de l'identité du node
+        # ==============================================================
         if node_def.type != "transform.merge":
             raise engine_errors.NodeExecutionError(
                 node_id=node_def.id,
@@ -36,8 +47,11 @@ class MergeNode(nodes_base.NodeExecutor):
                 error_code="ERR_INVALID_TRANSFORM_TYPE"
             )
 
-        # 2. Validation paramètres
+        # ==============================================================
+        # 2. Validation des paramètres
+        # ==============================================================
         raw_params = node_def.parameters or {}
+
         if not isinstance(raw_params, dict):
             raise engine_errors.NodeExecutionError(
                 node_id=node_def.id,
@@ -46,20 +60,33 @@ class MergeNode(nodes_base.NodeExecutor):
             )
 
         mode = raw_params.get("mode", "append")
-        allowed_modes = {"append", "dedupe_json", "first_only", "last_only"}
+
+        allowed_modes = {
+            "append",        # relaye tous les items dans l'ordre
+            "dedupe_json",   # retire les doublons exacts sur item.json
+            "first_only",    # garde seulement le premier
+            "last_only"      # garde seulement le dernier
+        }
 
         if mode not in allowed_modes:
             raise engine_errors.NodeExecutionError(
                 node_id=node_def.id,
-                message="Le paramètre 'mode' doit valoir 'append', 'dedupe_json', 'first_only' ou 'last_only'.",
+                message=(
+                    "Le paramètre 'mode' doit valoir "
+                    "'append', 'dedupe_json', 'first_only' ou 'last_only'."
+                ),
                 error_code="ERR_INVALID_MERGE_MODE"
             )
 
-        # 3. Transform pur : pas d'input => on s'arrête
+        # ==============================================================
+        # 3. Transform pur : pas d'input => pas de création artificielle
+        # ==============================================================
         if not input_items:
             return []
 
-        # 4. Validation contrat Item
+        # ==============================================================
+        # 4. Validation stricte du contrat Item
+        # ==============================================================
         for i, item in enumerate(input_items):
             if not isinstance(item, engine_context.Item):
                 raise engine_errors.NodeExecutionError(
@@ -67,20 +94,34 @@ class MergeNode(nodes_base.NodeExecutor):
                     message=f"Élément d'entrée invalide à l'index {i} : type Item attendu.",
                     error_code="ERR_INVALID_ITEM_TYPE"
                 )
+            
+            # --- AMÉLIORATION APPLIQUÉE ICI ---
+            # Validation explicite que le payload JSON est bien un dictionnaire
+            # avant de tenter de le cloner ou de le sérialiser.
+            if not isinstance(item.json, dict):
+                raise engine_errors.NodeExecutionError(
+                    node_id=node_def.id,
+                    message=f"Le json de l'item d'entrée {i} doit être un dictionnaire.",
+                    error_code="ERR_INVALID_ITEM_JSON"
+                )
 
-        # 5. CORRECTION SÉMANTIQUE : Clonage propre sans détourner ItemManager
-        # On reconstruit la traçabilité explicitement pour les outputs de ce nœud.
+        # ==============================================================
+        # 5. Clonage propre des items entrants
+        #    On reconstruit la traçabilité explicitement pour les outputs.
+        # ==============================================================
         prepared_items = []
         for index, item in enumerate(input_items):
             new_item = engine_context.Item(
-                json=dict(item.json),
-                binary=dict(item.binary),
+                json=dict(item.json),     # Désormais sécurisé par la validation (4)
+                binary=dict(item.binary) if item.binary else {},
                 paired_item={"source_node_id": node_def.id, "source_index": index}
             )
-            new_item.meta = dict(item.meta)
+            new_item.meta = dict(item.meta) if item.meta else {}
             prepared_items.append(new_item)
 
+        # ==============================================================
         # 6. Application du mode
+        # ==============================================================
         if mode == "append":
             return prepared_items
 
@@ -93,9 +134,10 @@ class MergeNode(nodes_base.NodeExecutor):
         if mode == "dedupe_json":
             deduped = []
             seen = set()
+
             for item in prepared_items:
                 try:
-                    # Sérialisation déterministe
+                    # déterministe : sérialisation triée
                     signature = json.dumps(item.json, sort_keys=True, ensure_ascii=False)
                 except Exception as e:
                     raise engine_errors.NodeExecutionError(
@@ -110,9 +152,11 @@ class MergeNode(nodes_base.NodeExecutor):
 
             return deduped
 
-        # 7. Sécurité
+        # ==============================================================
+        # 7. Sécurité finale
+        # ==============================================================
         raise engine_errors.NodeExecutionError(
             node_id=node_def.id,
-            message="Mode de merge non traité.",
+            message="Mode de merge non traité malgré validation préalable.",
             error_code="ERR_MERGE_UNREACHABLE_STATE"
         )
