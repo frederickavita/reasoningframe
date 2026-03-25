@@ -1,0 +1,14 @@
+cache/
+sessions/
+errors/
+databases/
+uploads/
+languages/
+
+private/appconfig.ini
+private/*.secret
+private/*.key
+private/*.pem
+.env
+*.pyc
+__pycache__/
