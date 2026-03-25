@@ -22,6 +22,12 @@
     <!-- include stylesheets -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://www.w3schools.com/w3css/5/w3.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+   {{if request.function in ['proposal_new', 'proposal_show', 'history', 'account', 'index', 'dashboard', 'new']:}}
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/brython@3.12.0/brython.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/brython@3.12.0/brython_stdlib.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+   {{pass}}
 
     <link rel="shortcut icon" href="{{=URL('static','images/favicon.ico')}}" type="image/x-icon">
     <link rel="apple-touch-icon" href="{{=URL('static','images/favicon.png')}}">
@@ -33,441 +39,332 @@
 
 
 
-{{if request.function == "index":}}    
+{{if request.function == "index":}}
 <style>
-/* Dégradés personnalisés inspirés de l'image */
-.bg-gradient-btn {
-    background: linear-gradient(90deg, #60a5fa, #fb923c);
-    color: white !important;
-    border: none;
-    transition: opacity 0.3s ease;
+/* ==========================================================================
+   1. TYPOGRAPHIE & BASE
+   ========================================================================== */
+body, h1, h2, h3, h4, h5, h6 { 
+    font-family: 'Inter', system-ui, -apple-system, sans-serif; 
 }
-.bg-gradient-btn:hover {
-    opacity: 0.9;
-}
-
-.soft-gradient-box {
-    background: linear-gradient(135deg, #f1f5f9, #fed7aa);
-    border-radius: 24px;
-    padding: 40px;
+body { 
+    background-color: #ffffff; 
+    color: #111827; 
+    margin: 0; 
 }
 
-.hero-heading {
-    font-weight: 700;
-    line-height: 1.2;
-    font-size: 3.5rem;
-}
+.section-pad-light { padding: 96px 20px; background-color: #f8fafc; }
+.muted { color: #6b7280; font-weight: 400; }
 
-/* Style des cartes "mockup" internes */
-.mockup-card {
-    background: white;
-    border-radius: 16px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-}
+.kicker-style { text-transform: uppercase; font-size: 14px; font-weight: 800; color: #2563eb; letter-spacing: 1.5px; margin-bottom: 12px; }
+.h2-style { font-size: 44px; line-height: 1.15; font-weight: 800; margin: 0 0 16px; letter-spacing: -1px; }
+.gradient-text { background: linear-gradient(90deg, #1d4ed8 0%, #d49cff 60%, #ff9e7a 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
 
-.badge-green { 
-    background-color: #dcfce7; 
-    color: #16a34a; 
-    padding: 2px 8px; 
-    border-radius: 12px; 
-}
+/* Utilitaires Flexbox pour cartes de même hauteur */
+.flex-match-row { display: flex; flex-wrap: wrap; }
+.flex-match-col { display: flex; flex-direction: column; }
 
-
-/* Styles spécifiques pour la section Features */
-.text-orange-custom {
-    color: #ea580c;
-}
-
-.text-gradient-brown {
-    background: linear-gradient(90deg, #431407, #b45309);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-}
-
-/* Cartes latérales (gris très clair) */
-.feature-card-side {
-    background-color: #f9fafb;
-    border-radius: 24px;
-    padding: 32px;
-    height: 100%;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.02);
-}
-
-/* Carte centrale (tons chauds/crème) */
-.feature-card-center {
-    background-color: #fffaf0;
-    border-radius: 24px;
-    padding: 32px;
-    height: 100%;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.02);
-}
-
-/* Icônes oranges avec fond blanc */
-.icon-wrapper {
-    background-color: white;
-    color: #ea580c;
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.2rem;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-}
-
-/* Fausse interface UI pour la carte centrale */
-.mockup-ui-box {
-    background-color: white;
-    border-radius: 16px;
-    padding: 24px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.03);
-}
-
-
-/* Titre en dégradé */
-.text-gradient-brown {
-    background: linear-gradient(90deg, #431407, #b45309);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-}
-
-/* Frise du processus (Timeline) */
-.timeline-wrapper {
-    position: relative;
-    max-width: 600px;
-    margin: 0 auto;
-    padding: 60px 0; /* Espace pour le halo lumineux */
-}
-
-/* Ligne continue en arrière-plan */
-.timeline-line {
-    position: absolute;
-    top: 50%;
-    left: 2%;
-    right: 2%;
-    height: 2px;
-    background: linear-gradient(90deg, #fed7aa, #ea580c, #fed7aa);
-    transform: translateY(-50%);
-    z-index: 1;
-}
-
-/* Conteneur flex pour aligner les icônes */
-.timeline-steps {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    position: relative;
-    z-index: 2;
-}
-
-/* Petits nœuds standards */
-.step-node {
-    width: 44px;
-    height: 44px;
-    background-color: #fffaf0; /* Fond crème */
-    color: #ea580c; /* Icône orange */
-    border-radius: 50%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    box-shadow: 0 0 0 6px white; /* Masque la ligne derrière l'icône */
-}
-
-/* Gros nœud central actif avec effet de halo */
-.step-node-active {
-    width: 72px;
-    height: 72px;
-    background-color: #ea580c; /* Fond orange plein */
-    color: white; /* Icône blanche */
-    font-size: 1.5rem;
-    border-radius: 50%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    /* Création du halo lumineux orange avec de multiples ombres */
-    box-shadow: 0 0 0 8px white, 0 0 0 20px rgba(234, 88, 12, 0.1), 0 0 0 35px rgba(234, 88, 12, 0.05);
-}
-
-
-/* Alignement vertical pour l'en-tête (Titre + Bouton) */
-.header-flex-align {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    justify-content: space-between;
-}
-
-/* Style des cartes "How it works" */
-.how-card {
-    background-color: #f9fafb; /* Gris très clair */
-    border-radius: 24px;
-    padding: 40px;
-    height: 100%;
-    transition: transform 0.3s ease;
-}
-
-.how-card:hover {
-    transform: translateY(-5px); /* Petit effet sympa au survol */
-}
-
-/* Style spécifique des icônes (cercle avec bordure) */
-.icon-outline-wrapper {
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #ea580c;
-    background-color: white;
-    border: 1px solid #fed7aa; /* Bordure orange très claire */
-    font-size: 1.2rem;
-}
-
-
-/* Fonds et formes des cartes de prix */
-.pricing-card-pro {
-    background-color: #fffaf0; /* Fond crème */
-    border-radius: 24px;
-    padding: 40px;
-    height: 100%;
-}
-
-.pricing-card-ent {
-    background-color: #f9fafb; /* Fond gris très clair */
-    border-radius: 24px;
-    padding: 40px;
-    height: 100%;
-}
-
-/* Typographie spécifique des prix */
-.price-display {
-    font-size: 3.5rem;
-    font-weight: 500;
-    line-height: 1;
-    color: #111827;
-}
-
-.price-month {
-    font-size: 1rem;
-    color: #6b7280;
-    margin-left: 4px;
-}
-
-/* Liste des fonctionnalités (Checkmarks) */
-.pricing-features {
-    list-style: none;
-    padding: 0;
-    margin: 24px 0 0 0;
-}
-
-.pricing-features li {
-    display: flex;
-    align-items: center;
-    margin-bottom: 16px;
-    font-size: 0.95rem;
-    color: #374151;
-}
-
-/* Puce ronde noire avec icône blanche */
-.check-circle {
-    background-color: #111827;
-    color: white;
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 10px;
-    margin-right: 12px;
-    flex-shrink: 0;
-}
-
-/* Conteneur pour l'image du téléphone */
-.phone-mockup-img {
-    border-radius: 20px;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-}
-
-
-/* Style des liens du footer */
-.footer-links a {
-    display: block;
-    text-decoration: none;
-    margin-bottom: 16px;
-    font-size: 0.95rem;
-    transition: color 0.3s ease;
-}
-
-/* Badge vert fluo "News" */
-.badge-news {
-    background-color: #22c55e; /* Vert vif */
-    color: white;
-    font-size: 0.7rem;
-    padding: 3px 8px;
-    border-radius: 12px;
-    margin-left: 8px;
-    vertical-align: middle;
-    font-weight: normal;
-}
-
-/* Bouton rond "Back to Top" */
-.back-to-top-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 32px;
-    height: 32px;
-    border: 1px solid #d1d5db;
-    border-radius: 50%;
-    font-size: 0.8rem;
-    color: #374151;
-    transition: all 0.3s ease;
-}
-
-.back-to-top-container:hover .back-to-top-btn {
-    background-color: #f3f4f6;
-    color: #111827;
-}
-
-
-
-/* ========================================= */
-/* SECTION FAQ (Inspirée de la maquette)     */
-/* ========================================= */
-.faq-container {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-}
-
-.faq-item {
-    background-color: #f9fafb; /* Gris très clair pour état fermé */
-    border-radius: 16px;
-    padding: 24px 32px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-}
-
-/* État Actif (Ouvert) = Fond crème comme dans l'image */
-.faq-item.active {
-    background-color: #fffaf0; 
-}
-
-.faq-question {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+/* ==========================================================================
+   2. BOUTONS (CTA)
+   ========================================================================== */
+.btn-pill {
+    border-radius: 9999px;
+    padding: 14px 32px;
     font-weight: 600;
-    font-size: 1.15rem;
-    color: #111827;
+    font-size: 16px;
+    border: none;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    display: inline-block;
+    text-decoration: none;
 }
-
-/* Le cercle pour l'icône + / - */
-.faq-icon {
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    border: 1px solid #e5e7eb;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #374151;
-    transition: all 0.3s ease;
-    flex-shrink: 0;
-    margin-left: 16px;
+.btn-pill-large {
+    border-radius: 9999px; 
+    padding: 18px 48px; 
+    font-weight: 800; 
+    font-size: 18px; 
+    border: none; 
+    display: inline-block; 
+    text-decoration: none; 
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
-
-/* Style du cercle quand la FAQ est ouverte (Orange plein) */
-.faq-item.active .faq-icon {
-    background-color: #ea580c; /* Orange custom */
-    border-color: #ea580c;
+.btn-gradient {
+    background: linear-gradient(90deg, #7ab2ff 0%, #d49cff 50%, #ff9e7a 100%);
     color: white;
+    box-shadow: 0 10px 25px rgba(212, 156, 255, 0.3); 
 }
-
-.faq-answer {
-    display: none; /* Caché par défaut */
-    margin-top: 16px;
+.btn-gradient:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 14px 30px rgba(212, 156, 255, 0.4);
+}
+.btn-ghost {
+    background-color: transparent;
     color: #4b5563;
-    line-height: 1.6;
-    font-size: 0.95rem;
-    padding-right: 40px; /* Pour ne pas passer sous l'icône */
+    border: 1px solid #e5e7eb;
 }
-
-/* Afficher la réponse quand actif */
-.faq-item.active .faq-answer {
-    display: block;
-    animation: fadeIn 0.4s ease;
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(-5px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-
-/* ========================================= */
-/* SOFT SAAS DESIGN (Instructor & Modules)   */
-/* ========================================= */
-
-.section-soft-bg {
-    background-color: #faf8f6; /* Very subtle warm off-white from the reference */
-}
-
-.soft-ui-card {
-    background: #ffffff;
-    border-radius: 24px;
-    padding: 32px;
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.03);
-    border: 1px solid rgba(0,0,0,0.02);
-    transition: transform 0.3s ease;
-}
-
-.soft-ui-card:hover {
-    transform: translateY(-3px);
-}
-
-/* Icon Wrappers for Modules */
-.module-icon {
-    width: 48px;
-    height: 48px;
-    border-radius: 14px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.2rem;
-    margin-bottom: 16px;
-}
-
-.icon-orange { background-color: #fff7ed; color: #ea580c; }
-.icon-blue { background-color: #eff6ff; color: #3b82f6; }
-.icon-purple { background-color: #faf5ff; color: #a855f7; }
-.icon-green { background-color: #f0fdf4; color: #22c55e; }
-
-.module-title {
-    font-size: 1.1rem;
-    font-weight: 700;
+.btn-ghost:hover {
+    background-color: #f9fafb;
     color: #111827;
-    margin-bottom: 8px;
 }
 
-.module-desc {
-    font-size: 0.9rem;
-    color: #6b7280;
-    line-height: 1.6;
+/* ==========================================================================
+   3. HERO SECTION & MOCKUP
+   ========================================================================== */
+.card-floating {
+    background: white;
+    border-radius: 24px;
+    border: 1px solid rgba(0,0,0,0.03);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.04);
+    transition: transform 0.2s;
 }
+.card-floating:hover { transform: translateY(-4px); }
+
+.metric-number { font-size: 42px; font-weight: 800; color: #111827; line-height: 1; }
+.pill-badge { 
+    display: inline-block; padding: 6px 16px; border-radius: 50px; 
+    font-size: 14px; font-weight: 600; background: #f3f4f6; 
+    color: #4b5563; margin-bottom: 24px;
+}
+
+.mockup-container {
+    background: linear-gradient(135deg, #eef4fc 0%, #f3ebfc 50%, #fef0eb 100%);
+    border-radius: 36px; padding: 40px; position: relative;
+}
+.mockup-item {
+    background: white; border-radius: 20px; padding: 20px; 
+    margin-bottom: 16px; box-shadow: 0 8px 24px rgba(0,0,0,0.05);
+}
+.mini-badge {
+    font-size: 12px; font-weight: 700; background: #f3f4f6; color: #4b5563;
+    padding: 4px 10px; border-radius: 8px; display: inline-block; margin-bottom: 12px;
+}
+.check-dot {
+    width: 20px; height: 20px; background: #10b981; color: white;
+    border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    font-size: 11px; margin-right: 12px; flex-shrink: 0;
+}
+.bullet-check { display: flex; align-items: center; margin-bottom: 10px; font-weight: 500; }
+
+/* ==========================================================================
+   4. SECTIONS POURQUOI & PROJET (Cartes features)
+   ========================================================================== */
+.feature-card-modern { 
+    background: white; border-radius: 28px; padding: 40px; 
+    border: 1px solid rgba(0,0,0,0.03); box-shadow: 0 12px 40px rgba(0,0,0,0.04); 
+    transition: transform 0.3s ease, box-shadow 0.3s ease; height: 100%;
+}
+.feature-card-modern:hover { transform: translateY(-5px); box-shadow: 0 16px 50px rgba(0,0,0,0.06); }
+.icon-circle { width: 48px; height: 48px; border-radius: 50%; background-color: #f3f4f6; display: flex; align-items: center; justify-content: center; font-size: 20px; color: #111827; margin-bottom: 24px; }
+.pill-badge-grey { display: inline-block; padding: 4px 12px; border-radius: 50px; font-size: 13px; font-weight: 700; background: #e5e7eb; color: #4b5563; margin-bottom: 16px; text-transform: none; }
+.card-title { font-size: 24px; font-weight: 800; margin-top: 0; margin-bottom: 8px; }
+
+/* ==========================================================================
+   5. SECTION LE PARCOURS (Modules)
+   ========================================================================== */
+.course-module-card {
+    flex: 1; background-color: #ffffff; border-radius: 32px; padding: 48px; 
+    border: 1px solid rgba(0,0,0,0.03); box-shadow: 0 12px 30px rgba(0,0,0,0.03);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.course-module-card:hover { transform: translateY(-4px); box-shadow: 0 20px 40px rgba(0,0,0,0.06); }
+.icon-circle-outline {
+    width: 56px; height: 56px; border-radius: 50%; background-color: #ffffff;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08); display: flex; align-items: center; justify-content: center;
+    font-size: 24px; color: #2563eb; margin-bottom: 32px; border: 1px solid #eff6ff;
+}
+.module-label { font-size: 13px; font-weight: 700; text-transform: uppercase; color: #94a3b8; margin-bottom: 8px; letter-spacing: 1px; }
+.card-title-large { font-size: 24px; font-weight: 800; margin-top: 0; margin-bottom: 16px; color: #111827; letter-spacing: -0.5px; }
+
+/* ==========================================================================
+   6. SECTION AUDIENCE (Bandeau & Anti-Audience)
+   ========================================================================== */
+.audience-banner {
+    background: linear-gradient(135deg, #eef4fc 0%, #f4f8ff 100%);
+    border-radius: 40px; padding: 64px; border: 1px solid #e2e8f0;
+    box-shadow: 0 10px 30px rgba(37, 99, 235, 0.05);
+}
+.anti-audience-card {
+    background-color: #ffffff; border-radius: 28px; padding: 48px 40px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.06); border: 1px solid rgba(0,0,0,0.02); height: 100%;
+}
+.list-item-modern { display: flex; align-items: flex-start; margin-bottom: 20px; font-size: 17px; font-weight: 500; color: #334155; line-height: 1.6; }
+.icon-check-green {
+    width: 28px; height: 28px; background: #10b981; color: white; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: bold; margin-right: 16px; flex-shrink: 0;
+    box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3);
+}
+.icon-cross-red {
+    width: 28px; height: 28px; background: #ef4444; color: white; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: bold; margin-right: 16px; flex-shrink: 0;
+    box-shadow: 0 4px 10px rgba(239, 68, 68, 0.3);
+}
+@media (max-width: 992px) { .audience-banner { padding: 40px 24px; } }
+
+/* ==========================================================================
+   7. SECTION TARIFS (Timeline & Cartes)
+   ========================================================================== */
+.kicker-orange { text-transform: uppercase; font-size: 14px; font-weight: 800; color: #f97316; letter-spacing: 1.5px; margin-bottom: 12px; }
+.text-orange { color: #f97316; }
+
+/* Timeline tarifaire */
+.pricing-timeline { background: #fff7ed; border: 1px solid #fed7aa; border-radius: 32px; padding: 40px 24px; margin-bottom: 64px; }
+.timeline-track { position: relative; display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-top: 32px; }
+.timeline-track::before { content: ""; position: absolute; top: 26px; left: 10%; right: 10%; height: 3px; background: #fdba74; z-index: 1; border-radius: 999px; }
+.timeline-step { position: relative; z-index: 2; text-align: center; flex: 1; }
+.timeline-dot {
+    width: 52px; height: 52px; border-radius: 50%; margin: 0 auto 14px;
+    display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 18px;
+    background: white; border: 3px solid #fb923c; color: #ea580c; box-shadow: 0 6px 16px rgba(249, 115, 22, 0.12);
+}
+.timeline-step.active .timeline-dot { background: #f97316; color: white; border-color: #f97316; box-shadow: 0 10px 24px rgba(249, 115, 22, 0.25); }
+.timeline-title { font-weight: 800; font-size: 18px; color: #111827; margin-bottom: 6px; }
+.timeline-price { font-size: 28px; font-weight: 800; color: #111827; margin-bottom: 6px; letter-spacing: -0.5px; }
+.timeline-desc { font-size: 14px; line-height: 1.5; color: #6b7280; max-width: 220px; margin: 0 auto; }
+.timeline-badge {
+    display: inline-block; background: #ffedd5; color: #c2410c; font-size: 12px; font-weight: 800;
+    padding: 6px 12px; border-radius: 999px; margin-bottom: 12px; text-transform: uppercase;
+}
+@media (max-width: 768px) {
+    .timeline-track { flex-direction: column; align-items: center; gap: 32px; }
+    .timeline-track::before { display: none; }
+    .timeline-desc { max-width: 100%; }
+}
+
+/* Cartes Tarifs */
+.pricing-card-beige {
+    flex: 1; position: relative; background-color: #fffcf5; border-radius: 32px; padding: 48px 40px;
+    height: 100%; border: 2px solid #f97316; box-shadow: 0 20px 40px rgba(249, 115, 22, 0.1);
+}
+.pricing-card-locked {
+    flex: 1; background-color: #f8fafc; border-radius: 32px; padding: 48px 40px;
+    height: 100%; border: 1px dashed #e2e8f0; opacity: 0.8;
+}
+.pricing-title { font-size: 26px; font-weight: 800; margin-top: 0; margin-bottom: 12px; color: #111827; }
+.price-display { font-size: 56px; font-weight: 700; color: #111827; line-height: 1; margin: 8px 0 24px 0; letter-spacing: -1.5px; }
+.price-suffix { font-size: 16px; color: #6b7280; font-weight: 500; letter-spacing: 0; margin-left: 4px; }
+.price-strike { text-decoration: line-through; color: #94a3b8; font-size: 20px; font-weight: 600; display: block; margin-bottom: 4px; }
+
+/* Éléments FOMO / Urgence */
+.badge-save {
+    position: absolute; top: -16px; right: 32px; background: #10b981; color: white;
+    font-weight: 800; font-size: 14px; padding: 6px 16px; border-radius: 999px; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+.progress-container { background-color: #fef0da; border-radius: 999px; height: 8px; width: 100%; margin-top: 24px; margin-bottom: 8px; overflow: hidden; }
+.progress-bar { background-color: #f97316; height: 100%; border-radius: 999px; width: 78%; }
+.urgency-text { font-size: 13px; font-weight: 700; color: #f97316; display: flex; justify-content: space-between; }
+.pulse-dot { height: 8px; width: 8px; background-color: #ef4444; border-radius: 50%; display: inline-block; margin-right: 6px; animation: pulse 2s infinite; }
+@keyframes pulse {
+    0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+    70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(239, 68, 68, 0); }
+    100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+}
+.pricing-list { margin-top: 32px; display: flex; flex-direction: column; gap: 16px; }
+.bullet-dark { display: flex; align-items: center; font-size: 15px; font-weight: 500; color: #4b5563; }
+.check-dark { width: 22px; height: 22px; background: #111827; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; margin-right: 14px; flex-shrink: 0; }
+
+/* ==========================================================================
+   8. SECTION PROMESSE (DARK MODE)
+   ========================================================================== */
+.section-dark { background-color: #0f172a; padding: 112px 20px; }
+.section-dark .manifesto-title { color: #ffffff; }
+.section-dark .manifesto-subtitle { color: #94a3b8; }
+.section-dark .step-title { color: #f8fafc; }
+.section-dark .step-desc { color: #cbd5e1; }
+.section-dark .step-line { background-color: #334155; }
+.section-dark .step-circle { background-color: #1e293b; border-color: #0f172a; color: #60a5fa; }
+.section-dark .step-circle.active { background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%); color: white; }
+
+.manifesto-title { font-size: 48px; line-height: 1.15; font-weight: 800; margin: 0 auto 24px; letter-spacing: -1px; max-width: 900px; color: #111827; }
+.manifesto-subtitle { font-size: 20px; line-height: 1.7; color: #4b5563; max-width: 800px; margin: 0 auto 64px; }
+.steps-wrapper { position: relative; max-width: 1000px; margin: 0 auto 64px; }
+.step-line { position: absolute; top: 32px; left: 12.5%; right: 12.5%; height: 2px; background-color: #e5e7eb; z-index: 1; }
+.step-item { position: relative; z-index: 2; text-align: center; }
+.step-circle {
+    width: 64px; height: 64px; border-radius: 50%; background-color: #f8fafc; border: 4px solid #ffffff;
+    color: #2563eb; font-weight: 800; font-size: 20px; display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+}
+.step-circle.active { background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%); color: white; box-shadow: 0 10px 25px rgba(37, 99, 235, 0.3); transform: scale(1.15); }
+.step-title { font-weight: 800; font-size: 18px; color: #111827; margin-bottom: 6px; margin-top: 12px; }
+.step-desc { font-size: 15px; color: #6b7280; line-height: 1.5; padding: 0 16px; }
+@media (max-width: 600px) {
+    .step-line { display: none; }
+    .step-item { margin-bottom: 40px; }
+    .manifesto-title { font-size: 36px; }
+}
+
+/* ==========================================================================
+   9. SECTION FAQ
+   ========================================================================== */
+.faq-container { display: flex; flex-wrap: wrap; align-items: flex-start; }
+.faq-card {
+    background-color: #ffffff; border-radius: 20px; padding: 24px 32px;
+    margin-bottom: 16px; cursor: pointer; border: 1px solid transparent; transition: all 0.3s ease;
+}
+.faq-card:hover { background-color: #f1f5f9; }
+.faq-card.active { background-color: #fffcf5; border: 1px solid #fef0da; box-shadow: 0 10px 25px rgba(249, 115, 22, 0.05); }
+
+.faq-header { display: flex; justify-content: space-between; align-items: center; }
+.faq-title { font-size: 18px; font-weight: 800; color: #111827; margin: 0; padding-right: 16px; }
+.faq-icon-plus, .faq-icon-minus {
+    width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    font-size: 18px; font-weight: bold; flex-shrink: 0; transition: all 0.3s ease;
+}
+.faq-icon-plus { background-color: #ffffff; color: #111827; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+.faq-icon-minus { background-color: #f97316; color: #ffffff; box-shadow: 0 4px 12px rgba(249, 115, 22, 0.2); display: none; }
+
+.faq-body { display: none; padding-top: 16px; color: #4b5563; font-size: 16px; line-height: 1.7; }
+.faq-card.active .faq-body { display: block; }
+.faq-card.active .faq-icon-plus { display: none; }
+.faq-card.active .faq-icon-minus { display: flex; }
+
+/* ==========================================================================
+   10. CTA FINAL (Dernier pas)
+   ========================================================================== */
+.cta-bottom-card {
+    background-color: #ffffff; border-radius: 40px; padding: 80px 40px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.05); border: 1px solid rgba(0, 0, 0, 0.02);
+    position: relative; overflow: hidden;
+}
+.cta-bottom-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 8px;
+    background: linear-gradient(90deg, #2563eb 0%, #d49cff 50%, #ff9e7a 100%);
+}
+
+/* ==========================================================================
+   11. FOOTER
+   ========================================================================== */
+.footer-wrapper { border-top: 1px solid #f1f5f9; padding: 80px 20px 32px; background-color: #ffffff; }
+.footer-brand { font-size: 24px; font-weight: 800; color: #111827; letter-spacing: -0.5px; margin-bottom: 16px; }
+.footer-desc { color: #64748b; font-size: 15px; line-height: 1.7; max-width: 320px; }
+.footer-col-title { font-size: 13px; font-weight: 800; color: #111827; margin-bottom: 24px; text-transform: uppercase; letter-spacing: 1px; }
+.footer-link { color: #64748b; text-decoration: none; display: block; margin-bottom: 16px; font-size: 15px; font-weight: 500; transition: color 0.2s ease; }
+.footer-link:hover { color: #2563eb; }
+.footer-bottom {
+    border-top: 1px solid #f1f5f9; margin-top: 64px; padding-top: 24px;
+    display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;
+    color: #94a3b8; font-size: 14px; font-weight: 500;
+}
+@media (max-width: 768px) {
+    .footer-wrapper { padding: 64px 20px 32px; }
+    .footer-col-container { margin-top: 48px; }
+    .footer-bottom { flex-direction: column; text-align: center; gap: 16px; }
+}
+
 
 </style>
+
 {{pass}}
-    
   
   </head>
-  <body>
+  {{if request.function in ['proposal_new', 'proposal_show', 'history', 'account', 'index', 'dashboard','new']:}}
+  <body onload="brython()">
+
+    {{else:}}
+    <body>
+    {{pass}}
+
+
+
     {{include}}
   </body>
 </html>

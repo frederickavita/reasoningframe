@@ -1,0 +1,181 @@
+<aside class="cogni-sidebar">
+    <div class="sidebar-header">
+        <a href="{{=URL('default', 'index')}}" class="cogni-logo">
+            Reasoning<span style="color: #FF8A00;">Frame</span>
+        </a>
+    </div>
+
+    <nav class="sidebar-nav">
+        <a href="{{=URL('default', 'new')}}" class="nav-item {{='active' if request.function == 'new' else ''}}">
+            <span class="nav-icon">➕</span>
+            <span data-i18n="nav_new">Nouvelle analyse</span>
+        </a>
+
+        <a href="{{=URL('default', 'history')}}" class="nav-item {{='active' if request.function == 'history' else ''}}">
+            <span class="nav-icon">📂</span>
+            <span data-i18n="nav_history">Historique</span>
+        </a>
+
+        <a href="{{=URL('default', 'settings')}}" class="nav-item {{='active' if request.function == 'settings' else ''}}">
+            <span class="nav-icon">⚙️</span>
+            <span data-i18n="nav_settings">Paramètres</span>
+        </a>
+    </nav>
+
+    <div class="sidebar-footer">
+        <div class="sidebar-lang-container">
+            <div class="lang-switcher-vertical">
+                <span id="btn_fr" class="lang-btn active">FR</span>
+                <span id="btn_en" class="lang-btn">EN</span>
+                <span id="btn_es" class="lang-btn">ES</span>
+            </div>
+        </div>
+
+        <div class="user-profile-section">
+            <div style="position: relative; width: 100%;">
+                <button id="user_avatar_btn" class="sidebar-user-card">
+                    <div class="avatar-circle">{{=auth.user.first_name[0].upper() if auth.user.first_name else '?'}}{{=auth.user.last_name[0].upper() if auth.user.last_name else ''}}</div>
+                    <div class="user-info w3-hide-small">
+                        <span class="user-name">{{=auth.user.first_name}} {{=auth.user.last_name}}</span>
+                        <span class="user-email">{{=auth.user.email}}</span>
+                    </div>
+                </button>
+                
+                <div id="user_dropdown" class="user-dropdown-menu sidebar-dropdown">
+                    <a href="{{=URL('default', 'user', args=['logout'])}}" class="dropdown-item" style="color: #ef4444;" data-i18n="nav_logout">
+                        Déconnexion
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</aside>
+
+<style>
+/* --- CONFIGURATION SIDEBAR --- */
+:root {
+    --sidebar-width: 260px;
+}
+
+body {
+    display: flex; /* Permet d'aligner la sidebar et le contenu */
+    background-color: #FAFAFA;
+}
+
+.cogni-sidebar {
+    width: var(--sidebar-width);
+    height: 100vh;
+    position: fixed;
+    left: 0;
+    top: 0;
+    background-color: white;
+    border-right: 1px solid #e5e7eb;
+    display: flex;
+    flex-direction: column;
+    z-index: 100;
+}
+
+.sidebar-header { padding: 32px 24px; }
+
+.sidebar-nav {
+    flex-grow: 1;
+    padding: 0 16px;
+}
+
+.nav-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    text-decoration: none;
+    color: #4b5563;
+    font-weight: 600;
+    font-size: 0.95rem;
+    border-radius: 12px;
+    margin-bottom: 4px;
+    transition: all 0.2s;
+}
+
+.nav-item:hover {
+    background-color: #f3f4f6;
+    color: #111827;
+}
+
+/* --- FOOTER & USER --- */
+.sidebar-footer {
+    padding: 20px 16px;
+    border-top: 1px solid #f3f4f6;
+}
+
+.sidebar-user-card {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: none;
+    border: none;
+    padding: 12px;
+    border-radius: 12px;
+    cursor: pointer;
+    text-align: left;
+    transition: background 0.2s;
+}
+
+.sidebar-user-card:hover { background-color: #f9fafb; }
+
+.avatar-circle {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: linear-gradient(135deg, #7BA8FF, #D7A8DF);
+    color: white; font-weight: 800; font-size: 0.8rem;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+}
+
+.user-info { display: flex; flex-direction: column; overflow: hidden; }
+.user-name { font-weight: 700; font-size: 0.85rem; color: #111827; }
+.user-email { font-size: 0.75rem; color: #6b7280; white-space: nowrap; text-overflow: ellipsis; overflow: hidden; }
+
+/* Positionnement du dropdown dans la sidebar */
+.sidebar-dropdown {
+    bottom: 70px; /* S'ouvre au-dessus du bouton user */
+    left: 10px;
+    right: 10px;
+    top: auto;
+}
+
+/* --- LANG SWITCHER VERTICAL --- */
+.lang-switcher-vertical {
+    display: flex;
+    justify-content: space-around;
+    background: #f3f4f6;
+    padding: 4px;
+    border-radius: 10px;
+    margin-bottom: 16px;
+}
+
+/* Ajustement du contenu principal */
+.main-content-wrapper {
+    margin-left: var(--sidebar-width);
+    width: 100%;
+    padding: 40px;
+}
+
+@media (max-width: 600px) {
+    .cogni-sidebar { width: 70px; }
+    .main-content-wrapper { margin-left: 70px; }
+    .user-info, .sidebar-header span, .nav-item span:not(.nav-icon) { display: none; }
+}    
+
+
+/* Style pour le lien actif dans la sidebar */
+.nav-item.active {
+    background-color: #f3f4f6; /* Gris très clair */
+    color: #111827;           /* Texte noir profond */
+    border-right: 3px solid #FF8A00; /* Petite barre de rappel orange à droite */
+}
+
+.nav-item.active .nav-icon {
+    filter: none; /* Si tu utilises des icônes complexes */
+}
+
+</style>

@@ -113,67 +113,57 @@ response.form_label_separator = ""
 # host names must be a list of allowed host names (glob syntax allowed)
 auth = Auth(db, host_names=configuration.get("host.names"))
 
-# -------------------------------------------------------------------------
-# create all tables needed by auth, maybe add a list of extra fields
-# -------------------------------------------------------------------------
-# --- EXTENSION DE LA TABLE AUTH_USER (Mise à jour Trial) ---
-# --- EXTENSION DE LA TABLE AUTH_USER ---
-import datetime
 
+ACCOUNT_STATUS_SET = ['active', 'suspended', 'deleted']
+PRIMARY_PROFILE_SET = ['entrepreneur', 'manager', 'ops', 'support', 'sales', 'curious']
+PRIMARY_GOAL_SET = ['understand_basics', 'build_agent', 'evaluate_roi', 'avoid_risks']
+LOCALE_SET = ['fr', 'en']
+
+# -------------------------------------------------------------------------
+# 1. EXTENSION DE AUTH_USER (Identité, État, Préférences)
+# -------------------------------------------------------------------------
 auth.settings.extra_fields['auth_user'] = [
-    
-   # -------------------------------------------------------------------------
-    # 1. IDENTIFICATION EXTERNE (SSO & Agnostique Provider)
-    # -------------------------------------------------------------------------
-    Field('google_id', 'string', length=255, label='Google ID'), 
-    
-    # Pivot PayPal -> Stripe anticipé !
-    Field('billing_provider', 'string', 
-          requires=IS_IN_SET(['paypal', 'stripe', 'none']), default='none'),
-    Field('billing_customer_id', 'string', length=255, writable=False, readable=False),
-    
-    # -------------------------------------------------------------------------
-    # 2. BUSINESS MODEL & DROITS
-    # -------------------------------------------------------------------------
-    Field('account_status', 'string', default='active', 
-          requires=IS_IN_SET(['active', 'suspended', 'banned']), 
-          label='Statut du compte'),
-    
-    # Le champ compagnon pour le support client
-    Field('suspension_reason', 'string', label='Raison de la suspension (ex: chargeback paypal)'),
-          
-    # Règle stricte : Compte le nombre de user_workflow où desired_state == 'ON'
-    Field('max_active_workflows', 'integer', default=10, label='Quota de workflows actifs'),
+    # Identité / Auth externe
+    Field('google_id', 'string', length=255, unique=True, readable=False, writable=False),
+    Field('auth_provider', 'string', default='google', requires=IS_IN_SET(['google', 'local']), readable=False, writable=False),
+    Field('avatar_url', 'string', length=512, default='', readable=False, writable=False),
+    Field('display_name', 'string', length=255, default='', readable=False, writable=False),
+    Field('xp_points', 'integer', default=0, readable=False, writable=False),
+    Field('streak_days', 'integer', default=0, readable=False, writable=False),
+    Field('subscription_tier', 'string', default='Free', 
+          requires=IS_IN_SET(['Free', 'Premium'])),
 
-    # -------------------------------------------------------------------------
-    # 3. CONFIGURATION MOTEUR & ONBOARDING
-    # -------------------------------------------------------------------------
-    # Marqueur produit très utile pour la PWA
-    Field('onboarding_completed', 'boolean', default=False),
-    
-    # Pas de valeur par défaut ! Oblige l'UI à demander ou détecter le fuseau.
-    Field('timezone', 'string', 
-          requires=IS_IN_SET(pytz.common_timezones), 
-          label='Fuseau Horaire (IANA)'),
-          
-    Field('locale', 'string', default='fr', 
-          requires=IS_IN_SET(['fr', 'en', 'es']), 
-          label='Langue UI'),
+    # Statut du compte
+    Field('account_status', 'string', default='active', requires=IS_IN_SET(ACCOUNT_STATUS_SET), readable=False, writable=False),
+    Field('suspension_reason', 'text', readable=False, writable=False),
 
-    # -------------------------------------------------------------------------
-    # 4. UI / UX & AUDIT
-    # -------------------------------------------------------------------------
-    Field('company_name', 'string', label='Nom Entreprise/Agence'),
-    Field('avatar_url', 'string', length=512, default='', label='Avatar URL (Temporaire)'),
-    
-    # web2py Auth ne crée pas created_on/updated_on par défaut sur auth_user,
-    # c'est donc une excellente pratique de les rajouter.
-    Field('created_on', 'datetime', default=request.now, writable=False),
-    Field('updated_on', 'datetime', default=request.now, update=request.now, writable=False),
+    # Lien Billing (Technique)
+    Field('stripe_customer_id', 'string', length=255, readable=False, writable=False),
+    Field('credits', 'integer', default=5),
+
+    # Onboarding & Préférences
+    Field('onboarding_completed', 'boolean', default=False, readable=False, writable=False),
+    Field('primary_profile', 'string', requires=IS_EMPTY_OR(IS_IN_SET(PRIMARY_PROFILE_SET)), readable=False, writable=False),
+    Field('primary_goal', 'string', requires=IS_EMPTY_OR(IS_IN_SET(PRIMARY_GOAL_SET)), readable=False, writable=False),
+    Field('timezone', 'string', requires=IS_EMPTY_OR(IS_IN_SET(pytz.common_timezones)), readable=False, writable=False),
+    Field('locale', 'string', default='fr', requires=IS_IN_SET(LOCALE_SET), readable=False, writable=False),
+    Field('company_name', 'string', length=255, default='', readable=False, writable=False),
+
+    # Métadonnées manuelles (web2py gère déjà created_on/modified_on si signature=True, 
+    # mais on les explicite ici comme demandé pour l'activité)
+    Field('last_login_at', 'datetime', readable=False, writable=False),
+    Field('last_active_at', 'datetime', readable=False, writable=False),
+    Field('created_on', 'datetime', default=request.now, readable=False, writable=False),
+    Field('updated_on', 'datetime', default=request.now, update=request.now, readable=False, writable=False),
 ]
 
 
+
+
 auth.define_tables(username=False, signature=False)
+
+
+
 
 # -------------------------------------------------------------------------
 # configure email
@@ -193,6 +183,7 @@ auth.settings.registration_requires_approval = False
 auth.settings.reset_password_requires_verification = True
 auth.settings.login_next = URL('default', 'dashboard')
 auth.settings.register_next = URL('default', 'dashboard')
+auth.settings.logout_next = URL('default', 'login')
 
 # -------------------------------------------------------------------------  
 # read more at http://dev.w3.org/html5/markup/meta.name.html               
@@ -238,208 +229,8 @@ if configuration.get("scheduler.enabled"):
 # auth.enable_record_versioning(db)
 
 # -*- coding: utf-8 -*-
-# applications/n8n_life/models/01_schema.py
 
 
-# =========================================================================
-# 1. CATALOGUE COMMERCIAL (Les "Recettes")
-# =========================================================================
-
-"""
-TABLE : workflow_template
--------------------------
-* UTILITÉ : C'est le catalogue de la boutique. Cette table stocke la version "Master" 
-  (le modèle original) d'un workflow généré par l'IA ou créé par un expert.
-* POURQUOI SA CRÉATION : Pour séparer le "Produit vendu" de "l'Instance utilisée". 
-  Si on ne faisait pas ça, une modification du template original casserait les workflows 
-  de tous les clients l'ayant déjà acheté. Cela permet aussi le versioning et la gestion des prix.
-"""
-db.define_table('workflow_template',
-    Field('name', 'string', requires=IS_NOT_EMPTY()),
-    Field('description', 'text'),
-    Field('version', 'integer', default=1, label="Version du template"),
-    Field('provider_price_id', 'string', label="ID Prix (ex: Stripe Price ID)"), 
-    Field('price_cents', 'integer', default=0),
-    Field('workflow_json', 'json', label="Graphe DAG Canonique"),
-    Field('required_credentials', 'list:string', label="Cache métier des secrets requis"), 
-    Field('is_published', 'boolean', default=False),
-    
-    Field('created_on', 'datetime', default=request.now, writable=False),
-    Field('updated_on', 'datetime', default=request.now, update=request.now, writable=False),
-    format='%(name)s (v%(version)s)'
-)
-
-# =========================================================================
-# 2. ESPACE UTILISATEUR (Instances et Secrets)
-# =========================================================================
-
-"""
-TABLE : user_workflow
----------------------
-* UTILITÉ : C'est l'instance vivante et personnelle du workflow pour un client donné. 
-  C'est le clone d'un template (ou une création de zéro) qui lui appartient.
-* POURQUOI SA CRÉATION : Chaque utilisateur doit pouvoir activer/désactiver son flux, 
-  le modifier, et surtout y injecter ses propres données sans impacter les autres. 
-  C'est ici qu'on gère l'état d'exécution réel (runtime_status) versus l'intention (desired_state).
-"""
-db.define_table('user_workflow',
-    Field('user_id', 'reference auth_user'),
-    Field('template_id', 'reference workflow_template'), # Peut être None si création manuelle (Optionnel V2)
-    Field('template_version_at_clone', 'integer'),
-    Field('name', 'string', requires=IS_NOT_EMPTY()),
-    
-    Field('desired_state', 'string', requires=IS_IN_SET(['ON', 'OFF']), default='OFF', label="Intention Utilisateur"),
-    Field('runtime_status', 'string', requires=IS_IN_SET(['waiting_credentials', 'ready', 'active', 'error', 'archived']), default='waiting_credentials'),
-    
-    Field('workflow_json', 'json'),
-    Field('is_legitimately_acquired', 'boolean', default=False),
-    
-    Field('created_on', 'datetime', default=request.now, writable=False),
-    Field('updated_on', 'datetime', default=request.now, update=request.now, writable=False),
-    Field('deleted_on', 'datetime', readable=False), 
-    format='%(name)s'
-)
-
-"""
-TABLE : user_credential
------------------------
-* UTILITÉ : C'est le coffre-fort (Vault) de l'utilisateur. Il stocke les mots de passe, 
-  clés API et tokens OAuth de manière chiffrée.
-* POURQUOI SA CRÉATION : Règle de sécurité absolue. On ne stocke JAMAIS de secrets en clair 
-  dans le `workflow_json`. Les secrets sont isolés ici pour être déchiffrés "Just-in-Time" 
-  pendant le run, puis détruits de la mémoire.
-"""
-db.define_table('user_credential',
-    Field('user_id', 'reference auth_user'),
-    Field('service_name', 'string', requires=IS_NOT_EMPTY()), # ex: 'slack_api'
-    Field('encrypted_data', 'text'),
-    
-    Field('crypto_algo', 'string', default='AES-256-CBC-HMAC'),
-    Field('crypto_version', 'integer', default=1),
-    Field('is_valid', 'boolean', default=False),
-    Field('last_checked_on', 'datetime'),
-    
-    Field('created_on', 'datetime', default=request.now, writable=False),
-    Field('updated_on', 'datetime', default=request.now, update=request.now, writable=False)
-)
-# Règle architecturale : L'unicité composite (user_id, service_name) sera garantie
-# au niveau de la couche Service (CredentialService) lors de l'insertion/mise à jour.
-
-# =========================================================================
-# 3. ROUTAGE EXTERNE (Ingestion des Triggers)
-# =========================================================================
-
-"""
-TABLE : webhook_endpoint
-------------------------
-* UTILITÉ : C'est le standardiste. Il mappe une URL publique (ex: /api/webhook/123-abc) 
-  vers un Workflow et un Nœud précis.
-* POURQUOI SA CRÉATION : Optimisation des performances et de la sécurité (O(1) lookup). 
-  Quand un événement HTTP arrive, au lieu d'ouvrir et de parser des milliers de JSON en base 
-  pour trouver qui écoute, on interroge cette petite table ultra-rapide. Elle gère aussi la 
-  stratégie de signature (HMAC) avant même de réveiller le moteur.
-"""
-db.define_table('webhook_endpoint',
-    Field('user_workflow_id', 'reference user_workflow'),
-    Field('trigger_node_id', 'string'),
-    
-    # AJOUT DU VALIDATEUR IS_NOT_IN_DB COMBINÉ AVEC IS_NOT_EMPTY
-    Field('path', 'string', requires=[IS_NOT_EMPTY(), IS_NOT_IN_DB(db, 'webhook_endpoint.path')], unique=True),
-    
-    Field('http_method', 'string', requires=IS_IN_SET(['GET', 'POST', 'PUT', 'ANY']), default='POST'),
-    Field('signature_strategy', 'string', requires=IS_IN_SET(['none', 'stripe_hmac', 'github_hmac', 'custom_hmac']), default='none'), 
-    Field('is_active', 'boolean', default=False), 
-    
-    Field('created_on', 'datetime', default=request.now, writable=False),
-    Field('updated_on', 'datetime', default=request.now, update=request.now, writable=False)
-)
-
-# =========================================================================
-# 4. SUPERVISION ET TRAÇABILITÉ (Strict Déterminisme)
-# =========================================================================
-
-"""
-TABLE : workflow_run
---------------------
-* UTILITÉ : C'est le journal de bord (Log) de haut niveau. Il trace chaque exécution 
-  globale d'un workflow (du début à la fin).
-* POURQUOI SA CRÉATION : Indispensable pour l'audit, le support client et l'idempotence. 
-  Si un webhook Stripe est reçu deux fois (même `source_event_id`), on regarde ici pour ne 
-  pas facturer le client deux fois. Permet aussi d'afficher un historique propre à l'utilisateur.
-"""
-db.define_table('workflow_run',
-    Field('user_workflow_id', 'reference user_workflow'),
-    Field('trigger_type', 'string'), 
-    Field('started_by', 'string'),
-    Field('source_event_id', 'string', label="Idempotency Key"), 
-    
-    Field('status', 'string', requires=IS_IN_SET(['running', 'success', 'failed']), default='running'),
-    Field('error_code', 'string'),
-    Field('trigger_payload_snapshot', 'json'),
-    
-    Field('started_at', 'datetime', default=request.now),
-    Field('finished_at', 'datetime'),
-    Field('created_on', 'datetime', default=request.now, writable=False),
-    Field('updated_on', 'datetime', default=request.now, update=request.now, writable=False)
-)
-
-"""
-TABLE : workflow_run_step
--------------------------
-* UTILITÉ : C'est la boîte noire de l'avion. Elle logge l'état exact (inputs, outputs, erreurs) 
-  pour CHAQUE NŒUD traversé pendant un run.
-* POURQUOI SA CRÉATION : Débogage "Fail Fast". Si un workflow de 10 étapes plante à l'étape 4, 
-  le système s'arrête net. Cette table permet de savoir exactement ce qui est entré et sorti de 
-  l'étape 3, et l'erreur exacte levée à l'étape 4, sans avoir à deviner ce qui s'est passé en mémoire.
-"""
-db.define_table('workflow_run_step',
-    Field('run_id', 'reference workflow_run'),
-    Field('execution_order', 'integer', label="Séquence stricte du run"), # Pas de default, forcé par le moteur
-    Field('node_id', 'string', requires=IS_NOT_EMPTY()), 
-    Field('node_type', 'string', label="ex: slack.send_message"), 
-    
-    Field('status', 'string', requires=IS_IN_SET(['running', 'success', 'failed', 'skipped'])),
-    Field('error_code', 'string'),
-    Field('error_message', 'text'),
-    
-    Field('input_count', 'integer', default=0),
-    Field('output_count', 'integer', default=0),
-    Field('context_snapshot', 'json', label="Inputs/Outputs Sanitizés Uniquement"),
-    
-    Field('started_at', 'datetime', default=request.now),
-    Field('finished_at', 'datetime'),
-    Field('execution_time_ms', 'integer')
-)
-
-# =========================================================================
-# 5. E-COMMERCE ET PROVISIONING (La Boutique)
-# =========================================================================
-
-"""
-TABLE : payment_order
----------------------
-* UTILITÉ : C'est le reçu d'achat. Il lie un utilisateur, un paiement externe (ex: Stripe) 
-  et un Template de Workflow.
-* POURQUOI SA CRÉATION : C'est le pilier de votre business model (B2C - Achat de recettes). 
-  Il sert de preuve ("Acquisition légitime") pour déclencher le "ProvisioningService", 
-  qui va cloner le Template vers un `user_workflow` et donner l'accès au client en toute sécurité.
-"""
-db.define_table('payment_order',
-    Field('user_id', 'reference auth_user'),
-    Field('template_id', 'reference workflow_template'),
-    Field('provisioned_workflow_id', 'reference user_workflow'),
-    
-    Field('provider', 'string', default='stripe'),
-    
-    # AJOUT DU VALIDATEUR IS_NOT_IN_DB
-    Field('provider_session_id', 'string', requires=IS_NOT_IN_DB(db, 'payment_order.provider_session_id'), unique=True), 
-    
-    Field('amount_cents', 'integer'),
-    Field('currency', 'string', default='EUR'),
-    
-    Field('status', 'string', requires=IS_IN_SET(['pending', 'paid', 'failed']), default='pending'),
-    Field('paid_at', 'datetime'),
-    
-    Field('created_on', 'datetime', default=request.now, writable=False),
-    Field('updated_on', 'datetime', default=request.now, update=request.now, writable=False)
-)
+# -------------------------------------------------------------------------
+# 2. CORE BUSINESS & PRICING (La vérité business)
+# -------------------------------------------------------------------------

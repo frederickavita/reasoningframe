@@ -1,169 +1,239 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <title>reasoningframe - Login</title>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login | ReasoningFrame</title>
-    
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:300,400,500,600,700,800&display=swap">
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/brython@3.12.0/brython.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/brython@3.12.0/brython_stdlib.js"></script>
 
     <style>
-        :root {
-            --bg-dark: #0a0a0a;
-            --text-main: #e5e5e5;
-            --accent-blue: #3b82f6; 
-            --accent-green: #00ff41;
-            --border-color: #333;
-            --font-mono: 'JetBrains Mono', monospace;
-            --font-sans: 'Inter', sans-serif;
+        /* --- Base Design (Dark Mode) --- */
+        html, body {
+            font-family: 'Inter', sans-serif;
+            background: #0b0b0f;
+            color: #e5e7eb;
+            margin: 0;
+            overflow-x: hidden;
         }
 
-        * { box-sizing: border-box; }
-        body { 
-            background-color: var(--bg-dark); 
-            color: var(--text-main); 
-            font-family: var(--font-sans); 
-            margin: 0; 
-            height: 100vh; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            overflow: hidden; 
-            position: relative;
+        .rf-shell { max-width: 1180px; margin: 0 auto; }
+
+        /* --- Glassmorphism --- */
+        .rf-glass {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            backdrop-filter: blur(10px);
+            border-radius: 24px;
         }
 
-        .orb {
-            position: absolute;
-            border-radius: 50%;
-            filter: blur(80px);
-            opacity: 0.3;
-            animation: float 10s infinite ease-in-out;
-            z-index: 0;
-        }
-        .orb-1 { width: 400px; height: 400px; background: var(--accent-blue); top: -100px; left: -100px; }
-        .orb-2 { width: 300px; height: 300px; background: var(--accent-green); bottom: -50px; right: -50px; animation-delay: 2s; }
-
-        @keyframes float {
-            0%, 100% { transform: translate(0, 0); }
-            50% { transform: translate(20px, 40px); }
+        .text-gradient {
+            background: linear-gradient(135deg, #6366f1, #a5b4fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 800;
         }
 
-        .login-card {
-            background: rgba(15, 15, 15, 0.7);
-            backdrop-filter: blur(20px);
-            border: 1px solid var(--border-color);
-            padding: 50px 40px;
-            border-radius: 16px;
-            width: 100%;
-            max-width: 400px;
-            text-align: center;
-            z-index: 10;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
-            animation: slideUp 0.6s ease-out;
-        }
-
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .logo-box {
-            width: 60px;
-            height: 60px;
-            background: linear-gradient(135deg, rgba(59,130,246,0.1), rgba(0,255,65,0.05));
-            border: 1px solid #333;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 20px;
-            font-size: 1.8rem;
-            color: var(--accent-blue);
-        }
-
-        h1 { font-size: 1.5rem; font-weight: 700; margin: 0 0 5px; }
-        p { color: #888; font-size: 0.9rem; margin: 0 0 30px; }
-
+        /* --- Buttons --- */
         .btn-google {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 15px;
-            width: 100%;
-            background: white;
-            color: #111;
+            background: #fff;
+            color: #000 !important;
+            border: none;
+            border-radius: 14px;
+            padding: 16px 32px;
             font-weight: 600;
-            padding: 14px;
-            border-radius: 8px;
-            text-decoration: none;
-            transition: transform 0.2s, box-shadow 0.2s;
-            font-size: 1rem;
-        }
-        .btn-google:hover {
-            transform: scale(1.02);
-            box-shadow: 0 0 20px rgba(255,255,255,0.2);
-        }
-
-        .divider {
-            margin: 30px 0;
-            display: flex;
+            display: inline-flex;
             align-items: center;
-            color: #444;
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
+            gap: 12px;
+            cursor: pointer;
+            transition: 0.2s;
+            text-decoration: none;
         }
-        .divider::before, .divider::after {
-            content: "";
-            flex: 1;
-            height: 1px;
-            background: #333;
-        }
-        .divider span { margin: 0 15px; }
+        .btn-google:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(255,255,255,0.1); }
+        .btn-google[disabled] { opacity: 0.6; cursor: not-allowed; transform: none; }
 
+        .btn-outline {
+            background: transparent;
+            color: #fff;
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 14px;
+            padding: 14px 28px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .btn-outline:hover { border-color: #6366f1; color: #a5b4fc; }
+
+        /* --- UI Elements --- */
+        .lang-selector {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: #fff;
+            padding: 8px 12px;
+            border-radius: 10px;
+            outline: none;
+            cursor: pointer;
+        }
+
+        /* --- State Management --- */
+        .app-state { display: none; animation: fadeIn 0.5s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .spinner {
+            width: 50px; height: 50px;
+            border: 4px solid rgba(99,102,241,0.1);
+            border-top-color: #6366f1;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
     </style>
 </head>
-<body>
 
-    <div class="orb orb-1"></div>
-    <div class="orb orb-2"></div>
+<body onload="brython()">
 
-    <div class="login-card">
-        
-        <div class="logo-box">
-            <i class="fa fa-shield-halved"></i>
+<div class="rf-shell w3-container">
+    
+    <header class="w3-padding-32 w3-cell-row">
+        <div class="w3-cell w3-cell-middle">
+            <h2 style="font-weight: 800; margin: 0; letter-spacing: -1.5px;">reasoning<span style="color:#818cf8;">frame</span></h2>
         </div>
-        
-        <h1>ReasoningFrame</h1>
-        <p>Secure your advertising budgets.</p>
+        <div class="w3-cell w3-cell-middle" style="text-align: right;">
+            <select id="lang-select" class="lang-selector">
+                <option value="en">🇬🇧 EN</option>
+                <option value="fr">🇫🇷 FR</option>
+            </select>
+        </div>
+    </header>
 
-        <a href="{{=google_url}}" class="btn-google">
-            <svg width="20" height="20" viewBox="0 0 24 24">
-                <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-                <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-                <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
-                <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-            </svg>
-            Continue with Google
-        </a>
-
-        <div class="divider">
-            <span>Secure Access</span>
+    <div id="state-ideal" class="app-state w3-row-padding" style="margin-top: 40px;">
+        <div class="w3-col l6 m12 w3-padding-32">
+            <h1 style="font-size: 56px; font-weight: 800; line-height: 1.1; letter-spacing: -2px;">
+                <span id="tr-hero-1">Master Python</span> <span class="text-gradient" id="tr-hero-2">through Action.</span>
+            </h1>
+            <p id="tr-desc" class="w3-large w3-text-grey" style="margin: 24px 0 40px 0; max-width: 500px; line-height: 1.6;">
+                Stop watching, start coding. Join thousands of students generating custom micro-courses to bridge the gap between theory and implementation.
+            </p>
+            
+            <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                <button class="btn-google btn-google-login">
+                    <svg width="20" height="20" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6,20.1H42V20H24v8h11.3C33.7,32.7,29.3,36,24,36c-6.6,0-12-5.4-12-12s5.4-12,12-12c3.1,0,5.8,1.2,8,3l5.7-5.7C34,6.1,29.3,4,24,4C13,4,4,13,4,24s9,20,20,20s20-9,20-20C44,22.7,43.9,21.4,43.6,20.1z"></path><path fill="#FF3D00" d="M6.3,14.7l6.6,4.8C14.7,15.1,19,12,24,12c3.1,0,5.8,1.2,8,3l5.7-5.7C34,6.1,29.3,4,24,4C16.3,4,9.7,8.3,6.3,14.7z"></path><path fill="#4CAF50" d="M24,44c5.2,0,9.9-2,13.4-5.2l-6.2-5.2C29.2,35.1,26.7,36,24,36c-5.2,0-9.6-3.3-11.3-7.9l-6.5,5C9.5,39.6,16.2,44,24,44z"></path><path fill="#1976D2" d="M43.6,20.1H42V20H24v8h11.3c-0.8,2.2-2.2,4.2-4.1,5.6l6.2,5.2C37,39.2,44,34,44,24C44,22.7,43.9,21.4,43.6,20.1z"></path></svg>
+                    <span id="tr-btn-google">Continue with Google</span>
+                </button>
+                <button class="btn-outline" id="tr-btn-back">Go back</button>
+            </div>
         </div>
 
-        <p style="font-size: 0.75rem; color: #555; margin-bottom: 0;">
-            By continuing, you agree to our Terms of Service.<br>
-            Data is end-to-end encrypted.
-        </p>
-
+        <div class="w3-col l6 m12 w3-padding-32 w3-hide-small">
+            <div class="rf-glass w3-padding-32 w3-container" style="background: linear-gradient(135deg, rgba(99,102,241,0.05), rgba(165,180,252,0.05)); border-radius: 40px;">
+                <div class="rf-glass w3-padding-16 w3-margin-bottom" style="opacity: 0.5; transform: scale(0.9);">
+                    <span class="w3-tiny w3-uppercase" id="tr-old-title" style="font-weight:700;">Passive Learning (Videos)</span>
+                    <p style="font-style: italic; font-size: 14px;">"Watch me code a loop for 15 minutes while you fall asleep..."</p>
+                </div>
+                <div class="w3-center w3-margin-bottom" style="font-size: 24px;">⚡</div>
+                <div class="rf-glass w3-padding-24" style="border-left: 4px solid #6366f1;">
+                    <span class="w3-tiny w3-text-indigo w3-uppercase" style="font-weight: 700;" id="tr-new-title">ReasoningFrame Method</span>
+                    <p style="font-weight: 700; margin: 10px 0 5px;" id="tr-new-task">Active Coding Session</p>
+                    <p class="w3-small w3-text-grey">1. Concept generated (3s) | 2. Practice (90s)</p>
+                    <div style="background: #121218; padding: 10px; border-radius: 8px; margin-top: 10px; font-family: monospace; font-size: 12px; color: #818cf8;">
+                        for i in range(credits):<br>&nbsp;&nbsp;print("Learning by Doing")
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <div style="position: absolute; bottom: 20px; color: #444; font-size: 0.7rem; font-family: var(--font-mono);">
-        REASONINGFRAME © 2026
+    <div id="state-chargement" class="app-state w3-center" style="padding-top: 100px;">
+        <div class="spinner w3-margin-bottom" style="margin: 0 auto;"></div>
+        <h3 id="tr-loading" style="font-weight:700;">Securing your session...</h3>
+        <p class="rf-muted">You're one step away from your first programming course.</p>
     </div>
 
+</div>
+
+<script type="text/python">
+from browser import document, window
+
+# --- DICTIONARY OF TRANSLATIONS ---
+LANGUAGES = {
+    'en': {
+        'tr-hero-1': 'Master Coding',
+        'tr-hero-2': 'through Action.',
+        'tr-desc': 'Stop watching, start coding. Join thousands of students generating custom micro-courses to bridge the gap between theory and implementation.',
+        'tr-btn-google': 'Continue with Google',
+        'tr-btn-back': 'Go back',
+        'tr-old-title': 'Passive Learning (Videos)',
+        'tr-new-title': 'ReasoningFrame Method',
+        'tr-new-task': 'Active Coding Session',
+        'tr-loading': 'Securing your session...'
+    },
+    'fr': {
+        'tr-hero-1': 'Maîtrisez le Code',
+        'tr-hero-2': 'par l\'Action.',
+        'tr-desc': 'Arrêtez de regarder, commencez à coder. Rejoignez des milliers d\'étudiants générant des micro-cours personnalisés pour combler le fossé entre théorie et pratique.',
+        'tr-btn-google': 'Continuer avec Google',
+        'tr-btn-back': 'Retour',
+        'tr-old-title': 'Apprentissage Passif (Vidéos)',
+        'tr-new-title': 'La Méthode ReasoningFrame',
+        'tr-new-task': 'Session de Code Actif',
+        'tr-loading': 'Sécurisation de la session...'
+    }
+}
+
+def apply_language(lang):
+    translations = LANGUAGES.get(lang, LANGUAGES['en'])
+    for element_id, text in translations.items():
+        if element_id in document:
+            document[element_id].text = text
+
+def on_lang_change(ev):
+    lang = ev.target.value
+    apply_language(lang)
+
+document['lang-select'].bind('change', on_lang_change)
+
+# --- STATE MANAGEMENT ---
+states = ['state-ideal', 'state-chargement']
+
+def show_state(state_id):
+    for s in states:
+        document[s].style.display = "none"
+    document[state_id].style.display = "block"
+
+# Initialize with English
+apply_language('en')
+show_state('state-ideal')
+
+# --- AUTH LOGIC ---
+def start_google_auth(ev):
+    # Disable buttons to prevent double clicks
+    for btn in document.select('.btn-google-login'):
+        btn.attrs['disabled'] = True
+    
+    show_state('state-chargement')
+    
+    # Framework Variables (web2py / py4web)
+    google_url = "{{=google_url}}"
+    # Safety check if variable is not parsed
+    if google_url and not google_url.startswith("{"):
+        window.location.href = google_url
+    else:
+        # Fallback for dev/preview
+        window.alert("Auth URL not configured in backend.")
+        show_state('state-ideal')
+
+for btn in document.select('.btn-google-login'):
+    btn.bind('click', start_google_auth)
+
+# Action: Back Button
+def go_back(ev):
+    window.history.back()
+
+document['tr-btn-back'].bind('click', go_back)
+
+</script>
 </body>
 </html>

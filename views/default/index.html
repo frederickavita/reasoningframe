@@ -1,538 +1,623 @@
-{{extend 'malayout.html'}}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>reasoningframe - Generate your micro-course</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<div class="w3-bar w3-white w3-padding-16" style="max-width:1200px; margin:auto">
-    <a href="#" class="w3-bar-item w3-button w3-hover-none w3-xlarge" style="font-weight:600">ReasoningFrame</a>
-    
-    <div class="w3-right">
-        <a href="#pricing" class="w3-bar-item w3-button bg-gradient-btn w3-round-xxlarge w3-margin-left">Enroll for €79</a>
-    </div>
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:300,400,500,600,700&display=swap">
 
-    <div class="w3-hide-small w3-center" style="margin: 0 auto; width: fit-content;">
-        <a href="#" class="w3-bar-item w3-button w3-hover-none">Home</a>
-        <a href="#" class="w3-bar-item w3-button w3-hover-none w3-text-grey">Curriculum</a>
-        <a href="#" class="w3-bar-item w3-button w3-hover-none w3-text-grey">Demo</a>
-        <a href="#pricing" class="w3-bar-item w3-button w3-hover-none w3-text-grey">Pricing</a>
-    </div>
-</div>
-
-<div class="w3-content w3-padding-64" style="max-width:1200px">
-    <div class="w3-row">
-        
-        <div class="w3-half w3-padding-32 w3-container">
-            <h1 class="hero-heading w3-margin-bottom">Build an AI Lead Gen Agent in 2 Hours</h1>
-            <p class="w3-text-grey w3-margin-bottom w3-large" style="max-width:85%;">
-             Stop prospecting manually. Learn how to use n8n and Claude to build a No-Code AI agent that browses websites, qualifies leads, and drafts your B2B emails.
-            </p>
-            <br>
-            <a href="#pricing" class="w3-button bg-gradient-btn w3-round-xxlarge w3-padding-large w3-margin-bottom w3-large">Start the Interactive Course</a>
-            
-            <div class="w3-margin-top w3-padding-32">
-                <p class="w3-small w3-text-grey">The modern stack for automation agencies</p>
-                <div class="w3-row">
-                    <div class="w3-col s4 w3-large" style="font-weight:600"><i class="fa fa-cogs"></i> n8n</div>
-                    <div class="w3-col s4 w3-large" style="font-weight:600"><i class="fa fa-bolt"></i> LangChain</div>
-                    <div class="w3-col s4 w3-large" style="font-weight:600"><i class="fa fa-commenting-o"></i> Claude API</div>
-                </div>
-            </div>
-        </div>
-
-        <div class="w3-half w3-container w3-hide-small">
-            <div class="soft-gradient-box">
-                
-                <div class="mockup-card w3-padding w3-margin-bottom">
-                    <div class="w3-small w3-text-dark-grey w3-margin-bottom" style="font-weight:600">
-                        Agent Live Performance <i class="fa fa-magic w3-right w3-text-grey w3-light-grey w3-circle w3-padding-small"></i>
-                    </div>
-                    
-                    <div class="w3-row-padding">
-                        <div class="w3-half w3-margin-bottom">
-                            <div class="w3-border w3-round-large w3-padding-small w3-display-container">
-                                <div class="w3-tiny"><strong><i class="fa fa-search w3-text-blue"></i> Scraped Sites</strong><br><span class="w3-text-grey">Websites Analyzed: 142</span></div>
-                                <div class="w3-display-right w3-padding-small"><span class="badge-green">Live</span></div>
-                            </div>
-                        </div>
-                        <div class="w3-half w3-margin-bottom">
-                            <div class="w3-border w3-round-large w3-padding-small w3-display-container">
-                                <div class="w3-tiny"><strong><i class="fa fa-check-circle w3-text-green"></i> Qualified</strong><br><span class="w3-text-grey">High Intent Leads: 38</span></div>
-                                <div class="w3-display-right w3-padding-small"><span class="badge-green">ROI</span></div>
-                            </div>
-                        </div>
-                        <div class="w3-half">
-                            <div class="w3-border w3-round-large w3-padding-small w3-display-container">
-                                <div class="w3-tiny"><strong><i class="fa fa-envelope w3-text-purple"></i> Drafts Ready</strong><br><span class="w3-text-grey">Emails Generated: 38</span></div>
-                                <div class="w3-display-right w3-padding-small"><span class="badge-green">Done</span></div>
-                            </div>
-                        </div>
-                        <div class="w3-half">
-                            <div class="w3-border w3-round-large w3-padding-small w3-display-container">
-                                <div class="w3-tiny"><strong><i class="fa fa-slack w3-text-black"></i> Human in Loop</strong><br><span class="w3-text-grey">Awaiting Approval: 5</span></div>
-                                <div class="w3-display-right w3-padding-small"><span class="badge-green">Ping!</span></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="mockup-card w3-padding">
-                    <div class="w3-small w3-text-dark-grey w3-margin-bottom" style="font-weight:600">
-                        Course Completion Progress <i class="fa fa-graduation-cap w3-right w3-text-grey w3-light-grey w3-circle w3-padding-small"></i>
-                    </div>
-                    <div class="w3-xlarge w3-margin-bottom">
-                        <strong>Lab 3 / 4</strong> 
-                        <span class="w3-right w3-tiny w3-text-grey w3-border w3-round-xlarge w3-padding-small w3-light-grey" style="margin-top:8px">Build the Brain</span>
-                    </div>
-                    
-                    <div class="w3-row w3-margin-bottom" style="display:flex; gap:4px;">
-                        <div class="w3-green w3-round" style="height:6px; flex:1"></div>
-                        <div class="w3-green w3-round" style="height:6px; flex:1"></div>
-                        <div class="w3-orange w3-round" style="height:6px; flex:1"></div>
-                        <div class="w3-light-grey w3-round" style="height:6px; flex:1"></div>
-                    </div>
-                    
-                    <div class="w3-tiny w3-text-grey w3-margin-bottom" style="display:flex; justify-content:space-between">
-                        <span>Setup</span>
-                        <span>Extraction</span>
-                        <span>Claude AI</span>
-                        <span class="w3-text-light-grey">Final Agent</span>
-                    </div>
-                </div>
-
-            </div>
-        </div>
-
-    </div>
-</div>
-
-<div class="w3-white w3-padding-64">
-    
-    <div class="w3-content w3-center w3-margin-bottom" style="max-width:800px">
-        <p class="w3-small w3-bold text-orange-custom" style="letter-spacing: 1px;">THE CURRICULUM</p>
-        <h2 class="w3-xxxlarge w3-bold" style="line-height: 1.2;">
-            Zero Theory. <span class="text-gradient-brown">100% Practical<br>Building & Validation.</span>
-        </h2>
-        <p class="w3-large w3-text-grey w3-margin-top">
-            You won't just watch videos. You will build your agent live and validate your progress using our interactive Webhook API.
-        </p>
-    </div>
-
-    <div class="w3-content w3-margin-top" style="max-width:1100px">
-        <div class="w3-row-padding">
-
-            <div class="w3-col l4 m4 s12">
-                <div class="feature-card-side w3-margin-bottom">
-                    <div class="icon-wrapper w3-margin-bottom">
-                        <i class="fa fa-sitemap"></i>
-                    </div>
-                    <h3 class="w3-large w3-bold">Visual Orchestration</h3>
-                    <p class="w3-text-grey w3-small">Master n8n to connect tools without writing backend code.</p>
-                </div>
-                <div class="feature-card-side">
-                    <div class="icon-wrapper w3-margin-bottom">
-                        <i class="fa fa-search"></i>
-                    </div>
-                    <h3 class="w3-large w3-bold">Web Browsing</h3>
-                    <p class="w3-text-grey w3-small">Give your agent the ability to scrape and read any website.</p>
-                </div>
-            </div>
-
-            <div class="w3-col l4 m4 s12">
-                <div class="feature-card-center w3-margin-bottom">
-                    <h3 class="w3-large w3-bold w3-margin-bottom">The Final B2B Agent</h3>
-                    <div class="w3-border w3-round-xlarge w3-padding w3-margin-bottom w3-left-align">
-                        <div class="w3-small w3-bold"><i class="fa fa-google w3-text-blue"></i> 1. Search Trigger</div>
-                        <div class="w3-tiny w3-text-grey">Finds companies on Google.</div>
-                    </div>
-                    <div class="w3-border w3-round-xlarge w3-padding w3-margin-bottom w3-left-align">
-                        <div class="w3-small w3-bold"><i class="fa fa-cogs w3-text-black"></i> 2. Scrape & Clean</div>
-                        <div class="w3-tiny w3-text-grey">Extracts "About Us" and Contact info.</div>
-                    </div>
-                    <div class="w3-border w3-round-xlarge w3-padding w3-margin-bottom w3-left-align">
-                        <div class="w3-small w3-bold"><i class="fa fa-commenting-o w3-text-purple"></i> 3. Claude Reasoner</div>
-                        <div class="w3-tiny w3-text-grey">Qualifies the lead & drafts outreach.</div>
-                    </div>
-                    <div class="w3-border w3-round-xlarge w3-padding w3-left-align" style="background-color: #f0fdf4;">
-                        <div class="w3-small w3-bold w3-text-green"><i class="fa fa-check"></i> 4. Slack Approval</div>
-                        <div class="w3-tiny w3-text-dark-grey">Human validates before sending.</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="w3-col l4 m4 s12">
-                <div class="feature-card-side w3-margin-bottom">
-                    <div class="icon-wrapper w3-margin-bottom">
-                        <i class="fa fa-bolt"></i>
-                    </div>
-                    <h3 class="w3-large w3-bold">Claude Intelligence</h3>
-                    <p class="w3-text-grey w3-small">Use Anthropic's latest models for superior B2B reasoning.</p>
-                </div>
-                <div class="feature-card-side">
-                    <div class="icon-wrapper w3-margin-bottom">
-                        <i class="fa fa-shield"></i>
-                    </div>
-                    <h3 class="w3-large w3-bold">Human-in-the-Loop</h3>
-                    <p class="w3-text-grey w3-small">Learn how to securely pause agents for human approval.</p>
-                </div>
-            </div>
-
-        </div>
-    </div>
-</div>
-
-
-
-<div class="w3-white w3-padding-64">
-    <div class="w3-content w3-center" style="max-width:900px">
-        
-        <h2 class="w3-xxxlarge" style="font-weight: 600;">
-            From scratch to a <span class="text-gradient-brown">Working Agency Tool.</span>
-        </h2>
-
-        <div class="timeline-wrapper w3-margin-top">
-            <div class="timeline-line"></div>
-            <div class="timeline-steps">
-                <div class="step-node"><i class="fa fa-laptop"></i></div>
-                <div class="step-node"><i class="fa fa-globe"></i></div>
-                <div class="step-node-active"><i class="fa fa-code-fork"></i></div>
-                <div class="step-node"><i class="fa fa-magic"></i></div>
-                <div class="step-node"><i class="fa fa-rocket"></i></div>
-            </div>
-        </div>
-
-        <p class="w3-large w3-text-grey w3-margin-top" style="max-width:700px; margin: 0 auto; line-height: 1.6;">
-            By the end of this 2-hour interactive course, you won't just have a certificate. You will own a customized, fully deployed AI agent that generates leads for your business.
-        </p>
-
-    </div>
-</div>
-
-<div class="w3-white w3-padding-64" style="border-top: 1px solid rgba(0,0,0,0.02); border-bottom: 1px solid rgba(0,0,0,0.02);">
-    <div class="w3-content" style="max-width:1000px">
-        
-        <div class="w3-center w3-margin-bottom w3-padding-32">
-            <h2 class="w3-xxxlarge w3-bold" style="line-height: 1.2; letter-spacing: -0.5px;">
-                Real results. <br><span class="text-gradient-brown">From week one.</span>
-            </h2>
-        </div>
-
-        <div class="soft-ui-card w3-center w3-margin-bottom" style="max-width: 800px; margin: 0 auto; padding: 40px;">
-            <div class="w3-text-orange w3-xlarge w3-margin-bottom"><i class="fa fa-quote-left"></i></div>
-            <p class="w3-large w3-text-dark-grey" style="line-height: 1.7; font-style: italic;">
-                "I originally built this system for myself. Running in the background, it qualified <strong>142 websites in 3 days</strong> and drafted <strong>38 hyper-personalized emails</strong>. I saved about 15 hours of manual prospecting that week alone."
-            </p>
-            <p class="w3-text-grey w3-small w3-bold w3-margin-top w3-uppercase" style="letter-spacing: 1px;">— Frédéric Kavita, Creator of ReasoningFrame</p>
-        </div>
-
-        <div class="w3-row-padding w3-margin-top w3-stretch">
-            
-            <div class="w3-half w3-margin-bottom">
-                <div class="soft-ui-card" style="height: 100%;">
-                    <div class="w3-text-yellow w3-margin-bottom"><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i></div>
-                    <p class="w3-text-dark-grey w3-small" style="line-height: 1.7;">"I used to pay a freelancer to scrape leads. With this course, I brought a n8n agent in-house in 2 hours. The time and money saved for my agency is massive."</p>
-                    <div class="w3-margin-top">
-                        <span class="w3-bold w3-small">Thomas L.</span><br>
-                        <span class="w3-tiny w3-text-grey">Marketing Agency Founder</span>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="w3-half w3-margin-bottom">
-                <div class="soft-ui-card" style="height: 100%;">
-                    <div class="w3-text-yellow w3-margin-bottom"><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i></div>
-                    <p class="w3-text-dark-grey w3-small" style="line-height: 1.7;">"I don't know how to code in Python, but n8n's visual interface and the course's interactive validation made the process dead simple. My agent runs every single morning."</p>
-                    <div class="w3-margin-top">
-                        <span class="w3-bold w3-small">Sarah M.</span><br>
-                        <span class="w3-tiny w3-text-grey">Freelance SEO Consultant</span>
-                    </div>
-                </div>
-            </div>
-            
-        </div>
-
-    </div>
-</div>
-<div class="section-soft-bg w3-padding-64">
-    <div class="w3-content" style="max-width:1200px">
-        <div class="w3-row-padding">
-            
-            <div class="w3-col l5 m12 w3-margin-bottom w3-padding-16">
-                <h3 class="w3-xxlarge w3-bold w3-margin-bottom" style="letter-spacing: -0.5px;">Meet Your Instructor</h3>
-                
-                <div class="soft-ui-card" style="background-color: #ffffff;">
-                    <div class="w3-center w3-margin-bottom w3-padding-16">
-                        <div class="w3-circle w3-light-grey" style="width: 96px; height: 96px; margin: 0 auto; display: flex; align-items: center; justify-content: center; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
-                            <img src="{{=URL('static', 'images/frederickavita.jpg')}}" alt="Frédéric Kavita" style="width: 100%; height: 100%; object-fit: cover;">
-                        </div>
-                        <h4 class="w3-xlarge w3-bold w3-margin-top" style="margin-bottom: 4px;">Frédéric Kavita</h4>
-                        <p class="w3-small w3-bold text-orange-custom w3-uppercase" style="letter-spacing: 1px; margin-bottom: 12px;">AI Engineer & PyTorch Developer</p>
-                        
-                        <a href="https://twitter.com/frederickavita" target="_blank" style="text-decoration: none; color: #64748b; font-size: 0.9rem; font-weight: 500; display: inline-flex; align-items: center; gap: 6px; padding: 6px 16px; border-radius: 20px; background-color: #f1f5f9; transition: all 0.2s ease;" onmouseover="this.style.backgroundColor='#eef2ff'; this.style.color='#1da1f2';" onmouseout="this.style.backgroundColor='#f1f5f9'; this.style.color='#64748b';">
-                            <i class="fa fa-twitter"></i> @frederickavita
-                        </a>
-                    </div>
-                    
-                    <p class="w3-text-dark-grey" style="line-height: 1.7; font-size: 0.95rem;">
-                        I'm a Python developer with over <strong>10 years of experience in PyTorch</strong>. After designing complex AI architectures and building over 20 autonomous workflows for enterprises, I realized one thing: <br><br>
-                        <strong>When it comes to B2B growth, execution speed beats technical complexity.</strong> <br><br>
-                        My mission with ReasoningFrame is to translate a decade of hard-coding experience into visual systems (n8n + Claude) that you can deploy in 2 hours to generate real revenue.
-                    </p>
-                </div>
-            </div>
-
-            <div class="w3-col l7 m12 w3-padding-16">
-                <h3 class="w3-xxlarge w3-bold w3-margin-bottom" style="letter-spacing: -0.5px;">What You'll Build</h3>
-                
-                <div class="w3-row-padding" style="margin: 0 -16px;">
-                    
-                    <div class="w3-col m6 w3-margin-bottom">
-                        <div class="soft-ui-card" style="height: 100%; padding: 24px;">
-                            <div class="module-icon icon-orange">
-                                <i class="fa fa-cogs"></i>
-                            </div>
-                            <h4 class="module-title">1. The Foundation</h4>
-                            <p class="module-desc">Connect your visual n8n environment to the Anthropic (Claude) API in under 15 minutes. The bedrock of your agent.</p>
-                        </div>
-                    </div>
-
-                    <div class="w3-col m6 w3-margin-bottom">
-                        <div class="soft-ui-card" style="height: 100%; padding: 24px;">
-                            <div class="module-icon icon-blue">
-                                <i class="fa fa-search"></i>
-                            </div>
-                            <h4 class="module-title">2. The Agent's Eyes</h4>
-                            <p class="module-desc">Teach your agent how to open any URL (Web Scraping), read the source code, and extract actionable text for outreach.</p>
-                        </div>
-                    </div>
-
-                    <div class="w3-col m6 w3-margin-bottom">
-                        <div class="soft-ui-card" style="height: 100%; padding: 24px;">
-                            <div class="module-icon icon-purple">
-                                <i class="fa fa-bolt"></i>
-                            </div>
-                            <h4 class="module-title">3. The Brain (Claude AI)</h4>
-                            <p class="module-desc">Use advanced prompting so Claude can reason, qualify prospects against your criteria, and draft hyper-personalized emails.</p>
-                        </div>
-                    </div>
-
-                    <div class="w3-col m6 w3-margin-bottom">
-                        <div class="soft-ui-card" style="height: 100%; padding: 24px;">
-                            <div class="module-icon icon-green">
-                                <i class="fa fa-slack"></i>
-                            </div>
-                            <h4 class="module-title">4. The Safety Net</h4>
-                            <p class="module-desc">Connect your agent to Slack to manually approve every generated email before it gets sent. You always stay in control.</p>
-                        </div>
-                    </div>
-
-                </div>
-            </div>
-
-        </div>
-    </div>
-</div>
-<div id="pricing" class="w3-white w3-padding-64">
-    <div class="w3-content" style="max-width:1100px">
-        <div class="w3-row-padding">
-
-            <div class="w3-col l6 m6 w3-margin-bottom">
-                <div class="pricing-card-pro">
-                    <div class="w3-row-padding" style="margin: 0 -16px;">
-                        <div class="w3-col m12 w3-margin-bottom">
-                            <h3 class="w3-xlarge" style="font-weight: 600;">Interactive Course</h3>
-                            <p class="w3-text-grey w3-small" style="line-height: 1.5; margin-bottom: 32px;">
-                                Everything you need to build your first AI Agent.
-                            </p>
-                            
-                            <div class="w3-margin-bottom">
-                                <span class="price-display">€79</span><span class="price-month">/One-time</span>
-                            </div>
-                            
-                            <button class="w3-button bg-gradient-btn w3-round-xxlarge w3-padding-large w3-margin-bottom">Buy the Course</button>
-                            
-                            <ul class="pricing-features">
-                                <li><span class="check-circle"><i class="fa fa-check"></i></span> 4 Interactive Modules</li>
-                                <li><span class="check-circle"><i class="fa fa-check"></i></span> Webhook Validation System</li>
-                                <li><span class="check-circle"><i class="fa fa-check"></i></span> Final Lead Gen Project</li>
-                                <li><span class="check-circle"><i class="fa fa-check"></i></span> Lifetime Access</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="w3-col l6 m6 w3-margin-bottom">
-                <div class="pricing-card-ent">
-                    <h3 class="w3-xlarge" style="font-weight: 600;">Agency Bundle</h3>
-                    <p class="w3-text-grey w3-small" style="line-height: 1.5; margin-bottom: 32px;">
-                        Course + Ready-to-use n8n Blueprints for your clients.
-                    </p>
-                    
-                    <div class="w3-margin-bottom">
-                        <span class="price-display">€149</span><span class="price-month">/One-time</span>
-                    </div>
-                    
-                    <button class="w3-button w3-black w3-round-xxlarge w3-padding-large w3-margin-bottom">Get the Agency Bundle</button>
-                    
-                    <ul class="pricing-features">
-                        <li><span class="check-circle"><i class="fa fa-check"></i></span> <strong>Everything in the Course</strong></li>
-                        <li><span class="check-circle"><i class="fa fa-check"></i></span> 5 Premium n8n AI Templates</li>
-                        <li><span class="check-circle"><i class="fa fa-check"></i></span> Advanced Prompt Library</li>
-                        <li><span class="check-circle"><i class="fa fa-check"></i></span> Priority Email Support</li>
-                    </ul>
-                </div>
-            </div>
-
-            <div class="w3-col m12 w3-margin-top">
-                <div class="soft-ui-card w3-center" style="max-width: 600px; margin: 32px auto 0 auto; padding: 24px; border: 1px solid #bbf7d0; background-color: #f0fdf4;">
-                    <div class="w3-text-green w3-large w3-margin-bottom"><i class="fa fa-shield"></i></div>
-                    <h4 class="w3-medium w3-bold w3-text-green" style="margin-bottom: 8px;">14-Day Action-Based Guarantee</h4>
-                    <p class="w3-tiny w3-text-dark-grey" style="line-height: 1.5; margin:0;">
-                        Complete the 4 modules and build your agent. If it doesn't save you time or generate leads, show me your n8n workflow and I'll refund your €79. <strong>Zero risk to start.</strong>
-                    </p>
-                </div>
-            </div>
-
-        </div>
-    </div>
-</div>
-
-
-<div class="w3-white w3-padding-64" id="faq">
-    <div class="w3-content" style="max-width:1200px">
-        <div class="w3-row-padding">
-            
-            <div class="w3-col l5 m12 w3-margin-bottom w3-padding-32">
-                <p class="w3-small w3-bold text-orange-custom w3-uppercase" style="letter-spacing: 1px;">Frequently Asked Questions</p>
-                <h2 class="w3-xxxlarge w3-bold w3-margin-bottom" style="line-height: 1.2; letter-spacing: -1px;">
-                    Your questions, <br>answered.
-                </h2>
-                <p class="w3-text-grey w3-large w3-margin-bottom" style="max-width: 85%; line-height: 1.6;">
-                    Find clear answers to common questions about how the course works and the tools we use (n8n & Claude).
-                </p>
-                <a href="#pricing" class="w3-button bg-gradient-btn w3-round-xxlarge w3-padding-large w3-margin-top">Start the Course</a>
-            </div>
-
-            <div class="w3-col l7 m12 w3-padding-16">
-                <div class="faq-container">
-                    
-                    <div class="faq-item active" onclick="toggleFaq(this)">
-                        <div class="faq-question">
-                            Do I need to know how to code (Python, JS) to take this course?
-                            <div class="faq-icon"><i class="fa fa-minus"></i></div>
-                        </div>
-                        <div class="faq-answer">
-                            Absolutely not. That's the beauty of n8n: it's visual orchestration (drag-and-drop). If you understand basic logic (If A happens, then do B), you will succeed in this course. Zero lines of code required.
-                        </div>
-                    </div>
-
-                    <div class="faq-item" onclick="toggleFaq(this)">
-                        <div class="faq-question">
-                            Will n8n and Claude be expensive to run on top of the course?
-                            <div class="faq-icon"><i class="fa fa-plus"></i></div>
-                        </div>
-                        <div class="faq-answer">
-                            No. You can self-host n8n for free on your machine (or use their free cloud trial). As for the Claude API, it costs fractions of a cent. Running this agent to qualify 100 prospects will cost you less than $1 in API fees.
-                        </div>
-                    </div>
-
-                    <div class="faq-item" onclick="toggleFaq(this)">
-                        <div class="faq-question">
-                            Does this agent work for all B2B industries?
-                            <div class="faq-icon"><i class="fa fa-plus"></i></div>
-                        </div>
-                        <div class="faq-answer">
-                            Yes! The agent is industry-agnostic. Whether you sell SaaS, design services, or consulting, you simply need to modify the instructions (the prompt) in Module 3 so Claude looks for your specific ideal criteria.
-                        </div>
-                    </div>
-
-                </div>
-            </div>
-
-        </div>
-    </div>
-</div>
-
-
-<div class="section-soft-bg w3-padding-64">
-    <div class="w3-content w3-center" style="max-width:800px">
-        <h2 class="w3-xxlarge w3-bold w3-margin-bottom" style="letter-spacing: -0.5px;">Ready to put your prospecting on autopilot?</h2>
-        <p class="w3-large w3-text-grey w3-margin-bottom">Join other agency founders and build your first AI agent today.</p>
-        <a href="#pricing" class="w3-button bg-gradient-btn w3-round-xxlarge w3-padding-large w3-large w3-margin-top" style="box-shadow: 0 10px 25px rgba(234, 88, 12, 0.2);">
-            Get Instant Access for €79
-        </a>
-    </div>
-</div>
-
-
-<div class="w3-white w3-padding-64" style="border-top: 1px solid #f9fafb;">
-    <div class="w3-content" style="max-width:1100px">
-        
-        <div class="w3-row-padding">
-            
-            <div class="w3-col l4 m12 w3-margin-bottom">
-                <h2 class="w3-xlarge w3-bold" style="letter-spacing: -0.5px;">ReasoningFrame</h2>
-                <p class="w3-text-grey" style="line-height: 1.6; padding-right: 20px; max-width: 350px;">
-                    Practical, interactive education for the next generation of AI automation builders.
-                </p>
-            </div>
-
-            <div class="w3-col l3 m4 s6 w3-margin-bottom">
-                <h4 class="w3-medium w3-bold w3-margin-bottom" style="color: #111827;">Platform</h4>
-                <div class="footer-links">
-                    <a href="#" class="w3-text-grey w3-hover-text-black">The Course</a>
-                    <a href="#pricing" class="w3-text-grey w3-hover-text-black">Pricing</a>
-                    <a href="#" class="w3-text-grey w3-hover-text-black">Login to Dashboard</a>
-                </div>
-            </div>
-
-            <div class="w3-col l3 m4 s6 w3-margin-bottom">
-                <h4 class="w3-medium w3-bold w3-margin-bottom" style="color: #111827;">Legal & Support</h4>
-                <div class="footer-links">
-                    <a href="#" class="w3-text-grey w3-hover-text-black">Contact Us</a>
-                    <a href="#" class="w3-text-grey w3-hover-text-black">Terms of Service</a>
-                    <a href="#" class="w3-text-grey w3-hover-text-black">Privacy Policy</a>
-                </div>
-            </div>
-
-        </div>
-
-        <br><br>
-
-        <div class="w3-row w3-margin-top w3-padding-16">
-            <div class="w3-half w3-text-grey w3-small" style="font-weight: 500;">
-                © 2026 ReasoningFrame. All Rights Reserved.
-            </div>
-            
-            <div class="w3-half w3-right-align">
-                <a href="#" class="back-to-top-container w3-text-black" style="text-decoration: none; display: inline-flex; align-items: center; gap: 12px; font-weight: 500;">
-                    <span class="back-to-top-btn"><i class="fa fa-arrow-up"></i></span> Back to Top
-                </a>
-            </div>
-        </div>
-
-    </div>
-</div>
-
-
-
-<script>
-    function toggleFaq(element) {
-        // Optionnel : fermer automatiquement les autres questions quand on en ouvre une
-        const allFaqs = document.querySelectorAll('.faq-item');
-        allFaqs.forEach(faq => {
-            if (faq !== element && faq.classList.contains('active')) {
-                faq.classList.remove('active');
-                faq.querySelector('.fa').classList.replace('fa-minus', 'fa-plus');
-            }
-        });
-
-        // Toggle l'état de la question cliquée
-        element.classList.toggle('active');
-        
-        // Changer l'icône + / -
-        const icon = element.querySelector('.fa');
-        if (element.classList.contains('active')) {
-            icon.classList.replace('fa-plus', 'fa-minus');
-        } else {
-            icon.classList.replace('fa-minus', 'fa-plus');
+    <style>
+        html, body {
+            font-family: 'Inter', sans-serif;
+            background: #0b0b0f;
+            color: #e5e7eb;
+            margin: 0;
         }
+
+        .rf-shell {
+            max-width: 1180px;
+            margin: 0 auto;
+        }
+
+        .rf-glass {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            backdrop-filter: blur(10px);
+            border-radius: 18px;
+        }
+
+        .rf-hero-title {
+            font-size: 52px;
+            line-height: 1.05;
+            font-weight: 700;
+            letter-spacing: -1.8px;
+        }
+
+        .rf-muted {
+            color: #a1a1aa;
+        }
+
+        .rf-brand {
+            font-weight: 700;
+            letter-spacing: -1px;
+            font-size: 24px;
+        }
+
+        .rf-brand span {
+            color: #818cf8;
+        }
+
+        .rf-input-wrap {
+            position: relative;
+            max-width: 760px;
+            margin: 0 auto;
+        }
+
+        .rf-input {
+            width: 100%;
+            background: rgba(255,255,255,0.03);
+            color: #fff;
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 18px;
+            padding: 20px 160px 20px 20px;
+            font-size: 17px;
+            outline: none;
+        }
+
+        .rf-input:focus {
+            border-color: #6366f1;
+            box-shadow: 0 0 0 4px rgba(99,102,241,0.12);
+        }
+
+        .rf-primary-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            height: 52px;
+            min-width: 135px;
+            border: none;
+            border-radius: 14px;
+            background: linear-gradient(135deg, #6366f1, #4f46e5);
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .rf-chip {
+            display: inline-block;
+            background: #17171c;
+            border: 1px solid #2b2b34;
+            color: #d4d4d8;
+            padding: 8px 14px;
+            border-radius: 999px;
+            cursor: pointer;
+            font-size: 13px;
+            margin: 4px;
+            transition: 0.2s ease;
+        }
+
+        .rf-chip:hover {
+            border-color: #818cf8;
+            color: #818cf8;
+        }
+
+        .rf-credit-badge {
+            display: inline-block;
+            color: #a5b4fc;
+            background: rgba(99,102,241,0.12);
+            border: 1px solid rgba(99,102,241,0.22);
+            padding: 8px 14px;
+            border-radius: 999px;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .rf-google-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            color: #fff;
+            border-radius: 12px;
+            padding: 10px 14px;
+            cursor: pointer;
+        }
+
+        .rf-preview-title {
+            font-weight: 700;
+            font-size: 30px;
+            letter-spacing: -1px;
+        }
+
+        .rf-code {
+            background: #121218;
+            border: 1px solid #242430;
+            border-radius: 12px;
+            padding: 16px;
+            overflow-x: auto;
+            color: #c4e1ff;
+            font-family: monospace;
+        }
+
+        .rf-challenge {
+            background: rgba(99,102,241,0.06);
+            border: 1px solid rgba(99,102,241,0.15);
+            border-left: 4px solid #6366f1;
+            border-radius: 12px;
+            padding: 18px;
+        }
+        
+        .rf-highlight { color: #818cf8; }
+
+        /* Homogénéisation des hauteurs */
+.rf-faq-grid {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.rf-faq-item {
+    display: flex;
+}
+
+.rf-glass {
+    flex: 1; /* Force la carte à prendre toute la hauteur disponible du parent */
+    display: flex;
+    flex-direction: column;
+}
+    </style>
+</head>
+<body onload="brython()">
+
+<div class="w3-container w3-padding-24">
+    <div class="rf-shell">
+
+        <div class="w3-bar">
+            <div class="w3-bar-item rf-brand">reasoning<span>frame</span></div>
+            <div class="w3-right w3-hide-small" style="display:flex; align-items:center; gap:12px; padding-top:4px;">
+                <span class="rf-credit-badge">⚡ 5 credits</span>
+                <button id="login" class="rf-google-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 48 48">
+                        <path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24s8.955,20,20,20s20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"></path>
+                        <path fill="#FF3D00" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"></path>
+                        <path fill="#4CAF50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z"></path>
+                        <path fill="#1976D2" d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.571c0.001-0.001,0.002-0.001,0.003-0.002l6.19,5.238C36.971,39.205,44,34,44,24C44,22.659,43.862,21.35,43.611,20.083z"></path>
+                    </svg>
+                    Sign in
+                </button>
+            </div>
+        </div>
+
+        <div class="w3-center" style="padding-top:70px; padding-bottom:10px;">
+          <div class="rf-hero-title">
+        Type what you want to learn.<br>
+        <span class="rf-highlight">We generate the programming course of your dreams.</span>
+    </div>
+            <p class="rf-muted" style="font-size:18px; max-width:760px; margin:18px auto 0;">
+             Stop scrolling through endless videos. Get a personalized, 
+        interactive coding experience generated specifically for your goal.
+            </p>
+
+            <div class="rf-input-wrap" style="margin-top:34px;">
+                <input id="course_prompt" type="text" class="rf-input" placeholder="e.g.: I want to learn Python lists">
+                <button id="generate_btn" class="rf-primary-btn">Generate ⚡</button>
+            </div>
+
+            <div style="margin-top:20px; color: #9ca3af; font-size: 14px;">
+                Sample requests:
+            </div>
+
+       <div style="margin-top:10px;">
+    <span class="chip rf-chip" data-topic="I want to learn Python lists for absolute beginners">Python Lists for Beginners</span>
+    
+    <span class="chip rf-chip" data-topic="I want to learn Python Dictionaries for Data Analysis">Dicts for Data Analysis</span>
+    
+    <span class="chip rf-chip" data-topic="I want to learn Responsive Design for Backend Developers">Responsive for Backend Devs</span>
+    
+    <span class="chip rf-chip" data-topic="I want to learn JavaScript Fetch API to connect Front and Back">JS Fetch: Front to Back</span>
+    
+    <span class="chip rf-chip" data-topic="I want to learn CSS Flexbox for modern App Layouts">Modern App Layouts (CSS)</span>
+</div>
+        </div>
+
+        <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.06); margin: 56px 0 36px;">
+
+        <section class="w3-container w3-content" style="max-width:1100px; padding-top:40px; padding-bottom:80px;">
+
+            <div class="w3-center" style="margin-bottom:50px;">
+                <h2 style="font-weight:700; font-size:38px; margin-bottom:12px;">
+                    Why students choose <span style="color:#818cf8;">reasoningframe</span>
+                </h2>
+                <p style="color:#a1a1aa; font-size:18px; max-width:760px; margin:0 auto;">
+                    On-demand Python micro-courses, designed to learn faster than passive video tutorials.
+                </p>
+            </div>
+
+            <div class="w3-row-padding" style="margin-bottom:60px;">
+                <div class="w3-col l4 m6 s12 w3-margin-bottom">
+                    <div class="rf-glass w3-padding-large" style="height:100%;">
+                        <h4 style="font-weight:600;">Courses based on your needs</h4>
+                        <p class="rf-muted" style="line-height:1.8;">
+                            Simply type what you want to learn: lists, dictionaries, variables, exceptions, loops, or functions. 
+                            reasoningframe generates a targeted course for you.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="w3-col l4 m6 s12 w3-margin-bottom">
+                    <div class="rf-glass w3-padding-large" style="height:100%;">
+                        <h4 style="font-weight:600;">Short & Actionable Format</h4>
+                        <p class="rf-muted" style="line-height:1.8;">
+                            Every course gets straight to the point: objective, clear explanation, simple example, concrete case, and quick challenge.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="w3-col l4 m6 s12 w3-margin-bottom">
+                    <div class="rf-glass w3-padding-large" style="height:100%;">
+                        <h4 style="font-weight:600;">No forced curriculum</h4>
+                        <p class="rf-muted" style="line-height:1.8;">
+                            You don't need to buy an 8-hour course just to find 10 useful minutes. 
+                            Request a specific topic, get exactly what you need.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="w3-col l4 m6 s12 w3-margin-bottom">
+                    <div class="rf-glass w3-padding-large" style="height:100%;">
+                        <h4 style="font-weight:600;">Course History</h4>
+                        <p class="rf-muted" style="line-height:1.8;">
+                            All generated courses are saved in your dashboard so you can review, compare, and revisit concepts later.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="w3-col l4 m6 s12 w3-margin-bottom">
+                    <div class="rf-glass w3-padding-large" style="height:100%;">
+                        <h4 style="font-weight:600;">One-click Google Sign-in</h4>
+                        <p class="rf-muted" style="line-height:1.8;">
+                            Sign in instantly to find your credits, profile, and previously generated courses.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="w3-col l4 m6 s12 w3-margin-bottom">
+                    <div class="rf-glass w3-padding-large" style="height:100%;">
+                        <h4 style="font-weight:600;">Simple Credit-based Payment</h4>
+                        <p class="rf-muted" style="line-height:1.8;">
+                            No complicated subscriptions. Generate a course only when you need it.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="w3-center" style="margin-bottom:30px;">
+                <h2 style="font-weight:700; font-size:34px; margin-bottom:12px;">
+                    What makes <span style="color:#818cf8;">reasoningframe</span> different
+                </h2>
+                <p style="color:#a1a1aa; font-size:17px; max-width:720px; margin:0 auto;">
+                    Most platforms sell fixed content. reasoningframe generates a course from your actual intent.
+                </p>
+            </div>
+
+            <div class="rf-glass w3-padding-24" style="margin-bottom:60px; overflow-x:auto;">
+                <table class="w3-table" style="color:#e5e7eb;">
+                    <thead>
+                        <tr style="border-bottom:1px solid rgba(255,255,255,0.08);">
+                            <th style="padding:14px 8px;">Feature</th>
+                            <th style="padding:14px 8px; color:#818cf8;">reasoningframe</th>
+                            <th style="padding:14px 8px;">Traditional Video Courses</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr style="border-bottom:1px solid rgba(255,255,255,0.05);">
+                            <td style="padding:14px 8px;">Course generated per request</td>
+                            <td style="padding:14px 8px;">✓ Yes</td>
+                            <td style="padding:14px 8px;">✗ No</td>
+                        </tr>
+                        <tr style="border-bottom:1px solid rgba(255,255,255,0.05);">
+                            <td style="padding:14px 8px;">Targeted learning on specific topics</td>
+                            <td style="padding:14px 8px;">✓ Yes</td>
+                            <td style="padding:14px 8px;">△ Sometimes</td>
+                        </tr>
+                        <tr style="border-bottom:1px solid rgba(255,255,255,0.05);">
+                            <td style="padding:14px 8px;">Instant access to micro-courses</td>
+                            <td style="padding:14px 8px;">✓ Yes</td>
+                            <td style="padding:14px 8px;">✗ No</td>
+                        </tr>
+                        <tr style="border-bottom:1px solid rgba(255,255,255,0.05);">
+                            <td style="padding:14px 8px;">No need for long curriculum</td>
+                            <td style="padding:14px 8px;">✓ Yes</td>
+                            <td style="padding:14px 8px;">✗ No</td>
+                        </tr>
+                        <tr style="border-bottom:1px solid rgba(255,255,255,0.05);">
+                            <td style="padding:14px 8px;">Saved course history</td>
+                            <td style="padding:14px 8px;">✓ Yes</td>
+                            <td style="padding:14px 8px;">✗ No</td>
+                        </tr>
+                        <tr>
+                            <td style="padding:14px 8px;">Flexible credit payment</td>
+                            <td style="padding:14px 8px;">✓ Yes</td>
+                            <td style="padding:14px 8px;">✗ No</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="w3-center" style="margin-bottom:30px;">
+                <h2 style="font-weight:700; font-size:34px; margin-bottom:12px;">
+                    Request exactly what you want to learn
+                </h2>
+                <p style="color:#a1a1aa; font-size:17px; max-width:760px; margin:0 auto;">
+                    reasoningframe is built for simple and concrete requests.
+                </p>
+            </div>
+
+            <div class="rf-glass w3-padding-24" style="margin-bottom:16px;">
+    <div style="display:flex; flex-wrap:wrap; gap:10px;">
+        <span class="rf-chip" data-topic="I want to learn Python lists for absolute beginners">Python Lists for Beginners</span>
+        <span class="rf-chip" data-topic="I want to learn Python Dictionaries for Data Analysis">Dicts for Data Analysis</span>
+        <span class="rf-chip" data-topic="I want to understand Error Handling with Try/Except for Backend Devs">Error Handling for Backend</span>
+        
+        <span class="rf-chip" data-topic="I want to learn Responsive Website Design for Backend Developers">Responsive UI for Backend Devs</span>
+        <span class="rf-chip" data-topic="I want to learn Modern CSS Flexbox for App Layouts">Modern App Layouts (Flexbox)</span>
+        <span class="rf-chip" data-topic="I want to learn JavaScript Fetch API to connect Front to Back">Connect Front to Back (JS Fetch)</span>
+        
+        <span class="rf-chip" data-topic="I want to learn Python For Loops for automating repetitive tasks">Automating Tasks with Loops</span>
+        <span class="rf-chip" data-topic="I want to learn clean Python Functions for scalable code">Clean Functions for Scalable Code</span>
+    </div>
+</div>
+
+            <div class="w3-center" style="margin-bottom:60px;">
+                <p class="rf-muted" style="font-size:15px;">
+                    <strong style="color:#e5e7eb;">1 credit = 1 generated course.</strong> You are free to pick only the topics that interest you.
+                </p>
+            </div>
+
+            <div class="w3-center" style="margin-bottom:30px;">
+                <h2 style="font-weight:700; font-size:34px; margin-bottom:12px;">
+                    Simple pricing to get started
+                </h2>
+                <p style="color:#a1a1aa; font-size:17px; max-width:760px; margin:0 auto;">
+                    Start for free, then buy credits when you want to go further.
+                </p>
+            </div>
+
+            <div class="w3-content" style="max-width:900px; margin-bottom:60px;">
+                <div class="w3-row-padding">
+                    <div class="w3-col l6 m6 s12 w3-margin-bottom">
+                        <div class="rf-glass w3-padding-large" style="height:27rem;">
+                            <div style="font-size:14px; color:#a1a1aa; margin-bottom:8px;">Free</div>
+                            <div style="font-size:42px; font-weight:700;">$0</div>
+                            <div class="rf-muted" style="margin-top:6px;">5 free credits</div>
+
+                            <div style="margin-top:24px; line-height:2; color:#d4d4d8;">
+                                <div>• Python micro-course generation</div>
+                                <div>• Basic history</div>
+                                <div>• Google Sign-in</div>
+                                <div>• No credit card required</div>
+                            </div>
+
+                            <button class="rf-primary-btn" id="free_started" style="position:static; width:100%; margin-top:60px;">
+                                Get started for free
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="w3-col l6 m6 s12 w3-margin-bottom">
+                        <div class="rf-glass w3-padding-large" style="height:100%; border:1px solid rgba(99,102,241,0.35);">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                                <div style="font-size:14px; color:#818cf8; font-weight:600;">Pro Credits</div>
+                                <div style="font-size:12px; color:#a5b4fc; background:rgba(99,102,241,0.12); padding:6px 10px; border-radius:999px;">
+                                    One-time payment
+                                </div>
+                            </div>
+
+                            <div style="font-size:42px; font-weight:700;">$39</div>
+                            <div class="rf-muted" style="margin-top:6px;">100 credits</div>
+
+                            <div style="margin-top:24px; line-height:2; color:#d4d4d8;">
+                                <div>• 100 courses generated</div>
+                                <div>• Full history access</div>
+                                <div>• Use anytime</div>
+                                <div>• No monthly subscription</div>
+                                <div>• More room to practice</div>
+                            </div>
+
+                            <button id="buy_credit" class="rf-primary-btn" style="position:static; width:100%; margin-top:24px;">
+                                Buy 100 credits
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="w3-center" style="margin-bottom:30px;">
+                <h2 style="font-weight:700; font-size:34px; margin-bottom:12px;">
+                    Frequently Asked Questions
+                </h2>
+                <p style="color:#a1a1aa; font-size:17px; max-width:760px; margin:0 auto;">
+                    Everything you need to know to get started with reasoningframe.
+                </p>
+            </div>
+
+         <div class="w3-row-padding  rf-faq-grid" style="margin-bottom:60px;">
+    <div class="w3-col l6 m12 s12 w3-margin-bottom rf-faq-item">
+        <div class="rf-glass w3-padding-large" style="height:100%;">
+            <h4 style="font-weight:600;">What is reasoningframe?</h4>
+            <p class="rf-muted" style="line-height:1.8;">
+                It's an AI-powered platform that generates <strong>instant programming micro-courses</strong>. Instead of watching someone else code, you get a personalized lesson tailored to your specific goal (Python, JS, HTML, or CSS) so you can start building immediately.
+            </p>
+        </div>
+    </div>
+
+    <div class="w3-col l6 m12 s12 w3-margin-bottom rf-faq-item">
+        <div class="rf-glass w3-padding-large" style="height:100%;">
+            <h4 style="font-weight:600;">How does it work?</h4>
+            <p class="rf-muted" style="line-height:1.8;">
+                Type an intention like "I want to learn CSS Flexbox for app layouts." Our engine generates a structured guide including the <strong>core logic, real-world code examples, and an interactive challenge</strong>. No fluff, just the code.
+            </p>
+        </div>
+    </div>
+
+    <div class="w3-col l6 m12 s12 w3-margin-bottom rf-faq-item">
+        <div class="rf-glass w3-padding-large" style="height:100%;">
+            <h4 style="font-weight:600;">Why is it better than video courses?</h4>
+            <p class="rf-muted" style="line-height:1.8;">
+                Videos are passive. Research shows you learn faster by <strong>doing</strong>. reasoningframe eliminates the "scroll-and-search" struggle by giving you exactly the explanation and snippet you need for your current project.
+            </p>
+        </div>
+    </div>
+
+    <div class="w3-col l6 m12 s12 w3-margin-bottom rf-faq-item">
+        <div class="rf-glass w3-padding-large" style="height:100%;">
+            <h4 style="font-weight:600;">How do credits work?</h4>
+            <p class="rf-muted" style="line-height:1.8;">
+                1 Credit = 1 Micro-course generated. We don't believe in monthly subscriptions that you forget to use. Buy credits, use them whenever you face a coding roadblock, and they never expire.
+            </p>
+        </div>
+    </div>
+
+    <div class="w3-col l6 m12 s12 w3-margin-bottom rf-faq-item">
+        <div class="rf-glass w3-padding-large" style="height:100%;">
+            <h4 style="font-weight:600;">Can I access my courses later?</h4>
+            <p class="rf-muted" style="line-height:1.8;">
+                Yes! Every course you generate is saved to your <strong>personal library</strong>. You can revisit your snippets, explanations, and challenges anytime by signing in with your Google account.
+            </p>
+        </div>
+    </div>
+
+    <div class="w3-col l6 m12 s12 w3-margin-bottom rf-faq-item">
+        <div class="rf-glass w3-padding-large" style="height:100%;">
+            <h4 style="font-weight:600;">Which languages are supported?</h4>
+            <p class="rf-muted" style="line-height:1.8;">
+                Currently, we specialize in the <strong>Full-Stack core</strong>: Python, JavaScript, HTML, and CSS. We focus on these to ensure the highest pedagogical quality and most accurate code generation.
+            </p>
+        </div>
+    </div>
+</div>
+
+        <div class="rf-glass w3-center w3-padding-48">
+    <h2 style="font-weight:700; font-size:36px; margin-bottom:12px;">
+        Generate the programming course you always needed.
+    </h2>
+    <p class="rf-muted" style="font-size:18px; max-width:720px; margin:0 auto 32px;">
+        Stop being a passive spectator. Take control of your coding journey with 
+        interactive micro-lessons tailored to your specific goals.
+    </p>
+
+    <div style="display: flex; justify-content: center;">
+        <button id="generate" class="rf-primary-btn" style="position:static; width: auto; min-width: 260px; padding: 0 35px;">
+            Generate my first course
+        </button>
+    </div>
+</div>
+
+        </section>
+
+    </div>
+</div>
+
+<script type="text/python">
+from browser import document, alert, window
+
+SAMPLES = {
+    "I want to learn Python lists for absolute beginners": {
+        "title": "Python Lists for Absolute Beginners",
+        "objective": "Master the basics of storing collections without the headache.",
+        "why": "Forget 20-minute videos. In 5 minutes, you'll know how to store, access, and modify data in Python's most popular container.",
+        "code": 'todo_list = ["Code", "Eat", "Sleep"]\ntodo_list.append("Repeat")\nprint(todo_list[0]) # Output: Code',
+        "challenge": "Create a list of 3 coding languages and print the last one."
+    },
+    "I want to learn Responsive Website Design for Backend Developers": {
+        "title": "Responsive Design for Backend Developers",
+        "objective": "Make your tools look professional on any screen with minimal CSS.",
+        "why": "Backend devs often skip CSS. This micro-course gives you the 20% of CSS that solves 80% of your layout problems.",
+        "code": '/* The Backend Devs Secret Weapon */\n.container {\n  display: flex;\n  flex-wrap: wrap;\n  gap: 20px;\n}',
+        "challenge": "Apply 'flex-direction: column' on mobile views using a media query."
+    },
+    "I want to learn JavaScript Fetch API to connect Front and Back": {
+        "title": "JS Fetch: Bridge your Front and Back",
+        "objective": "Stop refreshing pages. Learn to send data to your API asynchronously.",
+        "why": "This is the essential skill for modern web apps. Connect your UI to your Python/FastAPI backend instantly.",
+        "code": 'async def postData(url, data): \n  await fetch(url, { method: "POST", body: JSON.stringify(data) });',
+        "challenge": "Add a '.catch()' block to handle potential network errors."
     }
+}
+
+def set_preview(data):
+    document["preview_title"].text = data["title"]
+    document["preview_objective"].text = data["objective"]
+    document["preview_why"].text = data["why"]
+    document["preview_code"].text = data["code"]
+    document["preview_challenge"].text = data["challenge"]
+    document["preview_meta"].text = "Beginner • 5 min • 1 credit used"
+
+def generate_course(ev):
+    prompt = document["course_prompt"].value.strip()
+    if not prompt:
+        alert("Please type what you want to learn first.")
+        return
+
+    # 1. Check exact match from chips
+    for key in SAMPLES:
+        if prompt.lower() == key.lower():
+            set_preview(SAMPLES[key])
+            return
+
+    # 2. Logic detection by keywords
+    lowered = prompt.lower()
+    if "variable" in lowered:
+        set_preview(SAMPLES["I want to learn Python variables"])
+    elif "list" in lowered:
+        set_preview(SAMPLES["I want to learn Python lists"])
+    elif "dictionary" in lowered:
+        set_preview(SAMPLES["I want to learn Python dictionaries"])
+    elif "exception" in lowered or "try" in lowered or "except" in lowered:
+        set_preview(SAMPLES["I want to learn Python exceptions"])
+    else:
+        set_preview({
+            "title": "Custom Python Course",
+            "objective": f"Explore: {prompt}",
+            "why": "This topic has been interpreted as a custom learning request.",
+            "code": "# Generated Example\nprint('Custom course in preparation...')",
+            "challenge": "Try writing a first example related to this topic."
+        })
+
+for chip in document.select(".rf-chip"):
+    def fill_and_submit(ev):
+        topic = ev.currentTarget.attrs["data-topic"]
+        document["course_prompt"].value = topic
+        generate_course(None)
+    chip.bind("click", fill_and_submit)
+
+document["generate_btn"].bind("click", generate_course)
+
+# Fonction de redirection
+def go_to_login(ev):
+    prompt = document["course_prompt"].value.strip()
+    
+    if prompt:
+        # On sauvegarde l'intention dans le navigateur
+        window.sessionStorage.setItem("pending_prompt", prompt)
+    
+    # Redirection vers le login
+    window.location.href = "{{=URL('login')}}"
+
+# On lie cette fonction au bouton principal
+document["generate_btn"].bind("click", go_to_login)
+
+# Liaison du bouton par son ID
+document["free_started"].bind("click", go_to_login)
+document["login"].bind("click", go_to_login)
+document["generate"].bind("click", go_to_login)
+document["buy_credit"].bind("click", go_to_login)
+
 </script>
+<script src="https://cdn.jsdelivr.net/npm/brython@3.12.0/brython.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/brython@3.12.0/brython_stdlib.js"></script>
+
+</body>
+</html>
