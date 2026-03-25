@@ -4,6 +4,7 @@ errors/
 databases/
 uploads/
 languages/
+private/
 
 private/appconfig.ini
 private/*.secret

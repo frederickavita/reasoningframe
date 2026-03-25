@@ -125,19 +125,19 @@
             <span style="color: #818cf8; font-size: 20px; font-weight: 700;">$39.00</span>
         </div>
         
-        <!-- LE NOUVEAU LIEN PAYPAL -->
-        <a href="https://www.paypal.com/ncp/payment/K9HFS793MDVC4?custom={{=auth.user_id}}" 
+        <!-- LE LIEN QUI APPELLE TON SERVEUR AVANT PAYPAL -->
+        <a href="{{=URL('default', 'initiate_topup')}}" 
            class="btn-primary" 
            style="display: block; width: 100%; text-decoration: none; padding: 14px; font-size: 16px;">
            Pay with PayPal
         </a>
+        <p class="w3-small rf-muted w3-margin-top">You will be securely redirected to PayPal.</p>
         
         <button class="w3-button w3-margin-top rf-muted" id="close_topup" style="background: transparent; width: 100%;">Cancel</button>
     </div>
 </div>
 
 <script>
-    // Modal Toggle uniquement (on a supprimé tout le script paypal.Buttons)
     function toggleModal() {
         const modal = document.getElementById('modal_topup');
         modal.style.display = (modal.style.display === 'block') ? 'none' : 'block';
@@ -147,8 +147,7 @@
 </script>
 
 <script type="text/python">
-# Ton code Brython reste intact !
-from browser import document, ajax
+from browser import document, ajax, html
 import json
 
 class DashboardManager:
@@ -173,19 +172,26 @@ class DashboardManager:
 
     def _fill_table(self, data):
         container = document["course_table_body"]
-        container.html = ""
+        container.clear() # On vide proprement au lieu de remplacer du HTML brut
+
         for item in data:
-            container.html += f"""
-                <tr>
-                    <td>
-                        <div style="font-weight: 600;">{item.get('title', 'Untitled')}</div>
-                        <span class="rf-muted" style="font-size: 12px;">{item.get('language', 'Coding')}</span>
-                    </td>
-                    <td class="rf-muted">{item.get('date', 'N/A')}</td>
-                    <td style="text-align:right;">
-                        <button class="btn-primary" style="padding: 6px 16px; font-size: 13px;">Review</button>
-                    </td>
-                </tr>"""
+            # Construction sécurisée du DOM avec Brython
+            tr = html.TR()
+
+            td1 = html.TD()
+            td1 <= html.DIV(item.get("title", "Untitled"), style={"font-weight": "600"})
+            td1 <= html.SPAN(item.get("language", "Coding"), Class="rf-muted", style={"font-size": "12px"})
+
+            td2 = html.TD(item.get("date", "N/A"), Class="rf-muted")
+
+            td3 = html.TD(style={"text-align": "right"})
+            review_btn = html.BUTTON("Review", Class="btn-primary", style={"padding": "6px 16px", "font-size": "13px"})
+            td3 <= review_btn
+
+            tr <= td1
+            tr <= td2
+            tr <= td3
+            container <= tr
 
 manager = DashboardManager()
 manager.fetch_data()

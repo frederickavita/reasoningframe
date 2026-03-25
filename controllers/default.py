@@ -92,14 +92,14 @@ def _json(payload, status=200):
 
 def dashboard():
     if not auth.user:
-        redirect(URL('default', 'user', args='login'))
+        redirect(URL('default', 'login'))
     return dict()
 
 
 def initiate_topup():
     """Cette fonction est appelée UNIQUEMENT quand l'utilisateur clique sur 'Payer'"""
     if not auth.user:
-        redirect(URL('default', 'user', args='login')) 
+        redirect(URL('default', 'login')) 
     
     # 1. Création de la référence unique sécurisée
     topup_ref = "tpu_" + uuid.uuid4().hex
@@ -123,13 +123,11 @@ def initiate_topup():
 
 def initiate_topup():
     """Cette fonction est appelée UNIQUEMENT quand l'utilisateur clique sur 'Payer'"""
-    
-    # Vérification manuelle de la connexion
     if not auth.user:
         redirect(URL('default', 'user', args='login')) 
-        # (Ou tu peux renvoyer un message d'erreur si tu préfères)
-
+    
     import uuid
+    from decimal import Decimal
     
     # 1. Création de la référence unique sécurisée
     topup_ref = "tpu_" + uuid.uuid4().hex
@@ -139,16 +137,24 @@ def initiate_topup():
         user_id=auth.user_id,
         topup_ref=topup_ref,
         status="pending",
-        amount=PACK_PRICE,
+        amount=Decimal(PACK_PRICE),
         currency=PACK_CURRENCY,
         credits=PACK_CREDITS,
     )
     
-    # 3. Redirection instantanée vers PayPal avec la bonne référence
-    # (Remplace bien K9HFS... par ton vrai ID de lien hébergé)
-    topup_url = f"https://www.paypal.com/ncp/payment/K9HFS793MDVC4?custom={topup_ref}"
+    # 3. Redirection vers PayPal (Sandbox ou Live selon ta config)
+    mode = configuration.get("paypal.PAYPAL_MODE", "live").lower()
+    
+    if mode == "sandbox":
+        # TON NOUVEAU LIEN DE TEST
+        topup_url = f"https://www.sandbox.paypal.com/ncp/payment/6WD7R8ZKV5Y6J?custom={topup_ref}"
+    else:
+        # TON VRAI LIEN DE PRODUCTION (Pour le jour du lancement)
+        topup_url = f"https://www.paypal.com/ncp/payment/K9HFS793MDVC4?custom={topup_ref}"
     
     redirect(topup_url)
+
+
 
 
 
