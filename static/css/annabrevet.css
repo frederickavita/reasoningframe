@@ -1,0 +1,98 @@
+/* --- VARIABLES DE CHARTE (Inspiré des captures) --- */
+:root {
+    --anna-navy: #1a2b4c;       /* Titres principaux, texte lourd */
+    --anna-cyan: #00b4d8;       /* Badges, numéros, filets */
+    --anna-cyan-light: #e0f7fa; /* Fonds de tableaux/blocs */
+    --anna-green: #00a651;      /* Méthode / Validation */
+    --anna-green-light: #e8f8f0;/* Fond méthode */
+    --anna-grey-bg: #f7f9fa;    /* Fond général de la page */
+    --anna-grey-text: #4a4a4a;  /* Texte courant */
+    --anna-white: #ffffff;
+}
+
+/* --- BASE --- */
+.anna-course-container {
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    background-color: var(--anna-white);
+    color: var(--anna-grey-text);
+    max-width: 850px;
+    margin: 0 auto;
+    padding: 30px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    border-radius: 8px;
+    line-height: 1.6;
+}
+
+.anna-course-container h1, .anna-course-container h2, .anna-course-container h3 {
+    color: var(--anna-navy);
+    margin-top: 0;
+}
+
+/* --- COMPOSANTS --- */
+
+/* Gros numéro Cyan (Type Pages 2-3) */
+.anna-big-number {
+    font-size: 3.5rem;
+    font-weight: 900;
+    color: var(--anna-cyan);
+    line-height: 1;
+    margin-right: 20px;
+}
+
+/* Bouton d'action type Brevet */
+.anna-btn {
+    display: inline-block;
+    background-color: var(--anna-cyan);
+    color: var(--anna-white);
+    padding: 10px 20px;
+    text-decoration: none;
+    font-weight: bold;
+    border-radius: 20px;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    transition: background 0.2s;
+}
+.anna-btn:hover { background-color: var(--anna-navy); color: white; }
+
+/* Bandeau Titre (Type Page 11) */
+.anna-banner {
+    background-color: var(--anna-navy);
+    color: var(--anna-white);
+    padding: 25px;
+    border-left: 10px solid var(--anna-cyan);
+    margin-bottom: 30px;
+}
+.anna-banner h1 { color: var(--anna-white); margin: 0 0 10px 0; font-size: 2rem; }
+.anna-banner p { margin: 0; font-size: 1.2rem; opacity: 0.9; }
+
+/* Bloc de contenu (Type Pages 12-15) */
+.anna-block {
+    border-top: 3px solid var(--anna-cyan);
+    padding-top: 15px;
+    margin-bottom: 30px;
+}
+.anna-block-title {
+    color: var(--anna-cyan);
+    text-transform: uppercase;
+    font-weight: 800;
+    font-size: 1.1rem;
+    margin-bottom: 10px;
+}
+
+/* Encadré Méthode Vert (Type Pages 12-15) */
+.anna-methode-box {
+    border: 2px solid var(--anna-green);
+    background-color: var(--anna-green-light);
+    padding: 20px;
+    border-radius: 8px;
+    margin-top: 20px;
+}
+.anna-methode-title {
+    color: var(--anna-green);
+    font-weight: bold;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+}
