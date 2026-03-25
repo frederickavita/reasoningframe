@@ -156,7 +156,9 @@ def initiate_topup():
     redirect(topup_url)
 
 
-
+def payment_return():
+    """Page de redirection après le passage chez PayPal"""
+    return dict()
 
 
 def paypal_webhook():
