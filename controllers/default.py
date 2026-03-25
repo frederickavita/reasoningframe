@@ -7,7 +7,14 @@
 # ---- example index page ----
 import json, time, uuid, random, hashlib, io
 import requests 
+import uuid
+from decimal import Decimal
+import requests
 
+
+PACK_PRICE = Decimal("39.00")
+PACK_CURRENCY = "USD"
+PACK_CREDITS = 100
 
 
 GOOGLE_AUTH_URL      = 'https://accounts.google.com/o/oauth2/v2/auth'
@@ -20,6 +27,224 @@ GOOGLE_SCOPE         = 'openid email profile'
 # ROUTE 1 : Récupérer les données de la leçon et l'état de l'utilisateur
 # -------------------------------------------------------------------------
 # --- CONFIGURATION GLOBALE ---
+# -*- coding: utf-8 -*-
+
+
+def _paypal_base_url():
+    mode = configuration.get("PAYPAL_MODE", "live").lower()
+    return "https://api-m.paypal.com" if mode == "live" else "https://api-m.sandbox.paypal.com"
+
+def _paypal_credentials():
+    client_id = configuration.get("paypal.PAYPAL_CLIENT_ID")
+    client_secret = configuration.get("paypal.PAYPAL_CLIENT_SECRET")
+    webhook_id = configuration.get("paypal.PAYPAL_WEBHOOK_ID")
+    if not client_id or not client_secret:
+        raise RuntimeError("Missing PAYPAL_CLIENT_ID / PAYPAL_CLIENT_SECRET")
+    if not webhook_id:
+        raise RuntimeError("Missing PAYPAL_WEBHOOK_ID")
+    return client_id, client_secret, webhook_id
+
+def _paypal_access_token():
+    client_id, client_secret, _ = _paypal_credentials()
+    r = requests.post(
+        f"{_paypal_base_url()}/v1/oauth2/token",
+        auth=(client_id, client_secret),
+        headers={"Accept": "application/json"},
+        data={"grant_type": "client_credentials"},
+        timeout=20,
+    )
+    r.raise_for_status()
+    return r.json()["access_token"]
+
+def _verify_paypal_webhook_signature(event):
+    token = _paypal_access_token()
+    _, _, webhook_id = _paypal_credentials()
+
+    payload = {
+        "auth_algo": request.env.http_paypal_auth_algo,
+        "cert_url": request.env.http_paypal_cert_url,
+        "transmission_id": request.env.http_paypal_transmission_id,
+        "transmission_sig": request.env.http_paypal_transmission_sig,
+        "transmission_time": request.env.http_paypal_transmission_time,
+        "webhook_id": webhook_id,
+        "webhook_event": event,
+    }
+
+    r = requests.post(
+        f"{_paypal_base_url()}/v1/notifications/verify-webhook-signature",
+        headers={
+            "Authorization": f"Bearer {token}",
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+        },
+        json=payload,
+        timeout=20,
+    )
+    r.raise_for_status()
+    data = r.json()
+    return data.get("verification_status") == "SUCCESS"
+
+def _json(payload, status=200):
+    response.status = status
+    response.headers["Content-Type"] = "application/json"
+    return json.dumps(payload)
+
+
+def dashboard():
+    if not auth.user:
+        redirect(URL('default', 'user', args='login'))
+    return dict()
+
+
+def initiate_topup():
+    """Cette fonction est appelée UNIQUEMENT quand l'utilisateur clique sur 'Payer'"""
+    if not auth.user:
+        redirect(URL('default', 'user', args='login')) 
+    
+    # 1. Création de la référence unique sécurisée
+    topup_ref = "tpu_" + uuid.uuid4().hex
+
+    # 2. Enregistrement de l'intention d'achat en base (VRAIE intention)
+    db.credit_topup.insert(
+        user_id=auth.user_id,
+        topup_ref=topup_ref,
+        status="pending",
+        amount=Decimal(PACK_PRICE),
+        currency=PACK_CURRENCY,
+        credits=PACK_CREDITS,
+    )
+    
+    # 3. Redirection instantanée vers PayPal avec la bonne référence
+    topup_url = f"https://www.paypal.com/ncp/payment/K9HFS793MDVC4?custom={topup_ref}"
+    
+    redirect(topup_url)
+
+
+
+def initiate_topup():
+    """Cette fonction est appelée UNIQUEMENT quand l'utilisateur clique sur 'Payer'"""
+    
+    # Vérification manuelle de la connexion
+    if not auth.user:
+        redirect(URL('default', 'user', args='login')) 
+        # (Ou tu peux renvoyer un message d'erreur si tu préfères)
+
+    import uuid
+    
+    # 1. Création de la référence unique sécurisée
+    topup_ref = "tpu_" + uuid.uuid4().hex
+
+    # 2. Enregistrement de l'intention d'achat en base (VRAIE intention)
+    db.credit_topup.insert(
+        user_id=auth.user_id,
+        topup_ref=topup_ref,
+        status="pending",
+        amount=PACK_PRICE,
+        currency=PACK_CURRENCY,
+        credits=PACK_CREDITS,
+    )
+    
+    # 3. Redirection instantanée vers PayPal avec la bonne référence
+    # (Remplace bien K9HFS... par ton vrai ID de lien hébergé)
+    topup_url = f"https://www.paypal.com/ncp/payment/K9HFS793MDVC4?custom={topup_ref}"
+    
+    redirect(topup_url)
+
+
+
+def paypal_webhook():
+    """Le réceptionniste ultra-sécurisé des notifications PayPal"""
+    
+    # 1. Vérification de la méthode HTTP
+    if request.env.request_method != "POST":
+        return _json({"error": "Method not allowed"}, status=405)
+
+    # 2. Lecture et parsing du JSON
+    try:
+        raw_body = request.body.read()
+        event = json.loads(raw_body.decode("utf-8"))
+    except Exception:
+        return _json({"error": "Invalid JSON"}, status=400)
+
+    # 3. VÉRIFICATION DE LA SIGNATURE (Le garde du corps)
+    try:
+        if not _verify_paypal_webhook_signature(event):
+            return _json({"error": "Invalid signature"}, status=400)
+    except Exception as e:
+        return _json({"error": f"Verification failed: {str(e)}"}, status=502)
+
+    # 4. Extraction des données de l'événement
+    event_id = event.get("id")
+    event_type = event.get("event_type")
+    resource = event.get("resource", {})
+
+    # 5. Idempotence : Éviter de traiter le même Webhook deux fois
+    if event_id and db(db.credit_topup.paypal_event_id == event_id).count() > 0:
+        return "OK"
+
+    # 6. Traitement d'un paiement RÉUSSI
+    if event_type == "PAYMENT.CAPTURE.COMPLETED":
+        capture_id = resource.get("id")
+        amount_dict = resource.get("amount", {})
+        amount = amount_dict.get("value")
+        currency = amount_dict.get("currency_code")
+        
+        # LE FAMEUX TEST : Où se cache notre topup_ref ?
+        topup_ref = resource.get("custom_id") or resource.get("invoice_id") or resource.get("custom")
+
+        if topup_ref:
+            # On cherche l'intention d'achat correspondante
+            topup = db(db.credit_topup.topup_ref == topup_ref).select().first()
+            
+            if topup and topup.status == "pending":
+                # On vérifie que le montant et la devise correspondent bien à l'attendu
+                if str(amount) == str(PACK_PRICE) and currency == PACK_CURRENCY:
+                    
+                    # TOUT EST BON : On donne les crédits !
+                    user = db.auth_user(topup.user_id)
+                    if user:
+                        new_credits = (user.credits or 0) + topup.credits
+                        user.update_record(credits=new_credits)
+                    
+                    # On marque la transaction comme terminée
+                    topup.update_record(
+                        status="completed",
+                        paypal_capture_id=capture_id,
+                        paypal_event_id=event_id,
+                        raw_payload=json.dumps(event)
+                    )
+                    
+                else:
+                    # Échec : Le montant ne correspond pas (ex: tentative de fraude)
+                    topup.update_record(
+                        status="failed", 
+                        paypal_event_id=event_id,
+                        raw_payload=json.dumps(event)
+                    )
+            
+            elif topup and topup.status != "completed":
+                # Autre cas d'échec
+                topup.update_record(
+                    status="failed", 
+                    paypal_event_id=event_id,
+                    raw_payload=json.dumps(event)
+                )
+
+    # 7. Traitement d'un paiement REFUSÉ ou ANNULÉ
+    elif event_type in ("PAYMENT.CAPTURE.DENIED", "CHECKOUT.PAYMENT-APPROVAL.REVERSED"):
+        topup_ref = resource.get("custom_id") or resource.get("invoice_id") or resource.get("custom")
+        
+        if topup_ref:
+            topup = db(db.credit_topup.topup_ref == topup_ref).select().first()
+            if topup and topup.status != "completed":
+                topup.update_record(
+                    status="failed",
+                    paypal_event_id=event_id,
+                    raw_payload=json.dumps(event)
+                )
+
+    # 8. On répond toujours 200 OK à PayPal pour qu'il arrête d'envoyer la notification
+    return "OK"
 
 
 def index():
@@ -34,10 +259,6 @@ def logout():
 
 
 
-def dashboard():
-    if not auth.user:
-        redirect(URL('default', 'login'))
-    return dict()
 
 
 def profile():

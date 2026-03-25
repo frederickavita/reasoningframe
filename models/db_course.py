@@ -33,6 +33,28 @@ db.define_table('user_transaction',
 
 
 
+# -*- coding: utf-8 -*-
+from gluon.validators import IS_NOT_EMPTY
+
+db.define_table(
+    'credit_topup',
+    Field('user_id', 'reference auth_user', requires=IS_NOT_EMPTY()),
+    Field('topup_ref', requires=IS_NOT_EMPTY()),
+    Field('provider', default='paypal'),
+    Field('status', default='pending'),  # pending / completed / failed
+    Field('amount', 'decimal(10,2)', default=39.00),
+    Field('currency', length=3, default='USD'),
+    Field('credits', 'integer', default=100),
+    Field('paypal_capture_id', unique=True),
+    Field('paypal_event_id', unique=True),
+    Field('raw_payload', 'text'),
+    Field('created_on', 'datetime', default=request.now),
+    Field('updated_on', 'datetime', update=request.now),
+)
+
+
+
+
 # Définition de la référence utilisateur (Compatible avec Auth Web2py)
 USER_REF = 'reference auth_user' if 'auth_user' in db.tables else 'integer'
 
