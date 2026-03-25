@@ -143,7 +143,7 @@ def initiate_topup():
     )
     
     # 3. Redirection vers PayPal (Sandbox ou Live selon ta config)
-    mode = configuration.get("paypal.PAYPAL_MODE", 'sandbox').lower()
+    mode = configuration.get("paypal.PAYPAL_MODE", 'live').lower()
     print(mode)
     
     if mode == "sandbox":
