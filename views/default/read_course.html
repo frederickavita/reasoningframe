@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <title>{{=course.title}} - ReasoningFrame</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0b0b0f;
+            --surface: rgba(255,255,255,0.03);
+            --surface-border: rgba(255,255,255,0.08);
+            --primary: #6366f1;
+            --primary-hover: #4f46e5;
+            --text-main: #f3f4f6;
+            --text-muted: #9ca3af;
+            --code-bg: #1e1e24;
+            --success: #10b981;
+        }
+        body { font-family: 'Inter', sans-serif; background: var(--bg-color); color: var(--text-main); margin: 0; padding: 40px 20px; line-height: 1.6; }
+        .container { max-width: 900px; margin: 0 auto; }
+        
+        /* Header */
+        .course-header { text-align: center; margin-bottom: 50px; }
+        .course-title { font-size: 2.5rem; font-weight: 800; margin-bottom: 10px; background: linear-gradient(135deg, #a5b4fc, #6366f1); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .topic-overview { font-size: 1.1rem; color: var(--text-muted); max-width: 600px; margin: 0 auto; }
+        
+        /* Modules */
+        .module-card { background: var(--surface); border: 1px solid var(--surface-border); border-radius: 16px; padding: 30px; margin-bottom: 40px; }
+        .module-title { font-size: 1.5rem; font-weight: 600; margin-top: 0; margin-bottom: 15px; border-bottom: 1px solid var(--surface-border); padding-bottom: 10px;}
+        .goal-badge { display: inline-block; background: rgba(99, 102, 241, 0.1); color: #a5b4fc; padding: 4px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; margin-bottom: 20px; }
+        
+        .section-title { font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 5px; font-weight: 600; }
+        .syntax-box { background: var(--code-bg); padding: 15px; border-radius: 8px; font-family: monospace; color: #a5b4fc; border: 1px solid var(--surface-border); margin-bottom: 30px; }
+        
+        /* Stepper / Tabs */
+        .stepper-nav { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 1px solid var(--surface-border); padding-bottom: 10px; }
+        .stepper-btn { background: transparent; color: var(--text-muted); border: 1px solid transparent; padding: 8px 16px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: 0.2s; font-family: 'Inter', sans-serif; }
+        .stepper-btn:hover { color: var(--text-main); background: rgba(255,255,255,0.05); }
+        .stepper-btn.active-step { background: var(--primary); color: white; border-color: var(--primary); }
+        
+        /* Example Content */
+        .example-content { display: none; animation: fadeIn 0.3s ease-in-out; }
+        .example-content.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .code-block { background: var(--code-bg); padding: 20px; border-radius: 8px; font-family: monospace; font-size: 0.95rem; overflow-x: auto; border: 1px solid var(--surface-border); white-space: pre-wrap; margin-bottom: 15px; }
+        .result-block { border-left: 4px solid var(--success); background: rgba(16, 185, 129, 0.05); padding: 15px; border-radius: 0 8px 8px 0; margin-bottom: 15px; font-family: monospace; }
+        .explanation-block { color: #d1d5db; font-size: 0.95rem; }
+
+        /* Challenge */
+        .challenge-box { margin-top: 30px; padding: 20px; border-radius: 12px; background: linear-gradient(145deg, rgba(99,102,241,0.1), rgba(0,0,0,0)); border: 1px dashed var(--primary); }
+        
+        .btn-back { display: inline-block; margin-bottom: 20px; color: var(--text-muted); text-decoration: none; font-size: 0.9rem; }
+        .btn-back:hover { color: white; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <a href="{{=URL('default', 'dashboard')}}" class="btn-back">← Retour au Dashboard</a>
+
+    <div class="course-header">
+        <h1 class="course-title">{{=course_data.get('course_title', course.title)}}</h1>
+        <p class="topic-overview">{{=course_data.get('topic_overview', '')}}</p>
+    </div>
+
+    {{for i, module in enumerate(course_data.get('modules', [])):}}
+    <div class="module-card">
+        <div class="goal-badge">🎯 Objectif : {{=module.get('goal', '')}}</div>
+        <h2 class="module-title">{{=i+1}}. {{=module.get('module_title', 'Module')}}</h2>
+        
+        <div class="section-title">Définition</div>
+        <p style="margin-top: 5px; margin-bottom: 20px;">{{=module.get('definition', '')}}</p>
+        
+        <div class="section-title">Syntaxe de base</div>
+        <div class="syntax-box">{{=module.get('syntax', '')}}</div>
+
+        <div class="section-title" style="margin-bottom: 15px;">Progression par l'exemple</div>
+        
+        <!-- Stepper Navigation -->
+        <div class="stepper-nav">
+            {{for j, ex in enumerate(module.get('examples', [])):}}
+                <button 
+                    class="stepper-btn mod-{{=i}}-btn {{='active-step' if j==0 else ''}}" 
+                    onclick="showExample({{=i}}, {{=j}})"
+                    id="btn-{{=i}}-{{=j}}">
+                    {{if ex.get('type') == 'simple':}}🟢 Simple
+                    {{elif ex.get('type') == 'typical':}}🟡 Typique
+                    {{else:}}🔴 Complexe{{pass}}
+                </button>
+            {{pass}}
+        </div>
+
+        <!-- Examples Content -->
+        <div class="examples-container">
+            {{for j, ex in enumerate(module.get('examples', [])):}}
+            <div class="example-content mod-{{=i}}-content {{='active' if j==0 else ''}}" id="content-{{=i}}-{{=j}}">
+                <h4 style="margin-top:0; color: #a5b4fc;">{{=ex.get('title', '')}}</h4>
+                
+                <div class="section-title">Code</div>
+                <div class="code-block">{{=ex.get('code', '')}}</div>
+                
+                <div class="section-title">Résultat / Sortie</div>
+                <div class="result-block">{{=ex.get('result', '')}}</div>
+                
+                <div class="section-title">Ce qu'il faut comprendre</div>
+                <p class="explanation-block">{{=ex.get('explanation', '')}}</p>
+            </div>
+            {{pass}}
+        </div>
+
+        <!-- Quick Challenge -->
+        {{if module.get('quick_challenge'):}}
+        <div class="challenge-box">
+            <div class="section-title" style="color: var(--primary);">⚡ À vous de jouer</div>
+            <p style="margin: 5px 0 0 0;">{{=module['quick_challenge'].get('instruction', '')}}</p>
+        </div>
+        {{pass}}
+    </div>
+    {{pass}}
+
+</div>
+
+<script>
+    function showExample(moduleId, exampleIndex) {
+        // 1. Cacher tous les contenus de ce module spécifique
+        const contents = document.querySelectorAll('.mod-' + moduleId + '-content');
+        contents.forEach(content => content.classList.remove('active'));
+        
+        // 2. Retirer la classe active de tous les boutons de ce module
+        const buttons = document.querySelectorAll('.mod-' + moduleId + '-btn');
+        buttons.forEach(btn => btn.classList.remove('active-step'));
+        
+        // 3. Afficher le contenu ciblé et activer le bouton
+        document.getElementById('content-' + moduleId + '-' + exampleIndex).classList.add('active');
+        document.getElementById('btn-' + moduleId + '-' + exampleIndex).classList.add('active-step');
+    }
+</script>
+
+</body>
+</html>

@@ -234,3 +234,11 @@ if configuration.get("scheduler.enabled"):
 # -------------------------------------------------------------------------
 # 2. CORE BUSINESS & PRICING (La vérité business)
 # -------------------------------------------------------------------------
+# Définition de la table pour les acheteurs de la prévente
+db.define_table('founder_beta',
+    Field('email', type='string', 
+          requires=[IS_NOT_EMPTY(), IS_EMAIL(), IS_NOT_IN_DB(db, 'founder_beta.email')]),
+    Field('status', type='string', default='paid', 
+          requires=IS_IN_SET(['paid', 'invited', 'refunded'])),
+    Field('created_on', type='datetime', default=request.now, writable=False, readable=False)
+)

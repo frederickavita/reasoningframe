@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Welcome Founder — Reasoningframe</title>
+  
+  <!-- W3.CSS & Fonts -->
+  <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --primary-gradient: linear-gradient(135deg, #FF8A00 0%, #FF5E62 100%);
+      --text-main: #1F2937;
+      --text-muted: #6B7280;
+      --bg-light: #F9FAFB;
+      --bg-white: #FFFFFF;
+      --accent-color: #FF7331;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: var(--bg-light);
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+    }
+
+    .success-card {
+      background: var(--bg-white);
+      border-radius: 24px;
+      padding: 48px;
+      max-width: 500px;
+      width: 90%;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+      border: 1px solid #F3F4F6;
+      text-align: center;
+    }
+
+    .icon-success {
+      background: var(--primary-gradient);
+      color: white;
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 40px;
+      margin: 0 auto 24px auto;
+      box-shadow: 0 8px 24px rgba(255, 115, 49, 0.3);
+    }
+
+    h1 {
+      font-size: 2rem;
+      font-weight: 800;
+      margin-bottom: 16px;
+    }
+
+    p {
+      color: var(--text-muted);
+      font-size: 1.1rem;
+      line-height: 1.6;
+      margin-bottom: 32px;
+    }
+
+    /* Input Style */
+    .input-group {
+      text-align: left;
+      margin-bottom: 24px;
+    }
+    .input-group label {
+      font-weight: 600;
+      font-size: 0.9rem;
+      display: block;
+      margin-bottom: 8px;
+    }
+    .input-group input {
+      width: 100%;
+      padding: 14px 20px;
+      border-radius: 12px;
+      border: 2px solid #E5E7EB;
+      font-size: 1rem;
+      outline: none;
+      transition: border-color 0.3s ease;
+      font-family: 'Inter', sans-serif;
+    }
+    .input-group input:focus {
+      border-color: var(--accent-color);
+    }
+
+    /* Bouton */
+    .btn-gradient {
+      background: var(--primary-gradient);
+      color: white;
+      border: none;
+      padding: 16px;
+      border-radius: 50px;
+      font-weight: 700;
+      font-size: 1.1rem;
+      cursor: pointer;
+      width: 100%;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .btn-gradient:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(255, 115, 49, 0.3);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="success-card">
+    <div class="icon-success">✓</div>
+    
+    <h1>Payment Successful!</h1>
+    <p>
+      Welcome to the <b>Reasoningframe Founder Beta</b>. <br>
+      PayPal just confirmed your payment, but we need to know where to send your invite.
+    </p>
+
+    <!-- Le formulaire pointe vers la même URL pour être traité par web2py -->
+    <!-- form.custom.begin ouvre la balise form et gère la sécurité CSRF -->
+    {{=form.custom.begin}}
+      
+      <div class="input-group">
+        <label for="founder_beta_email">Where should we send your access link?</label>
+        
+        <!-- Ton input customisé. On utilise name="email" pour que SQLFORM le reconnaisse -->
+        <input 
+          type="email" 
+          id="founder_beta_email" 
+          name="email" 
+          placeholder="your.best.email@example.com" 
+          required 
+          autocomplete="email"
+          value="{{=request.vars.email or ''}}"
+        >
+        
+        <!-- Affichage de l'erreur web2py sous le champ (ex: "Value already in database") -->
+        {{if form.errors.email:}}
+          <div style="color: #DC2626; font-size: 0.85rem; margin-top: 8px; font-weight: 500;">
+            {{=form.errors.email}}
+          </div>
+        {{pass}}
+      </div>
+
+      <button type="submit" class="btn-gradient">
+        Activate my Founder Account
+      </button>
+      
+    {{=form.custom.end}}
+    <p style="font-size: 0.85rem; margin-top: 24px; margin-bottom: 0;">
+      🚀 The platform opens in 7 days. We will notify you at this exact address.
+    </p>
+  </div>
+
+</body>
+</html>

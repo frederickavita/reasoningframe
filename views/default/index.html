@@ -1,623 +1,711 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>reasoningframe - Generate your micro-course</title>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-
-    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:300,400,500,600,700&display=swap">
-
-    <style>
-        html, body {
-            font-family: 'Inter', sans-serif;
-            background: #0b0b0f;
-            color: #e5e7eb;
-            margin: 0;
-        }
-
-        .rf-shell {
-            max-width: 1180px;
-            margin: 0 auto;
-        }
-
-        .rf-glass {
-            background: rgba(255,255,255,0.04);
-            border: 1px solid rgba(255,255,255,0.08);
-            backdrop-filter: blur(10px);
-            border-radius: 18px;
-        }
-
-        .rf-hero-title {
-            font-size: 52px;
-            line-height: 1.05;
-            font-weight: 700;
-            letter-spacing: -1.8px;
-        }
-
-        .rf-muted {
-            color: #a1a1aa;
-        }
-
-        .rf-brand {
-            font-weight: 700;
-            letter-spacing: -1px;
-            font-size: 24px;
-        }
-
-        .rf-brand span {
-            color: #818cf8;
-        }
-
-        .rf-input-wrap {
-            position: relative;
-            max-width: 760px;
-            margin: 0 auto;
-        }
-
-        .rf-input {
-            width: 100%;
-            background: rgba(255,255,255,0.03);
-            color: #fff;
-            border: 1px solid rgba(255,255,255,0.08);
-            border-radius: 18px;
-            padding: 20px 160px 20px 20px;
-            font-size: 17px;
-            outline: none;
-        }
-
-        .rf-input:focus {
-            border-color: #6366f1;
-            box-shadow: 0 0 0 4px rgba(99,102,241,0.12);
-        }
-
-        .rf-primary-btn {
-            position: absolute;
-            top: 8px;
-            right: 8px;
-            height: 52px;
-            min-width: 135px;
-            border: none;
-            border-radius: 14px;
-            background: linear-gradient(135deg, #6366f1, #4f46e5);
-            color: white;
-            font-weight: 600;
-            cursor: pointer;
-        }
-
-        .rf-chip {
-            display: inline-block;
-            background: #17171c;
-            border: 1px solid #2b2b34;
-            color: #d4d4d8;
-            padding: 8px 14px;
-            border-radius: 999px;
-            cursor: pointer;
-            font-size: 13px;
-            margin: 4px;
-            transition: 0.2s ease;
-        }
-
-        .rf-chip:hover {
-            border-color: #818cf8;
-            color: #818cf8;
-        }
-
-        .rf-credit-badge {
-            display: inline-block;
-            color: #a5b4fc;
-            background: rgba(99,102,241,0.12);
-            border: 1px solid rgba(99,102,241,0.22);
-            padding: 8px 14px;
-            border-radius: 999px;
-            font-weight: 600;
-            font-size: 14px;
-        }
-
-        .rf-google-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            background: rgba(255,255,255,0.04);
-            border: 1px solid rgba(255,255,255,0.08);
-            color: #fff;
-            border-radius: 12px;
-            padding: 10px 14px;
-            cursor: pointer;
-        }
-
-        .rf-preview-title {
-            font-weight: 700;
-            font-size: 30px;
-            letter-spacing: -1px;
-        }
-
-        .rf-code {
-            background: #121218;
-            border: 1px solid #242430;
-            border-radius: 12px;
-            padding: 16px;
-            overflow-x: auto;
-            color: #c4e1ff;
-            font-family: monospace;
-        }
-
-        .rf-challenge {
-            background: rgba(99,102,241,0.06);
-            border: 1px solid rgba(99,102,241,0.15);
-            border-left: 4px solid #6366f1;
-            border-radius: 12px;
-            padding: 18px;
-        }
-        
-        .rf-highlight { color: #818cf8; }
-
-        /* Homogénéisation des hauteurs */
-.rf-faq-grid {
-    display: flex;
-    flex-wrap: wrap;
-}
-
-.rf-faq-item {
-    display: flex;
-}
-
-.rf-glass {
-    flex: 1; /* Force la carte à prendre toute la hauteur disponible du parent */
-    display: flex;
-    flex-direction: column;
-}
-    </style>
-</head>
-<body onload="brython()">
-
-<div class="w3-container w3-padding-24">
-    <div class="rf-shell">
-
-        <div class="w3-bar">
-            <div class="w3-bar-item rf-brand">reasoning<span>frame</span></div>
-            <div class="w3-right w3-hide-small" style="display:flex; align-items:center; gap:12px; padding-top:4px;">
-                <span class="rf-credit-badge">⚡ 5 credits</span>
-                <button id="login" class="rf-google-btn">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 48 48">
-                        <path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24s8.955,20,20,20s20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"></path>
-                        <path fill="#FF3D00" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"></path>
-                        <path fill="#4CAF50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z"></path>
-                        <path fill="#1976D2" d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.571c0.001-0.001,0.002-0.001,0.003-0.002l6.19,5.238C36.971,39.205,44,34,44,24C44,22.659,43.862,21.35,43.611,20.083z"></path>
-                    </svg>
-                    Sign in
-                </button>
-            </div>
-        </div>
-
-        <div class="w3-center" style="padding-top:70px; padding-bottom:10px;">
-          <div class="rf-hero-title">
-        Type what you want to learn.<br>
-        <span class="rf-highlight">We generate the programming course of your dreams.</span>
-    </div>
-            <p class="rf-muted" style="font-size:18px; max-width:760px; margin:18px auto 0;">
-             Stop scrolling through endless videos. Get a personalized, 
-        interactive coding experience generated specifically for your goal.
-            </p>
-
-            <div class="rf-input-wrap" style="margin-top:34px;">
-                <input id="course_prompt" type="text" class="rf-input" placeholder="e.g.: I want to learn Python lists">
-                <button id="generate_btn" class="rf-primary-btn">Generate ⚡</button>
-            </div>
-
-            <div style="margin-top:20px; color: #9ca3af; font-size: 14px;">
-                Sample requests:
-            </div>
-
-       <div style="margin-top:10px;">
-    <span class="chip rf-chip" data-topic="I want to learn Python lists for absolute beginners">Python Lists for Beginners</span>
-    
-    <span class="chip rf-chip" data-topic="I want to learn Python Dictionaries for Data Analysis">Dicts for Data Analysis</span>
-    
-    <span class="chip rf-chip" data-topic="I want to learn Responsive Design for Backend Developers">Responsive for Backend Devs</span>
-    
-    <span class="chip rf-chip" data-topic="I want to learn JavaScript Fetch API to connect Front and Back">JS Fetch: Front to Back</span>
-    
-    <span class="chip rf-chip" data-topic="I want to learn CSS Flexbox for modern App Layouts">Modern App Layouts (CSS)</span>
-</div>
-        </div>
-
-        <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.06); margin: 56px 0 36px;">
-
-        <section class="w3-container w3-content" style="max-width:1100px; padding-top:40px; padding-bottom:80px;">
-
-            <div class="w3-center" style="margin-bottom:50px;">
-                <h2 style="font-weight:700; font-size:38px; margin-bottom:12px;">
-                    Why students choose <span style="color:#818cf8;">reasoningframe</span>
-                </h2>
-                <p style="color:#a1a1aa; font-size:18px; max-width:760px; margin:0 auto;">
-                    On-demand Python micro-courses, designed to learn faster than passive video tutorials.
-                </p>
-            </div>
-
-            <div class="w3-row-padding" style="margin-bottom:60px;">
-                <div class="w3-col l4 m6 s12 w3-margin-bottom">
-                    <div class="rf-glass w3-padding-large" style="height:100%;">
-                        <h4 style="font-weight:600;">Courses based on your needs</h4>
-                        <p class="rf-muted" style="line-height:1.8;">
-                            Simply type what you want to learn: lists, dictionaries, variables, exceptions, loops, or functions. 
-                            reasoningframe generates a targeted course for you.
-                        </p>
-                    </div>
-                </div>
-
-                <div class="w3-col l4 m6 s12 w3-margin-bottom">
-                    <div class="rf-glass w3-padding-large" style="height:100%;">
-                        <h4 style="font-weight:600;">Short & Actionable Format</h4>
-                        <p class="rf-muted" style="line-height:1.8;">
-                            Every course gets straight to the point: objective, clear explanation, simple example, concrete case, and quick challenge.
-                        </p>
-                    </div>
-                </div>
-
-                <div class="w3-col l4 m6 s12 w3-margin-bottom">
-                    <div class="rf-glass w3-padding-large" style="height:100%;">
-                        <h4 style="font-weight:600;">No forced curriculum</h4>
-                        <p class="rf-muted" style="line-height:1.8;">
-                            You don't need to buy an 8-hour course just to find 10 useful minutes. 
-                            Request a specific topic, get exactly what you need.
-                        </p>
-                    </div>
-                </div>
-
-                <div class="w3-col l4 m6 s12 w3-margin-bottom">
-                    <div class="rf-glass w3-padding-large" style="height:100%;">
-                        <h4 style="font-weight:600;">Course History</h4>
-                        <p class="rf-muted" style="line-height:1.8;">
-                            All generated courses are saved in your dashboard so you can review, compare, and revisit concepts later.
-                        </p>
-                    </div>
-                </div>
-
-                <div class="w3-col l4 m6 s12 w3-margin-bottom">
-                    <div class="rf-glass w3-padding-large" style="height:100%;">
-                        <h4 style="font-weight:600;">One-click Google Sign-in</h4>
-                        <p class="rf-muted" style="line-height:1.8;">
-                            Sign in instantly to find your credits, profile, and previously generated courses.
-                        </p>
-                    </div>
-                </div>
-
-                <div class="w3-col l4 m6 s12 w3-margin-bottom">
-                    <div class="rf-glass w3-padding-large" style="height:100%;">
-                        <h4 style="font-weight:600;">Simple Credit-based Payment</h4>
-                        <p class="rf-muted" style="line-height:1.8;">
-                            No complicated subscriptions. Generate a course only when you need it.
-                        </p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="w3-center" style="margin-bottom:30px;">
-                <h2 style="font-weight:700; font-size:34px; margin-bottom:12px;">
-                    What makes <span style="color:#818cf8;">reasoningframe</span> different
-                </h2>
-                <p style="color:#a1a1aa; font-size:17px; max-width:720px; margin:0 auto;">
-                    Most platforms sell fixed content. reasoningframe generates a course from your actual intent.
-                </p>
-            </div>
-
-            <div class="rf-glass w3-padding-24" style="margin-bottom:60px; overflow-x:auto;">
-                <table class="w3-table" style="color:#e5e7eb;">
-                    <thead>
-                        <tr style="border-bottom:1px solid rgba(255,255,255,0.08);">
-                            <th style="padding:14px 8px;">Feature</th>
-                            <th style="padding:14px 8px; color:#818cf8;">reasoningframe</th>
-                            <th style="padding:14px 8px;">Traditional Video Courses</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr style="border-bottom:1px solid rgba(255,255,255,0.05);">
-                            <td style="padding:14px 8px;">Course generated per request</td>
-                            <td style="padding:14px 8px;">✓ Yes</td>
-                            <td style="padding:14px 8px;">✗ No</td>
-                        </tr>
-                        <tr style="border-bottom:1px solid rgba(255,255,255,0.05);">
-                            <td style="padding:14px 8px;">Targeted learning on specific topics</td>
-                            <td style="padding:14px 8px;">✓ Yes</td>
-                            <td style="padding:14px 8px;">△ Sometimes</td>
-                        </tr>
-                        <tr style="border-bottom:1px solid rgba(255,255,255,0.05);">
-                            <td style="padding:14px 8px;">Instant access to micro-courses</td>
-                            <td style="padding:14px 8px;">✓ Yes</td>
-                            <td style="padding:14px 8px;">✗ No</td>
-                        </tr>
-                        <tr style="border-bottom:1px solid rgba(255,255,255,0.05);">
-                            <td style="padding:14px 8px;">No need for long curriculum</td>
-                            <td style="padding:14px 8px;">✓ Yes</td>
-                            <td style="padding:14px 8px;">✗ No</td>
-                        </tr>
-                        <tr style="border-bottom:1px solid rgba(255,255,255,0.05);">
-                            <td style="padding:14px 8px;">Saved course history</td>
-                            <td style="padding:14px 8px;">✓ Yes</td>
-                            <td style="padding:14px 8px;">✗ No</td>
-                        </tr>
-                        <tr>
-                            <td style="padding:14px 8px;">Flexible credit payment</td>
-                            <td style="padding:14px 8px;">✓ Yes</td>
-                            <td style="padding:14px 8px;">✗ No</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-
-            <div class="w3-center" style="margin-bottom:30px;">
-                <h2 style="font-weight:700; font-size:34px; margin-bottom:12px;">
-                    Request exactly what you want to learn
-                </h2>
-                <p style="color:#a1a1aa; font-size:17px; max-width:760px; margin:0 auto;">
-                    reasoningframe is built for simple and concrete requests.
-                </p>
-            </div>
-
-            <div class="rf-glass w3-padding-24" style="margin-bottom:16px;">
-    <div style="display:flex; flex-wrap:wrap; gap:10px;">
-        <span class="rf-chip" data-topic="I want to learn Python lists for absolute beginners">Python Lists for Beginners</span>
-        <span class="rf-chip" data-topic="I want to learn Python Dictionaries for Data Analysis">Dicts for Data Analysis</span>
-        <span class="rf-chip" data-topic="I want to understand Error Handling with Try/Except for Backend Devs">Error Handling for Backend</span>
-        
-        <span class="rf-chip" data-topic="I want to learn Responsive Website Design for Backend Developers">Responsive UI for Backend Devs</span>
-        <span class="rf-chip" data-topic="I want to learn Modern CSS Flexbox for App Layouts">Modern App Layouts (Flexbox)</span>
-        <span class="rf-chip" data-topic="I want to learn JavaScript Fetch API to connect Front to Back">Connect Front to Back (JS Fetch)</span>
-        
-        <span class="rf-chip" data-topic="I want to learn Python For Loops for automating repetitive tasks">Automating Tasks with Loops</span>
-        <span class="rf-chip" data-topic="I want to learn clean Python Functions for scalable code">Clean Functions for Scalable Code</span>
-    </div>
-</div>
-
-            <div class="w3-center" style="margin-bottom:60px;">
-                <p class="rf-muted" style="font-size:15px;">
-                    <strong style="color:#e5e7eb;">1 credit = 1 generated course.</strong> You are free to pick only the topics that interest you.
-                </p>
-            </div>
-
-            <div class="w3-center" style="margin-bottom:30px;">
-                <h2 style="font-weight:700; font-size:34px; margin-bottom:12px;">
-                    Simple pricing to get started
-                </h2>
-                <p style="color:#a1a1aa; font-size:17px; max-width:760px; margin:0 auto;">
-                    Start for free, then buy credits when you want to go further.
-                </p>
-            </div>
-
-            <div class="w3-content" style="max-width:900px; margin-bottom:60px;">
-                <div class="w3-row-padding">
-                    <div class="w3-col l6 m6 s12 w3-margin-bottom">
-                        <div class="rf-glass w3-padding-large" style="height:27rem;">
-                            <div style="font-size:14px; color:#a1a1aa; margin-bottom:8px;">Free</div>
-                            <div style="font-size:42px; font-weight:700;">$0</div>
-                            <div class="rf-muted" style="margin-top:6px;">5 free credits</div>
-
-                            <div style="margin-top:24px; line-height:2; color:#d4d4d8;">
-                                <div>• Python micro-course generation</div>
-                                <div>• Basic history</div>
-                                <div>• Google Sign-in</div>
-                                <div>• No credit card required</div>
-                            </div>
-
-                            <button class="rf-primary-btn" id="free_started" style="position:static; width:100%; margin-top:60px;">
-                                Get started for free
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="w3-col l6 m6 s12 w3-margin-bottom">
-                        <div class="rf-glass w3-padding-large" style="height:100%; border:1px solid rgba(99,102,241,0.35);">
-                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                                <div style="font-size:14px; color:#818cf8; font-weight:600;">Pro Credits</div>
-                                <div style="font-size:12px; color:#a5b4fc; background:rgba(99,102,241,0.12); padding:6px 10px; border-radius:999px;">
-                                    One-time payment
-                                </div>
-                            </div>
-
-                            <div style="font-size:42px; font-weight:700;">$39</div>
-                            <div class="rf-muted" style="margin-top:6px;">100 credits</div>
-
-                            <div style="margin-top:24px; line-height:2; color:#d4d4d8;">
-                                <div>• 100 courses generated</div>
-                                <div>• Full history access</div>
-                                <div>• Use anytime</div>
-                                <div>• No monthly subscription</div>
-                                <div>• More room to practice</div>
-                            </div>
-
-                            <button id="buy_credit" class="rf-primary-btn" style="position:static; width:100%; margin-top:24px;">
-                                Buy 100 credits
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="w3-center" style="margin-bottom:30px;">
-                <h2 style="font-weight:700; font-size:34px; margin-bottom:12px;">
-                    Frequently Asked Questions
-                </h2>
-                <p style="color:#a1a1aa; font-size:17px; max-width:760px; margin:0 auto;">
-                    Everything you need to know to get started with reasoningframe.
-                </p>
-            </div>
-
-         <div class="w3-row-padding  rf-faq-grid" style="margin-bottom:60px;">
-    <div class="w3-col l6 m12 s12 w3-margin-bottom rf-faq-item">
-        <div class="rf-glass w3-padding-large" style="height:100%;">
-            <h4 style="font-weight:600;">What is reasoningframe?</h4>
-            <p class="rf-muted" style="line-height:1.8;">
-                It's an AI-powered platform that generates <strong>instant programming micro-courses</strong>. Instead of watching someone else code, you get a personalized lesson tailored to your specific goal (Python, JS, HTML, or CSS) so you can start building immediately.
-            </p>
-        </div>
-    </div>
-
-    <div class="w3-col l6 m12 s12 w3-margin-bottom rf-faq-item">
-        <div class="rf-glass w3-padding-large" style="height:100%;">
-            <h4 style="font-weight:600;">How does it work?</h4>
-            <p class="rf-muted" style="line-height:1.8;">
-                Type an intention like "I want to learn CSS Flexbox for app layouts." Our engine generates a structured guide including the <strong>core logic, real-world code examples, and an interactive challenge</strong>. No fluff, just the code.
-            </p>
-        </div>
-    </div>
-
-    <div class="w3-col l6 m12 s12 w3-margin-bottom rf-faq-item">
-        <div class="rf-glass w3-padding-large" style="height:100%;">
-            <h4 style="font-weight:600;">Why is it better than video courses?</h4>
-            <p class="rf-muted" style="line-height:1.8;">
-                Videos are passive. Research shows you learn faster by <strong>doing</strong>. reasoningframe eliminates the "scroll-and-search" struggle by giving you exactly the explanation and snippet you need for your current project.
-            </p>
-        </div>
-    </div>
-
-    <div class="w3-col l6 m12 s12 w3-margin-bottom rf-faq-item">
-        <div class="rf-glass w3-padding-large" style="height:100%;">
-            <h4 style="font-weight:600;">How do credits work?</h4>
-            <p class="rf-muted" style="line-height:1.8;">
-                1 Credit = 1 Micro-course generated. We don't believe in monthly subscriptions that you forget to use. Buy credits, use them whenever you face a coding roadblock, and they never expire.
-            </p>
-        </div>
-    </div>
-
-    <div class="w3-col l6 m12 s12 w3-margin-bottom rf-faq-item">
-        <div class="rf-glass w3-padding-large" style="height:100%;">
-            <h4 style="font-weight:600;">Can I access my courses later?</h4>
-            <p class="rf-muted" style="line-height:1.8;">
-                Yes! Every course you generate is saved to your <strong>personal library</strong>. You can revisit your snippets, explanations, and challenges anytime by signing in with your Google account.
-            </p>
-        </div>
-    </div>
-
-    <div class="w3-col l6 m12 s12 w3-margin-bottom rf-faq-item">
-        <div class="rf-glass w3-padding-large" style="height:100%;">
-            <h4 style="font-weight:600;">Which languages are supported?</h4>
-            <p class="rf-muted" style="line-height:1.8;">
-                Currently, we specialize in the <strong>Full-Stack core</strong>: Python, JavaScript, HTML, and CSS. We focus on these to ensure the highest pedagogical quality and most accurate code generation.
-            </p>
-        </div>
-    </div>
-</div>
-
-        <div class="rf-glass w3-center w3-padding-48">
-    <h2 style="font-weight:700; font-size:36px; margin-bottom:12px;">
-        Generate the programming course you always needed.
-    </h2>
-    <p class="rf-muted" style="font-size:18px; max-width:720px; margin:0 auto 32px;">
-        Stop being a passive spectator. Take control of your coding journey with 
-        interactive micro-lessons tailored to your specific goals.
-    </p>
-
-    <div style="display: flex; justify-content: center;">
-        <button id="generate" class="rf-primary-btn" style="position:static; width: auto; min-width: 260px; padding: 0 35px;">
-            Generate my first course
-        </button>
-    </div>
-</div>
-
-        </section>
-
-    </div>
-</div>
-
-<script type="text/python">
-from browser import document, alert, window
-
-SAMPLES = {
-    "I want to learn Python lists for absolute beginners": {
-        "title": "Python Lists for Absolute Beginners",
-        "objective": "Master the basics of storing collections without the headache.",
-        "why": "Forget 20-minute videos. In 5 minutes, you'll know how to store, access, and modify data in Python's most popular container.",
-        "code": 'todo_list = ["Code", "Eat", "Sleep"]\ntodo_list.append("Repeat")\nprint(todo_list[0]) # Output: Code',
-        "challenge": "Create a list of 3 coding languages and print the last one."
-    },
-    "I want to learn Responsive Website Design for Backend Developers": {
-        "title": "Responsive Design for Backend Developers",
-        "objective": "Make your tools look professional on any screen with minimal CSS.",
-        "why": "Backend devs often skip CSS. This micro-course gives you the 20% of CSS that solves 80% of your layout problems.",
-        "code": '/* The Backend Devs Secret Weapon */\n.container {\n  display: flex;\n  flex-wrap: wrap;\n  gap: 20px;\n}',
-        "challenge": "Apply 'flex-direction: column' on mobile views using a media query."
-    },
-    "I want to learn JavaScript Fetch API to connect Front and Back": {
-        "title": "JS Fetch: Bridge your Front and Back",
-        "objective": "Stop refreshing pages. Learn to send data to your API asynchronously.",
-        "why": "This is the essential skill for modern web apps. Connect your UI to your Python/FastAPI backend instantly.",
-        "code": 'async def postData(url, data): \n  await fetch(url, { method: "POST", body: JSON.stringify(data) });',
-        "challenge": "Add a '.catch()' block to handle potential network errors."
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reasoningframe — Turn any fun idea into a real modern project</title>
+  <meta name="description" content="Reasoningframe helps you learn by building real modern projects with a live AI mentor. Join the Founder Beta and lock your founder price.">
+  
+  <!-- W3.CSS Framework -->
+  <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <style>
+    /* Scroll fluide pour la navigation */
+    html {
+      scroll-behavior: smooth;
     }
-}
 
-def set_preview(data):
-    document["preview_title"].text = data["title"]
-    document["preview_objective"].text = data["objective"]
-    document["preview_why"].text = data["why"]
-    document["preview_code"].text = data["code"]
-    document["preview_challenge"].text = data["challenge"]
-    document["preview_meta"].text = "Beginner • 5 min • 1 credit used"
+    :root {
+      --primary-gradient: linear-gradient(135deg, #FF8A00 0%, #FF5E62 100%);
+      --text-main: #1F2937;
+      --text-muted: #6B7280;
+      --bg-light: #F9FAFB;
+      --bg-white: #FFFFFF;
+      --accent-light: #FFF3EB;
+      --accent-color: #FF7331;
+    }
 
-def generate_course(ev):
-    prompt = document["course_prompt"].value.strip()
-    if not prompt:
-        alert("Please type what you want to learn first.")
-        return
+    body, h1, h2, h3, h4, h5, h6 {
+      font-family: 'Inter', sans-serif;
+      color: var(--text-main);
+    }
 
-    # 1. Check exact match from chips
-    for key in SAMPLES:
-        if prompt.lower() == key.lower():
-            set_preview(SAMPLES[key])
-            return
+    body {
+      background-color: var(--bg-white);
+      line-height: 1.6;
+    }
 
-    # 2. Logic detection by keywords
-    lowered = prompt.lower()
-    if "variable" in lowered:
-        set_preview(SAMPLES["I want to learn Python variables"])
-    elif "list" in lowered:
-        set_preview(SAMPLES["I want to learn Python lists"])
-    elif "dictionary" in lowered:
-        set_preview(SAMPLES["I want to learn Python dictionaries"])
-    elif "exception" in lowered or "try" in lowered or "except" in lowered:
-        set_preview(SAMPLES["I want to learn Python exceptions"])
-    else:
-        set_preview({
-            "title": "Custom Python Course",
-            "objective": f"Explore: {prompt}",
-            "why": "This topic has been interpreted as a custom learning request.",
-            "code": "# Generated Example\nprint('Custom course in preparation...')",
-            "challenge": "Try writing a first example related to this topic."
-        })
+    /* Fix pour le scroll avec la navbar fixe */
+    section {
+      scroll-margin-top: 90px;
+    }
 
-for chip in document.select(".rf-chip"):
-    def fill_and_submit(ev):
-        topic = ev.currentTarget.attrs["data-topic"]
-        document["course_prompt"].value = topic
-        generate_course(None)
-    chip.bind("click", fill_and_submit)
+    /* Typographie responsive */
+    @media (max-width: 768px) {
+      h1 { font-size: 2.4rem !important; }
+      h2 { font-size: 2rem !important; }
+    }
 
-document["generate_btn"].bind("click", generate_course)
+    /* Utilitaires de Design */
+    .text-gradient {
+      background: var(--primary-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      font-weight: 800;
+    }
 
-# Fonction de redirection
-def go_to_login(ev):
-    prompt = document["course_prompt"].value.strip()
+    .bg-light-section { background-color: var(--bg-light); }
+    .section-padding { padding: 80px 0; }
     
-    if prompt:
-        # On sauvegarde l'intention dans le navigateur
-        window.sessionStorage.setItem("pending_prompt", prompt)
+    /* Boutons */
+    .btn-gradient {
+      background: var(--primary-gradient);
+      color: white;
+      border: none;
+      padding: 12px 28px;
+      border-radius: 50px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.3s ease, transform 0.2s ease;
+      text-decoration: none;
+      display: inline-block;
+      text-align: center;
+    }
+    .btn-gradient:hover {
+      opacity: 0.9;
+      color: white;
+      transform: translateY(-2px);
+    }
+
+    .btn-secondary {
+      background: transparent;
+      color: var(--text-main);
+      border: 2px solid #E5E7EB;
+      padding: 10px 26px;
+      border-radius: 50px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      display: inline-block;
+      text-align: center;
+    }
+    .btn-secondary:hover {
+      border-color: var(--accent-color);
+      color: var(--accent-color);
+    }
+
+    /* Badges */
+    .badge {
+      background-color: var(--accent-light);
+      color: var(--accent-color);
+      padding: 6px 16px;
+      border-radius: 50px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      display: inline-block;
+      margin-bottom: 16px;
+    }
     
-    # Redirection vers le login
-    window.location.href = "{{=URL('login')}}"
+    .badge-urgent {
+      background-color: #FEF2F2;
+      color: #DC2626;
+      border: 1px solid #FCA5A5;
+    }
 
-# On lie cette fonction au bouton principal
-document["generate_btn"].bind("click", go_to_login)
+    /* Cartes */
+    .modern-card {
+      background: var(--bg-white);
+      border-radius: 16px;
+      padding: 32px;
+      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
+      border: 1px solid #F3F4F6;
+      height: 100%;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .modern-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 12px 32px rgba(255, 115, 49, 0.08);
+    }
 
-# Liaison du bouton par son ID
-document["free_started"].bind("click", go_to_login)
-document["login"].bind("click", go_to_login)
-document["generate"].bind("click", go_to_login)
-document["buy_credit"].bind("click", go_to_login)
+    .card-icon {
+      background: var(--accent-light);
+      color: var(--accent-color);
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 1.25rem;
+      margin-bottom: 20px;
+    }
 
-</script>
-<script src="https://cdn.jsdelivr.net/npm/brython@3.12.0/brython.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/brython@3.12.0/brython_stdlib.js"></script>
+    /* Hero Input */
+    .hero-input-group {
+      display: flex;
+      max-width: 600px;
+      margin: 32px auto;
+      background: white;
+      padding: 8px;
+      border-radius: 50px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      border: 1px solid #E5E7EB;
+    }
+    @media (max-width: 600px) {
+      .hero-input-group { flex-direction: column; border-radius: 16px; }
+      .hero-input-group button { margin-top: 8px; width: 100%; }
+    }
+    .hero-input-group input {
+      flex: 1;
+      border: none;
+      padding: 12px 24px;
+      outline: none;
+      font-size: 1rem;
+      background: transparent;
+    }
 
+    /* Video Placeholder */
+    .video-placeholder {
+      background: linear-gradient(135deg, #1F2937 0%, #111827 100%);
+      border-radius: 20px;
+      padding: 20%;
+      position: relative;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+      cursor: pointer;
+    }
+    .play-btn {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      background: var(--primary-gradient);
+      color: white;
+      width: 80px; height: 80px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 32px;
+      padding-left: 8px;
+      box-shadow: 0 8px 24px rgba(255, 115, 49, 0.4);
+    }
+
+    /* Tableau de comparaison */
+    .table-container {
+      overflow-x: auto;
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
+      border: 1px solid #F3F4F6;
+      margin-top: 32px;
+    }
+    .modern-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+    .modern-table th {
+      background-color: var(--bg-light);
+      font-weight: 700;
+      padding: 16px 24px;
+      border-bottom: 2px solid #E5E7EB;
+    }
+    .modern-table td {
+      padding: 20px 24px;
+      border-bottom: 1px solid #F3F4F6;
+      color: var(--text-muted);
+      font-size: 0.95rem;
+    }
+    .modern-table tr:last-child td {
+      border-bottom: none;
+    }
+    .col-highlight {
+      background-color: var(--accent-light);
+      color: var(--text-main) !important;
+      font-weight: 600;
+    }
+    .header-highlight {
+      background-color: var(--accent-color) !important;
+      color: white !important;
+    }
+
+    /* Accordion FAQ */
+    .faq-btn {
+      width: 100%;
+      text-align: left;
+      border: none;
+      background: white;
+      padding: 24px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      border-bottom: 1px solid #F3F4F6;
+      display: flex;
+      justify-content: space-between;
+    }
+    .faq-btn:hover { color: var(--accent-color); }
+    .faq-content {
+      padding: 0 24px;
+      background-color: white;
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease-out, padding 0.3s ease;
+    }
+    .faq-content p { color: var(--text-muted); padding-bottom: 24px; }
+  </style>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <div class="w3-top">
+    <div class="w3-bar w3-white w3-padding w3-card-2" style="display:flex; align-items:center; justify-content:space-between;">
+      <a href="{{=URL('index')}}" class="w3-bar-item w3-button w3-hover-none w3-hover-text-orange" style="font-size: 1.5rem; font-weight: 800;">Reasoningframe</a>
+      
+      <!-- Desktop Links -->
+      <div class="w3-hide-small">
+        <a href="#demo" class="w3-bar-item w3-button w3-hover-none w3-hover-text-orange">Demo</a>
+        <a href="#how-it-works" class="w3-bar-item w3-button w3-hover-none w3-hover-text-orange">How it works</a>
+        <a href="#compare" class="w3-bar-item w3-button w3-hover-none w3-hover-text-orange">Compare</a>
+        <a href="#pricing" class="w3-bar-item w3-button w3-hover-none w3-hover-text-orange">Founder Offer</a>
+      </div>
+
+      <div class="w3-hide-small">
+        <a href="#pricing" class="btn-gradient">Join Founder Beta — $39</a>
+      </div>
+
+      <!-- Mobile Menu Icon -->
+      <a href="javascript:void(0)" class="w3-bar-item w3-button w3-right w3-hide-large w3-hide-medium" onclick="toggleMenu()">&#9776;</a>
+    </div>
+    
+    <!-- Mobile Menu -->
+    <div id="mobileMenu" class="w3-bar-block w3-white w3-hide w3-hide-large w3-hide-medium w3-card-4">
+      <a href="#demo" class="w3-bar-item w3-button">Demo</a>
+      <a href="#how-it-works" class="w3-bar-item w3-button">How it works</a>
+      <a href="#compare" class="w3-bar-item w3-button">Compare</a>
+      <a href="#pricing" class="w3-bar-item w3-button">Founder Offer</a>
+      <a href="#pricing" class="w3-bar-item w3-button w3-text-orange w3-padding-16"><b>Join Founder Beta — $39</b></a>
+    </div>
+  </div>
+
+  <!-- Hero Section -->
+  <section class="w3-container w3-center section-padding" style="margin-top: 60px;">
+    <div class="w3-content" style="max-width: 900px;">
+      <span class="badge badge-urgent">🚀 Beta platform opens in maximum 7 days</span><br>
+      <span class="badge">Learn by building, not by watching outdated tutorials</span>
+      <h1 style="font-size: 3.5rem; font-weight: 800; line-height: 1.2; margin-bottom: 24px;">
+        Turn any fun idea into a <span class="text-gradient">real modern project.</span>
+      </h1>
+      <p style="font-size: 1.25rem; color: var(--text-muted); margin-bottom: 32px;">
+        Reasoningframe generates your project, guides you live like a senior mentor, explains the why behind the code, and helps you progress without tutorial hell.
+      </p>
+
+      <div class="hero-input-group">
+        <input type="text" placeholder="A Threads clone with dark mode, likes..." aria-label="Describe your project idea">
+        <button class="btn-gradient" onclick="location.href='#pricing'">Generate my project</button>
+      </div>
+
+      <div class="w3-margin-top" style="display:flex; gap:16px; justify-content:center; flex-wrap:wrap;">
+        <a href="https://www.paypal.com/ncp/payment/P4T3J3RQSXVZW" class="btn-gradient">Secure your Founder spot — $39</a>
+        <a href="#demo" class="btn-secondary">Watch the demo</a>
+      </div>
+      
+      <p style="font-size: 0.875rem; color: var(--text-muted); margin-top: 24px; font-weight: 500;">
+        Pay $39 today. Get early access. Unlock Founder Pro at $10/month after launch.<br>
+        <span style="color:#10B981;">✓ 14-day money-back guarantee</span> · Price locked while active.
+      </p>
+    </div>
+  </section>
+
+  <!-- Problem Section -->
+  <section class="w3-container section-padding bg-light-section">
+    <div class="w3-content" style="max-width: 1200px;">
+      <div class="w3-center w3-margin-bottom">
+        <h2 style="font-weight: 800; font-size: 2.5rem;">Most coding platforms teach you how to consume. <br><span class="text-gradient">Not how to build.</span></h2>
+        <p style="color: var(--text-muted); font-size: 1.1rem;">You pay for static courses, outdated stacks, shallow exercises, and explanations that stop exactly where your confusion begins.</p>
+      </div>
+
+      <div class="w3-row-padding w3-margin-top">
+        <div class="w3-col l6 m6 w3-margin-bottom">
+          <div class="modern-card">
+            <div class="card-icon">1</div>
+            <h3 style="font-weight: 700; font-size: 1.25rem;">Outdated too fast</h3>
+            <p style="color: var(--text-muted);">You start learning one stack and realize halfway through that the tooling, patterns, or project structure are already old.</p>
+          </div>
+        </div>
+        <div class="w3-col l6 m6 w3-margin-bottom">
+          <div class="modern-card">
+            <div class="card-icon">2</div>
+            <h3 style="font-weight: 700; font-size: 1.25rem;">Too much theory, not enough real building</h3>
+            <p style="color: var(--text-muted);">You watch lessons, complete tiny exercises, and still don’t feel able to create something on your own.</p>
+          </div>
+        </div>
+        <div class="w3-col l6 m6 w3-margin-bottom">
+          <div class="modern-card">
+            <div class="card-icon">3</div>
+            <h3 style="font-weight: 700; font-size: 1.25rem;">The why is missing</h3>
+            <p style="color: var(--text-muted);">You’re shown hooks, files, and patterns, but nobody really explains why they exist or when they matter.</p>
+          </div>
+        </div>
+        <div class="w3-col l6 m6 w3-margin-bottom">
+          <div class="modern-card">
+            <div class="card-icon">4</div>
+            <h3 style="font-weight: 700; font-size: 1.25rem;">You get stuck alone</h3>
+            <p style="color: var(--text-muted);">When something breaks, you don’t know whether the issue is your code, your understanding, or the course itself.</p>
+          </div>
+        </div>
+      </div>
+      <div class="w3-center w3-margin-top">
+        <p style="font-size: 1.25rem; font-weight: 700;">Reasoningframe replaces passive learning with a live, project-driven workflow.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Demo Section -->
+  <section id="demo" class="w3-container section-padding">
+    <div class="w3-content" style="max-width: 1200px;">
+      <div class="w3-row-padding w3-align-center" style="display:flex; flex-wrap:wrap; align-items:center;">
+        <div class="w3-col l5 m12 w3-margin-bottom">
+          <h2 style="font-weight: 800; font-size: 2.5rem;">See Reasoningframe in action</h2>
+          <p style="color: var(--text-muted); font-size: 1.1rem;">Watch a simple idea become a real project, then see how Reasoningframe explains errors, updates the preview, and guides the next step.</p>
+          <ul style="list-style: none; padding: 0; margin-top: 24px;">
+            <li style="margin-bottom:12px;">✅ Start with one project idea</li>
+            <li style="margin-bottom:12px;">✅ Get a modern stack instantly</li>
+            <li style="margin-bottom:12px;">✅ Code inside the workshop</li>
+            <li style="margin-bottom:12px;">✅ See the preview update</li>
+            <li style="margin-bottom:12px;">✅ Get errors explained in plain English</li>
+          </ul>
+          <a href="#pricing" class="btn-gradient w3-margin-top">I want access to this — $39</a>
+        </div>
+        <div class="w3-col l7 m12">
+          <div class="video-placeholder" role="button" aria-label="Play demo video" tabindex="0">
+            <div class="play-btn">▶</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- What you can build first -->
+  <section class="w3-container section-padding bg-light-section">
+    <div class="w3-content" style="max-width: 1200px;">
+      <div class="w3-center w3-margin-bottom">
+        <h2 style="font-weight: 800; font-size: 2.5rem;">What you can build first</h2>
+        <p style="color: var(--text-muted); font-size: 1.1rem;">Start from one of these or bring your own idea. Reasoningframe adapts.</p>
+      </div>
+      <div class="w3-row-padding w3-margin-top">
+        <div class="w3-col l3 m6 w3-margin-bottom">
+          <div class="modern-card" style="padding: 24px;">
+            <h4 style="font-weight: 700;">React Social Feed</h4>
+            <p style="color: var(--text-muted); font-size:0.9rem;">Posts, likes, dark mode, components, state, clean UI.</p>
+          </div>
+        </div>
+        <div class="w3-col l3 m6 w3-margin-bottom">
+          <div class="modern-card" style="padding: 24px;">
+            <h4 style="font-weight: 700;">Movie Dashboard</h4>
+            <p style="color: var(--text-muted); font-size:0.9rem;">Search, filters, cards, API calls, responsive layout.</p>
+          </div>
+        </div>
+        <div class="w3-col l3 m6 w3-margin-bottom">
+          <div class="modern-card" style="padding: 24px;">
+            <h4 style="font-weight: 700;">FastAPI Task API</h4>
+            <p style="color: var(--text-muted); font-size:0.9rem;">Routes, validation, JSON responses, backend logic.</p>
+          </div>
+        </div>
+        <div class="w3-col l3 m6 w3-margin-bottom">
+          <div class="modern-card" style="padding: 24px;">
+            <h4 style="font-weight: 700;">Quote App</h4>
+            <p style="color: var(--text-muted); font-size:0.9rem;">Favorites, interactions, simple state, modern structure.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Solution / How It Works -->
+  <section id="how-it-works" class="w3-container section-padding">
+    <div class="w3-content" style="max-width: 1200px;">
+      <div class="w3-center w3-margin-bottom">
+        <span class="badge">Workflow</span>
+        <h2 style="font-weight: 700; font-size: 2.5rem;">With Reasoningframe, you don’t start with a course.<br>You start with a <span class="text-gradient">project you actually want to build.</span></h2>
+      </div>
+
+      <div class="w3-row-padding w3-margin-top">
+        <div class="w3-col l4 m6 w3-margin-bottom">
+          <div class="modern-card">
+            <h4 style="font-weight: 700; color:var(--accent-color);">1. Describe your idea</h4>
+            <p style="color: var(--text-muted);">Write what you want to build, even if it’s rough, weird, ambitious, or incomplete.</p>
+          </div>
+        </div>
+        <div class="w3-col l4 m6 w3-margin-bottom">
+          <div class="modern-card">
+            <h4 style="font-weight: 700; color:var(--accent-color);">2. Get your project</h4>
+            <p style="color: var(--text-muted);">You get a real starting point with a modern stack, clear files, and a first mission.</p>
+          </div>
+        </div>
+        <div class="w3-col l4 m6 w3-margin-bottom">
+          <div class="modern-card">
+            <h4 style="font-weight: 700; color:var(--accent-color);">3. Code in the workshop</h4>
+            <p style="color: var(--text-muted);">Edit code, explore files, test things, break things, and see what your code actually produces.</p>
+          </div>
+        </div>
+        <div class="w3-col l4 m6 w3-margin-bottom">
+          <div class="modern-card">
+            <h4 style="font-weight: 700; color:var(--accent-color);">4. Live mentor guidance</h4>
+            <p style="color: var(--text-muted);">Reasoningframe explains the why, detects what went wrong, and helps you understand the missing concept.</p>
+          </div>
+        </div>
+        <div class="w3-col l4 m6 w3-margin-bottom">
+          <div class="modern-card">
+            <h4 style="font-weight: 700; color:var(--accent-color);">5. See immediate results</h4>
+            <p style="color: var(--text-muted);">Preview, logs, errors, tests, or API responses — every action gives you visible feedback.</p>
+          </div>
+        </div>
+        <div class="w3-col l4 m6 w3-margin-bottom">
+          <div class="modern-card">
+            <h4 style="font-weight: 700; color:var(--accent-color);">6. Move to the next project</h4>
+            <p style="color: var(--text-muted);">Once you finish, Reasoningframe recommends the next challenge based on what you truly learned.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- COMPARISON SECTION -->
+  <section id="compare" class="w3-container section-padding bg-light-section">
+    <div class="w3-content" style="max-width: 1000px;">
+      <div class="w3-center w3-margin-bottom">
+        <h2 style="font-weight: 800; font-size: 2.5rem;">Why Reasoningframe beats static learning platforms</h2>
+        <p style="color: var(--text-muted); font-size: 1.1rem; max-width: 800px; margin: 0 auto;">
+          Most platforms sell fixed courses or curated catalogs. Reasoningframe starts from your idea and turns it into a project you can actually build.
+        </p>
+      </div>
+
+      <div class="table-container">
+        <table class="modern-table">
+          <thead>
+            <tr>
+              <th style="width: 20%;">Feature</th>
+              <th class="header-highlight" style="width: 30%;">Reasoningframe</th>
+              <th style="width: 25%;">Codecademy</th>
+              <th style="width: 25%;">Udemy</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Starting point</strong></td>
+              <td class="col-highlight">Your own project idea</td>
+              <td>Fixed courses and skill paths</td>
+              <td>Individual instructor-led courses</td>
+            </tr>
+            <tr>
+              <td><strong>Learning format</strong></td>
+              <td class="col-highlight">Live project workshop + AI mentor</td>
+              <td>Curated paths, projects, quizzes, AI assistance</td>
+              <td>Buy courses one by one or use a subscription plan</td>
+            </tr>
+            <tr>
+              <td><strong>Personalization</strong></td>
+              <td class="col-highlight">Personalized project generated from your prompt</td>
+              <td>Mostly fixed learning paths and catalog navigation</td>
+              <td>Depends on the course you buy</td>
+            </tr>
+            <tr>
+              <td><strong>Freshness</strong></td>
+              <td class="col-highlight">Built to evolve with the current stack</td>
+              <td>Catalog and path-based platform</td>
+              <td>Varies by instructor and course</td>
+            </tr>
+            <tr>
+              <td><strong>What you leave with</strong></td>
+              <td class="col-highlight">A project shaped around your idea</td>
+              <td>Progress through predefined platform content</td>
+              <td>A completed course or purchased course access</td>
+            </tr>
+            <tr>
+              <td><strong>Pricing model</strong></td>
+              <td class="col-highlight">$39 Founder Beta, then optional Founder Pro at $10/month</td>
+              <td>Free Basic, Plus from ~$10.50/month, Pro from ~$13.99/month</td>
+              <td>Subscription plan exists, or courses can be bought one by one</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="w3-row-padding w3-margin-top w3-margin-bottom">
+        <div class="w3-col l4 m4 w3-margin-bottom">
+          <div style="background: white; padding: 20px; border-radius: 12px; height: 100%; border: 1px solid #F3F4F6;">
+            <h4 style="font-weight: 700; margin-top: 0;">Codecademy</h4>
+            <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 0;">Best when you want a structured catalog and predefined learning paths.</p>
+          </div>
+        </div>
+        <div class="w3-col l4 m4 w3-margin-bottom">
+          <div style="background: white; padding: 20px; border-radius: 12px; height: 100%; border: 1px solid #F3F4F6;">
+            <h4 style="font-weight: 700; margin-top: 0;">Udemy</h4>
+            <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 0;">Best when you want to buy a specific course from a specific instructor or use a broader catalog.</p>
+          </div>
+        </div>
+        <div class="w3-col l4 m4 w3-margin-bottom">
+          <div style="background: var(--accent-light); padding: 20px; border-radius: 12px; height: 100%; border: 1px solid #FFE0D1;">
+            <h4 style="font-weight: 700; color: var(--accent-color); margin-top: 0;">Reasoningframe</h4>
+            <p style="color: var(--text-main); font-size: 0.9rem; margin-bottom: 0; font-weight: 500;">Best when you want to start from your own idea, generate a personalized project, and learn by building.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="w3-center w3-padding-16">
+        <p style="font-size: 1.1rem; font-weight: 600;">
+          If you want a fixed catalog, there are already plenty of options. If you want to learn by building your own idea with live guidance, that’s exactly why Reasoningframe exists.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Pricing / Founder Offer -->
+  <section id="pricing" class="w3-container section-padding">
+    <div class="w3-content w3-center" style="max-width: 800px;">
+      <span class="badge badge-urgent">Beta opens in exactly 7 days</span><br>
+      <h2 style="font-weight: 800; font-size: 2.5rem;">Join the Founder Beta</h2>
+      <p style="color: var(--text-muted); font-size: 1.1rem; margin-bottom: 40px;">
+        We’re not looking for free signups. We’re looking for the first serious builders who want to use Reasoningframe early, shape it directly, and validate that this product deserves to exist.
+      </p>
+
+      <div class="modern-card" style="border: 2px solid var(--accent-color); padding: 48px 32px; position:relative; background:white;">
+        <div style="position:absolute; top:-15px; left:50%; transform:translateX(-50%); background:var(--primary-gradient); color:white; padding:4px 16px; border-radius:20px; font-weight:bold; font-size:0.8rem;">BEST VALUE</div>
+        
+        <h3 style="font-weight: 800; font-size: 1.8rem; margin:0;">Reasoningframe Founder Access</h3>
+        <p style="font-size: 3rem; font-weight: 800; color: var(--accent-color); margin: 8px 0;">$39 <span style="font-size: 1rem; color:var(--text-muted); font-weight:500;">today (One-time)</span></p>
+        
+        <div style="background: var(--bg-light); border-radius: 8px; padding: 16px; margin-bottom: 24px; display: inline-block;">
+          <p style="margin:0; font-weight:700;">Founder Pro after launch: $10/month <span style="font-weight:400; color:var(--text-muted);">(Optional)</span></p>
+          <p style="margin:0; font-size:0.875rem; color:var(--text-muted); text-decoration: line-through;">Future public price: $24/month</p>
+        </div>
+
+        <ul style="list-style: none; padding: 0; text-align: left; max-width: 400px; margin: 0 auto 32px auto;">
+          <li style="margin-bottom:12px; border-bottom:1px solid #f3f4f6; padding-bottom:8px;">✅ 30 days of beta access</li>
+          <li style="margin-bottom:12px; border-bottom:1px solid #f3f4f6; padding-bottom:8px;">✅ Up to 5 generated projects</li>
+          <li style="margin-bottom:12px; border-bottom:1px solid #f3f4f6; padding-bottom:8px;">✅ Live AI mentor included</li>
+          <li style="margin-bottom:12px; border-bottom:1px solid #f3f4f6; padding-bottom:8px;">✅ Direct feedback channel with the founder</li>
+          <li style="margin-bottom:12px;">✅ <b>14-day money-back guarantee</b></li>
+        </ul>
+
+        <a href="https://www.paypal.com/ncp/payment/P4T3J3RQSXVZW" class="btn-gradient" style="width:100%; font-size:1.1rem; padding:16px;">Pay $39 and secure your spot</a>
+        <p style="font-size: 0.875rem; color: var(--text-muted); margin-top: 16px;">Price locked while your subscription remains active.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Why Paid Section -->
+  <section class="w3-container section-padding bg-light-section">
+    <div class="w3-content w3-center" style="max-width: 800px;">
+      <h2 style="font-weight: 800; font-size: 2rem;">Why there’s no free plan right now</h2>
+      <p style="color: var(--text-muted); font-size: 1.1rem; margin-top: 16px;">
+        Because free signups don’t validate a real problem. Paid users do.
+      </p>
+      <p style="color: var(--text-muted); font-size: 1.1rem;">
+        Reasoningframe is being built with a small group of serious early adopters, not a waitlist full of people who will never actually use the product. If you pay to get in, we owe you something real: a real workflow, real support, and real progress.
+      </p>
+    </div>
+  </section>
+
+  <!-- FAQ Section -->
+  <section id="faq" class="w3-container section-padding">
+    <div class="w3-content" style="max-width: 800px;">
+      <div class="w3-center w3-margin-bottom">
+        <h2 style="font-weight: 800; font-size: 2.5rem;">FAQ</h2>
+      </div>
+
+      <div style="border-top: 1px solid #F3F4F6;">
+        <button class="faq-btn" onclick="toggleAccordion('faq1')">
+          What happens after the beta ends? <span>+</span>
+        </button>
+        <div id="faq1" class="faq-content">
+          <p style="margin-top:16px;">Your $39 payment gives you Founder Beta access. After launch, you’ll be able to continue on Founder Pro at $10/month instead of $24/month. This is completely optional, not automatic.</p>
+        </div>
+
+        <button class="faq-btn" onclick="toggleAccordion('faq2')">
+          What do I get immediately after paying? <span>+</span>
+        </button>
+        <div id="faq2" class="faq-content">
+          <p style="margin-top:16px;">You secure your spot. The platform opens in maximum 7 days. You will receive an onboarding email and access to the first project-generation experience as soon as the gates open.</p>
+        </div>
+
+        <button class="faq-btn" onclick="toggleAccordion('faq3')">
+          Do I need to be an expert developer? <span>+</span>
+        </button>
+        <div id="faq3" class="faq-content">
+          <p style="margin-top:16px;">No. Reasoningframe is designed for serious beginners, learners stuck in tutorial hell, and juniors who want more hands-on practice.</p>
+        </div>
+
+        <button class="faq-btn" onclick="toggleAccordion('faq4')">
+          What happens if Reasoningframe is not for me? <span>+</span>
+        </button>
+        <div id="faq4" class="faq-content">
+          <p style="margin-top:16px;">You can ask for a refund within 14 days of your access starting. No questions asked.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Final CTA Section -->
+  <section class="w3-container section-padding" style="background: var(--primary-gradient); color: white; text-align: center;">
+    <div class="w3-content" style="max-width: 800px;">
+      <h2 style="font-weight: 800; font-size: 3rem; color: white;">Stop passively learning.<br>Build something tonight.</h2>
+      <p style="font-size: 1.25rem; margin-bottom: 32px; opacity: 0.9;">Describe an idea. Get a modern project. Let Reasoningframe guide you to a real result.</p>
+      
+      <div style="display:flex; gap:16px; justify-content:center; flex-wrap:wrap;">
+        <a href="https://www.paypal.com/ncp/payment/P4T3J3RQSXVZW" class="btn-secondary" style="background: white; color: var(--accent-color); border:none;">Join Founder Beta — $39</a>
+      </div>
+      <p style="font-size: 0.875rem; margin-top: 24px; opacity: 0.8;">14-day money-back guarantee · Limited founder access</p>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="w3-container w3-padding-64" style="background-color: #111827; color: #9CA3AF; text-align: center;">
+    <div class="w3-content" style="max-width: 1200px;">
+      <h3 style="color: white; font-weight: 800; margin-bottom: 8px;">Reasoningframe</h3>
+      <p>Learn by building real modern projects.</p>
+      
+      <div style="margin: 32px 0;">
+        <a href="#demo" style="color: #9CA3AF; text-decoration: none; margin: 0 16px;">Demo</a>
+        <a href="#how-it-works" style="color: #9CA3AF; text-decoration: none; margin: 0 16px;">How it works</a>
+        <a href="#compare" style="color: #9CA3AF; text-decoration: none; margin: 0 16px;">Compare</a>
+        <a href="#pricing" style="color: #9CA3AF; text-decoration: none; margin: 0 16px;">Founder Offer</a>
+        <a href="#faq" style="color: #9CA3AF; text-decoration: none; margin: 0 16px;">FAQ</a>
+      </div>
+      
+      <p style="font-size: 0.875rem; border-top: 1px solid #374151; padding-top: 32px; margin-top: 32px;">
+        Built for people who want to learn by shipping.
+      </p>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script>
+    // Mobile Menu Toggle
+    function toggleMenu() {
+      var x = document.getElementById("mobileMenu");
+      if (x.className.indexOf("w3-show") == -1) {
+        x.className += " w3-show";
+      } else { 
+        x.className = x.className.replace(" w3-show", "");
+      }
+    }
+
+    // FAQ Accordion
+    function toggleAccordion(id) {
+      var x = document.getElementById(id);
+      var btn = x.previousElementSibling;
+      var span = btn.querySelector('span');
+      
+      if (x.style.maxHeight) {
+        x.style.maxHeight = null;
+        span.innerHTML = '+';
+      } else {
+        x.style.maxHeight = x.scrollHeight + "px";
+        span.innerHTML = '−';
+      }
+    }
+  </script>
 </body>
 </html>

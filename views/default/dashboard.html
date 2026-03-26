@@ -47,6 +47,11 @@
         .btn-primary:hover { background: #4f46e5; }
         .btn-credit { background: rgba(99,102,241,0.1); color: #818cf8; border: 1px solid rgba(99,102,241,0.3); padding: 8px 16px; border-radius: 999px; font-weight: 600; cursor: pointer; font-size: 14px; transition: 0.2s; }
         
+        /* Form Generator */
+        .generator-form { display: flex; gap: 10px; width: 100%; align-items: center; justify-content: center; margin-top: 20px;}
+        .generator-input { flex-grow: 1; padding: 14px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); background: #16161e; color: white; font-size: 15px;}
+        .generator-select { padding: 14px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); background: #16161e; color: white; font-size: 15px; cursor: pointer;}
+        
         /* Table Style */
         .rf-table { width: 100%; border-collapse: separate; border-spacing: 0 10px; }
         .rf-table td { padding: 16px; background: rgba(255,255,255,0.02); border-top: 1px solid rgba(255,255,255,0.05); border-bottom: 1px solid rgba(255,255,255,0.05); }
@@ -57,9 +62,48 @@
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .spinner { width: 40px; height: 40px; border: 3px solid rgba(99,102,241,0.1); border-top-color: #6366f1; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto; }
         @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        /* Flash Messages */
+.rf-flash {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #4f46e5;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 12px;
+    font-weight: 600;
+    box-shadow: 0 10px 25px rgba(99,102,241,0.4);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    animation: slideDown 0.3s ease-out;
+}
+.rf-flash.error { background: #ef4444; box-shadow: 0 10px 25px rgba(239,68,68,0.4); }
+.rf-flash-close { cursor: pointer; opacity: 0.8; font-size: 18px; }
+.rf-flash-close:hover { opacity: 1; }
+@keyframes slideDown { from { top: -50px; opacity: 0; } to { top: 20px; opacity: 1; } }
     </style>
 </head>
 <body onload="brython()">
+
+
+<!-- Affichage des messages Flash Web2py -->
+{{if response.flash:}}
+<div id="flash-message" class="rf-flash {{='error' if 'erreur' in response.flash.lower() or 'insuffisants' in response.flash.lower() else ''}}">
+    <span>{{=response.flash}}</span>
+    <span class="rf-flash-close" onclick="document.getElementById('flash-message').style.display='none'">&times;</span>
+</div>
+<script>
+    // Fait disparaître le message automatiquement après 5 secondes
+    setTimeout(function() {
+        var flashObj = document.getElementById('flash-message');
+        if (flashObj) { flashObj.style.display = 'none'; }
+    }, 5000);
+</script>
+{{pass}}
 
 <div class="rf-shell">
     <!-- Navbar -->
@@ -71,7 +115,7 @@
         </div>
         <div class="w3-cell w3-cell-middle" style="text-align: right;">
             <button class="btn-credit w3-margin-right" id="open_topup">
-                ⚡ {{=auth.user.credits if auth.user else 0}} Credits
+                ⚡ {{=credits}} Credits
             </button>
             
             <div class="rf-dropdown">
@@ -84,6 +128,30 @@
         </div>
     </div>
 
+    <!-- NOUVEAU BLOC DE GÉNÉRATION (Toujours visible au-dessus des cours) -->
+    <div class="rf-glass w3-padding-24 w3-margin-bottom" style="text-align: center;">
+        <h3 style="margin-top:0; font-weight: 700;">What do you want to learn today?</h3>
+        
+        <form id="generate_form" method="POST" action="{{=URL('default', 'generate_course')}}" class="generator-form" onsubmit="document.getElementById('spinner-generate').style.display='inline-block';">
+            
+            <input type="text" id="course_topic" name="topic" class="generator-input" placeholder="e.g. Python dictionaries, CSS Flexbox..." required>
+            
+            <select id="course_language" name="language" class="generator-select" required>
+                <option value="Python">Python</option>
+                <option value="JavaScript">JavaScript</option>
+                <option value="HTML/CSS">HTML/CSS</option>
+                <option value="SQL">SQL</option>
+                <option value="React">React</option>
+                <option value="Java">Java</option>
+            </select>
+            
+            <button type="submit" class="btn-primary" style="display:flex; align-items:center; gap:8px;">
+                Generate
+                <div id="spinner-generate" class="spinner" style="width:16px; height:16px; border-width:2px; display:none; margin:0;"></div>
+            </button>
+        </form>
+    </div>
+
     <!-- States -->
     <div id="state-loading" class="dashboard-state w3-center w3-padding-64">
         <div class="spinner w3-margin-bottom"></div>
@@ -91,21 +159,18 @@
     </div>
 
     <div id="state-empty" class="dashboard-state w3-center w3-padding-64">
-        <div class="rf-glass w3-padding-48" style="max-width: 600px; margin: 0 auto;">
+        <div class="rf-glass w3-padding-48" style="max-width: 600px; margin: 0 auto; border: 1px dashed rgba(255,255,255,0.2);">
             <div style="font-size: 48px; margin-bottom: 20px;">📚</div>
             <h2 style="font-weight: 800;">Your library is empty</h2>
-            <button class="btn-primary" onclick="window.location.href='/'">Generate My First Course</button>
+            <p class="rf-muted">Use the bar above to generate your very first course!</p>
         </div>
     </div>
 
     <div id="state-content" class="dashboard-state">
         <div class="w3-row-padding w3-margin-bottom">
-            <div class="w3-col m8">
+            <div class="w3-col m12">
                 <h1 style="font-weight: 800; margin: 0; letter-spacing: -1.5px;">My Courses</h1>
                 <p class="rf-muted">Pick up where you left off.</p>
-            </div>
-            <div class="w3-col m4 w3-right-align">
-                <button class="btn-primary" onclick="window.location.href='/'">+ New Course</button>
             </div>
         </div>
         <table class="rf-table">
@@ -114,7 +179,7 @@
     </div>
 </div>
 
-<!-- Modal Topup -->
+<!-- Modal Topup (Intact) -->
 <div id="modal_topup" class="rf-modal">
     <div class="modal-body">
         <h2 style="font-weight: 800; margin-top: 0;">Top up Credits</h2>
@@ -125,11 +190,10 @@
             <span style="color: #818cf8; font-size: 20px; font-weight: 700;">$39.00</span>
         </div>
         
-        <!-- LE LIEN QUI APPELLE TON SERVEUR AVANT PAYPAL -->
         <a href="{{=URL('default', 'initiate_topup')}}" 
            class="btn-primary" 
            style="display: block; width: 100%; text-decoration: none; padding: 14px; font-size: 16px;">
-           Pay with PayPal
+            Pay with PayPal
         </a>
         <p class="w3-small rf-muted w3-margin-top">You will be securely redirected to PayPal.</p>
         
@@ -147,7 +211,7 @@
 </script>
 
 <script type="text/python">
-from browser import document, ajax, html
+from browser import document, ajax, html, window
 import json
 
 class DashboardManager:
@@ -172,10 +236,9 @@ class DashboardManager:
 
     def _fill_table(self, data):
         container = document["course_table_body"]
-        container.clear() # On vide proprement au lieu de remplacer du HTML brut
+        container.clear() 
 
         for item in data:
-            # Construction sécurisée du DOM avec Brython
             tr = html.TR()
 
             td1 = html.TD()
@@ -185,7 +248,11 @@ class DashboardManager:
             td2 = html.TD(item.get("date", "N/A"), Class="rf-muted")
 
             td3 = html.TD(style={"text-align": "right"})
-            review_btn = html.BUTTON("Review", Class="btn-primary", style={"padding": "6px 16px", "font-size": "13px"})
+            
+            course_id = item.get("id")
+            read_url = f"{{=URL('default', 'read_course')}}/{course_id}"
+            
+            review_btn = html.A("Read course", href=read_url, Class="btn-primary", style={"padding": "6px 16px", "font-size": "13px", "text-decoration": "none"})
             td3 <= review_btn
 
             tr <= td1
@@ -193,6 +260,18 @@ class DashboardManager:
             tr <= td3
             container <= tr
 
+# --- Gestion du pont depuis l'index ---
+def handle_pending_prompt():
+    pending_prompt = window.sessionStorage.getItem("pending_prompt")
+    
+    if pending_prompt:
+        if "course_topic" in document:
+            document["course_topic"].value = pending_prompt
+            
+        window.sessionStorage.removeItem("pending_prompt")
+
+# --- Lancement ---
+handle_pending_prompt()
 manager = DashboardManager()
 manager.fetch_data()
 </script>

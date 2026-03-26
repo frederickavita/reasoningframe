@@ -29,6 +29,412 @@ GOOGLE_SCOPE         = 'openid email profile'
 # --- CONFIGURATION GLOBALE ---
 # -*- coding: utf-8 -*-
 
+def _validate_course_json(raw_json):
+    """
+    Vérifie que le JSON généré par l'IA respecte le contrat minimal attendu.
+    Retourne (parsed_json, course_title) ou lève une ValueError.
+    """
+    try:
+        data = json.loads(raw_json)
+    except Exception:
+        raise ValueError("Le format renvoyé par l'IA n'est pas un JSON valide.")
+
+    if not isinstance(data, dict):
+        raise ValueError("Le cours doit être un objet JSON.")
+
+    required_root = ["course_title", "topic_overview", "modules"]
+    for key in required_root:
+        if key not in data:
+            raise ValueError(f"Champ manquant à la racine: {key}")
+
+    modules = data.get("modules")
+    if not isinstance(modules, list) or not (1 <= len(modules) <= 5):
+        raise ValueError("Le tableau 'modules' doit contenir entre 1 et 5 éléments.")
+
+    for module in modules:
+        if not isinstance(module, dict):
+            raise ValueError("Chaque module doit être un objet JSON.")
+
+        for key in ["module_title", "goal", "definition", "syntax", "examples", "quick_challenge"]:
+            if key not in module:
+                raise ValueError(f"Champ manquant dans un module: {key}")
+
+        examples = module.get("examples")
+        if not isinstance(examples, list) or len(examples) != 3:
+            raise ValueError("Chaque module doit contenir exactement 3 exemples.")
+
+        expected_types = ["simple", "typical", "complex"]
+        actual_types = [ex.get("type") for ex in examples]
+        if actual_types != expected_types:
+            raise ValueError("Les exemples doivent être dans l'ordre: simple, typical, complex.")
+
+        for ex in examples:
+            for key in ["type", "title", "code", "result", "explanation"]:
+                if key not in ex or not ex.get(key):
+                    raise ValueError(f"Champ manquant dans un exemple: {key}")
+
+        qc = module.get("quick_challenge")
+        if not isinstance(qc, dict) or "instruction" not in qc or not qc.get("instruction"):
+            raise ValueError("quick_challenge.instruction est obligatoire.")
+
+    course_title = data.get("course_title", "").strip()
+    if not course_title:
+        raise ValueError("Le titre du cours (course_title) est vide.")
+
+    return data, course_title
+
+
+
+def welcome_founder():
+    # On crée le formulaire basé sur la table (uniquement le champ email)
+    form = SQLFORM(db.founder_beta, fields=['email'])
+    
+    # process() gère la validation et l'insertion en base automatiquement
+    if form.process().accepted:
+        session.flash = "Email saved! Welcome to the Founder Beta."
+        redirect(URL('thank_you_final'))
+    elif form.errors:
+        # Si web2py détecte un doublon ou un email invalide
+        response.flash = "Please check your email. It might be invalid or already registered."
+        
+    return dict(form=form)
+
+def thank_you_final():
+    return dict()
+
+
+def generate_course():
+    from google import genai
+    from google.genai import types
+    """
+    Génère un cours sur mesure via le NOUVEAU SDK Gemini (google.genai).
+    """
+    
+    # 1) POST only
+    if request.env.request_method != "POST":
+        session.flash = "Méthode non autorisée."
+        redirect(URL('default', 'dashboard'))
+
+    # 2) Validation des entrées
+    topic = (request.post_vars.topic or "").strip()
+    language = (request.post_vars.language or "").strip()
+
+    if not topic or not language:
+        session.flash = "Veuillez préciser un sujet et un langage."
+        redirect(URL('default', 'dashboard'))
+
+    # 3) Vérification portefeuille (Pré-check UX)
+    if auth.user.credits < 1:
+        session.flash = "Crédits insuffisants. Veuillez recharger votre compte."
+        redirect(URL('default', 'dashboard'))
+
+    # 4) Configuration du NOUVEAU Client Gemini
+    myconf = AppConfig(reload=False)
+    api_key = myconf.get('gemini.api_key')
+    if not api_key:
+        session.flash = "Configuration IA manquante côté serveur."
+        redirect(URL('default', 'dashboard'))
+
+    # Instanciation du client (Nouvelle syntaxe)
+    client = genai.Client(api_key=api_key)
+
+    # 5) Prompts
+    system_prompt = """<role>
+You are an expert programming instructor for the 'ReasoningFrame' platform. 
+Your teaching philosophy is based on "Progressive Exemplification". You bridge the gap between abstract concepts and concrete applications.
+</role>
+
+<instructions>
+1. Analyze the user's requested topic and programming language.
+2. Determine the scope of the topic. Break it down into logical sub-topics if necessary.
+3. Create a micro-course containing one or more "modules" (1 module for a specific topic, up to 5 modules for a broad topic).
+4. For EACH module, follow the Progressive Exemplification method: generate exactly 3 examples strictly increasing in complexity (Simple -> Typical -> Complex).
+5. Ensure all examples are realistic, business-oriented, and concrete.
+</instructions>
+
+<constraints>
+- DO NOT use meaningless variables like `x=5`, `foo`, or `bar`.
+- DO NOT output any conversational text, introductions, or conclusions.
+- DO NOT wrap the output in markdown code blocks.
+- Your entire response MUST be a single, valid, raw JSON object.
+- All natural-language fields MUST be in French.
+</constraints>
+
+<few_shot_example>
+User Input: "CSS body style element"
+
+Expected JSON Output:
+{
+  "course_title": "Mastering the CSS Body Element",
+  "topic_overview": "Understanding how to style the foundational element of any webpage.",
+  "modules": [
+    {
+      "module_title": "Using the CSS body style element",
+      "goal": "Learn how to apply global styles like background color and fonts to an entire web page.",
+      "definition": "The CSS body element allows you to define the default styling for all visible content on a webpage.",
+      "syntax": "body { property: value; }",
+      "examples": [
+        {
+          "type": "simple",
+          "title": "Basic Colors",
+          "code": "body {\\n  background-color: #336699;\\n  color: #ffffff;\\n}",
+          "result": "The entire web page has a blue background and all text is white.",
+          "explanation": "This is the most fundamental use of the body tag: setting the baseline contrast for reading."
+        },
+        {
+          "type": "typical",
+          "title": "Adding Typography",
+          "code": "body {\\n  background-color: #336699;\\n  color: #ffffff;\\n  font-family: Trebuchet, Verdana, sans-serif;\\n  font-size: 1.5em;\\n}",
+          "result": "The background remains blue, but the text is now larger and uses a modern sans-serif font.",
+          "explanation": "In real projects, you always define a fallback font stack and a base font size in the body to ensure consistency across browsers."
+        },
+        {
+          "type": "complex",
+          "title": "Layout Constraints",
+          "code": "body {\\n  background-color: #336699;\\n  color: #ffffff;\\n  font-family: Trebuchet, Verdana, sans-serif;\\n  font-size: 1.5em;\\n  margin: 200px 50px 50px 50px;\\n  padding: 50px;\\n  border: 8px solid red;\\n}",
+          "result": "The page content is pushed down by 200px, surrounded by 50px of inner spacing, and wrapped in a thick red border.",
+          "explanation": "Applying margins, padding, and borders directly to the body allows you to create a 'framed' effect for the entire viewport."
+        }
+      ],
+      "quick_challenge": {
+        "instruction": "Change the simple example so the background is dark gray (#333333) and the text is a light green (#90EE90)."
+      }
+    }
+  ]
+}
+</few_shot_example>
+
+<output_format>
+Your output must strictly match the JSON structure shown in the <few_shot_example>. The "modules" array can contain multiple items depending on the breadth of the topic.
+</output_format>"""
+    
+    user_prompt = f"Sujet demandé: {topic}\nLangage: {language}\nNiveau cible: débutant"
+
+    try:
+        # 6) Appel Gemini avec le NOUVEAU SDK (Config via types.GenerateContentConfig)
+        response = client.models.generate_content(
+            model='gemini-2.5-flash',
+            contents=user_prompt,
+            config=types.GenerateContentConfig(
+                system_instruction=system_prompt,
+                response_mime_type="application/json",
+                response_schema=CourseSchema,
+                temperature=0.2
+            )
+        )
+        
+        raw_json = response.text
+
+        # 7) Validation métier du JSON
+        parsed_json, course_title = _validate_course_json(raw_json)
+
+        # 8) Débit Atomique
+        updated_rows = db(
+            (db.auth_user.id == auth.user_id) & 
+            (db.auth_user.credits >= 1)
+        ).update(credits=db.auth_user.credits - 1)
+
+        if updated_rows == 0:
+            db.rollback()
+            session.flash = "Transaction refusée : Vos crédits sont insuffisants."
+            redirect(URL('default', 'dashboard'))
+
+        auth.user.credits -= 1
+
+        # 9) Sauvegarde dans la DB
+        course_id = db.generated_course.insert(
+            user_id=auth.user_id,
+            title=course_title,
+            language=language,
+            topic=topic,
+            prompt_used=user_prompt,
+            content_json=raw_json
+        )
+
+        db.commit()
+
+        # 10) Succès et Redirection
+        session.flash = "Cours généré avec succès ! 🚀"
+        redirect(URL('default', 'read_course', args=[course_id]))
+
+    except ValueError as e:
+        db.rollback()
+        session.flash = f"Erreur de validation IA : {str(e)}"
+        redirect(URL('default', 'dashboard'))
+
+    except Exception as e:
+        db.rollback()
+        session.flash = "Une erreur serveur est survenue lors de la génération."
+        print(f"Erreur API Gemini : {str(e)}") # Très utile pour debugger dans la console Web2py
+        redirect(URL('default', 'dashboard'))
+
+
+
+
+# def read_course():
+#     """Récupère un cours généré et l'envoie à la vue"""
+
+#     # 1. ID du cours depuis l'URL (ex: /default/read_course/42)
+#     course_id = request.args(0, cast=int)
+#     if not course_id:
+#         session.flash = "Cours introuvable."
+#         redirect(URL('default', 'dashboard'))
+
+#     # 2. Récupération sécurisée : le cours doit exister ET appartenir à l'utilisateur connecté
+#     course = db(
+#         (db.generated_course.id == course_id) &
+#         (db.generated_course.user_id == auth.user_id)
+#     ).select().first()
+
+#     if not course:
+#         session.flash = "Vous n'avez pas accès à ce cours."
+#         redirect(URL('default', 'dashboard'))
+
+#     # 3. Décodage du JSON
+#     try:
+#         course_data = json.loads(course.content_json)
+#     except Exception:
+#         session.flash = "Erreur de lecture du cours. Le format est invalide."
+#         redirect(URL('default', 'dashboard'))
+
+#     # 4. Vérification minimale de structure (Garde du corps de l'affichage)
+#     if not isinstance(course_data, dict) or "modules" not in course_data:
+#         session.flash = "Le cours est incomplet ou corrompu."
+#         redirect(URL('default', 'dashboard'))
+
+#     # 5. Envoi des données à la vue read_course.html
+#     return dict(course=course, course_data=course_data)
+
+
+
+@auth.requires_login()
+def read_course():
+    from gluon.storage import Storage
+    """MOCK POUR LA DEMO : Affiche les cours fictifs en ANGLAIS"""
+    
+    course_id = request.args(0, cast=int)
+    
+    # --- COURS 1 : CSS FLEXBOX ---
+    if course_id == 101:
+        course = Storage(title="Mastering CSS Flexbox", language="CSS", topic="Flexbox")
+        course_data = {
+            "course_title": "Mastering CSS Flexbox",
+            "topic_overview": "Learn how to align your web elements effortlessly.",
+            "modules": [{
+                "module_title": "Flexbox Basics",
+                "goal": "Center elements and build a navigation bar.",
+                "definition": "Flexbox is a one-dimensional layout model to distribute space among items in an interface.",
+                "syntax": ".container { display: flex; justify-content: center; align-items: center; }",
+                "examples": [
+                    {
+                        "type": "simple",
+                        "title": "Centering an Element (Holy Grail)",
+                        "code": ".container {\n  display: flex;\n  justify-content: center;\n  align-items: center;\n  height: 100vh;\n}",
+                        "result": "The child element is perfectly centered in the middle of the screen, vertically and horizontally.",
+                        "explanation": "This is the most common use case for centering a modal or a loading spinner."
+                    },
+                    {
+                        "type": "typical",
+                        "title": "The Navigation Bar",
+                        "code": ".navbar {\n  display: flex;\n  justify-content: space-between;\n  padding: 20px;\n}\n.nav-links {\n  display: flex;\n  gap: 15px;\n}",
+                        "result": "The logo is pushed to the left, and navigation links are grouped on the right with even spacing.",
+                        "explanation": "space-between is the key here. It pushes the first and last elements to the opposite edges."
+                    },
+                    {
+                        "type": "complex",
+                        "title": "Responsive Product Grid",
+                        "code": ".product-grid {\n  display: flex;\n  flex-wrap: wrap;\n  gap: 20px;\n}\n.product-card {\n  flex: 1 1 300px;\n}",
+                        "result": "Product cards are 300px minimum. If the screen shrinks, they automatically wrap to the next line.",
+                        "explanation": "Combining flex-wrap with flex: 1 1 300px allows you to create a responsive UI without using Media Queries."
+                    }
+                ],
+                "quick_challenge": {"instruction": "Modify the navbar so that all links are clustered in the center instead of the right."}
+            }]
+        }
+
+    # --- COURS 2 : PYTHON DICTIONARIES ---
+    elif course_id == 102:
+        course = Storage(title="Python Dictionaries", language="Python", topic="Dictionaries")
+        course_data = {
+            "course_title": "Python Dictionaries",
+            "topic_overview": "Store and manipulate complex data using key-value pairs.",
+            "modules": [{
+                "module_title": "Manipulating Keys and Values",
+                "goal": "Learn how to extract and update business data.",
+                "definition": "A dictionary is an unordered, changeable, and indexed collection of keys and values.",
+                "syntax": "my_dict = {'key': 'value'}",
+                "examples": [
+                    {
+                        "type": "simple",
+                        "title": "Creating a User Profile",
+                        "code": "user = {\n  'name': 'Doe',\n  'role': 'Admin',\n  'credits': 10\n}\nprint(user['role'])",
+                        "result": "Admin",
+                        "explanation": "You access the value directly using the key inside square brackets. It is extremely fast."
+                    },
+                    {
+                        "type": "typical",
+                        "title": "Updating Data (Shopping Cart)",
+                        "code": "cart = {'apples': 2, 'bananas': 5}\n\n# Adding a product\ncart['oranges'] = 3\n\n# Updating a quantity\ncart['apples'] += 1\n\nprint(cart)",
+                        "result": "{'apples': 3, 'bananas': 5, 'oranges': 3}",
+                        "explanation": "In business apps, dictionaries are often used to manage dynamic states, like a shopping cart where quantities change."
+                    },
+                    {
+                        "type": "complex",
+                        "title": "Extracting API Data (Nested JSON)",
+                        "code": "api_response = {\n  'status': 200,\n  'data': {\n    'users': [\n      {'id': 1, 'email': 'a@test.com'},\n      {'id': 2, 'email': 'b@test.com'}\n    ]\n  }\n}\n\n# Safe extraction\nfor u in api_response.get('data', {}).get('users', []):\n    print(u['email'])",
+                        "result": "a@test.com\nb@test.com",
+                        "explanation": "Using the .get() method is crucial here. It prevents the code from crashing if the 'data' key doesn't exist in the server response."
+                    }
+                ],
+                "quick_challenge": {"instruction": "Create a dictionary representing a car (brand, model, year) and print the year."}
+            }]
+        }
+
+    # --- COURS 3 : REACT USESTATE ---
+    elif course_id == 103:
+        course = Storage(title="React useState Hook", language="React", topic="useState")
+        course_data = {
+             "course_title": "React: The useState Hook",
+             "topic_overview": "Learn how to make your interfaces interactive.",
+             "modules": [{
+                 "module_title": "Introduction to Local State",
+                 "goal": "Understand how React updates the screen.",
+                 "definition": "useState is a function that lets you add a state variable to a component. When the state changes, the component re-renders.",
+                 "syntax": "const [state, setState] = useState(initialValue);",
+                 "examples": [
+                     {
+                         "type": "simple",
+                         "title": "The Classic Counter",
+                         "code": "const [count, setCount] = useState(0);\n\nreturn (\n  <button onClick={() => setCount(count + 1)}>\n    Clicked {count} times\n  </button>\n);",
+                         "result": "A button that increments its number on every click.",
+                         "explanation": "On each click, setCount updates the count variable. React detects this change and redraws the button with the new number."
+                     },
+                     {
+                         "type": "typical",
+                         "title": "Handling Forms (Controlled Input)",
+                         "code": "const [email, setEmail] = useState('');\n\nreturn (\n  <input \n    type=\"email\" \n    value={email}\n    onChange={(e) => setEmail(e.target.value)}\n    placeholder=\"Your email\"\n  />\n);",
+                         "result": "A text input where every typed letter is instantly saved in the React state.",
+                         "explanation": "This is the standard React way to handle forms. The single source of truth is the React state, not the HTML DOM."
+                     },
+                     {
+                         "type": "complex",
+                         "title": "Complex Update (Array of Objects)",
+                         "code": "const [todos, setTodos] = useState([{id: 1, text: 'Eat'}]);\n\nconst addTodo = (newText) => {\n  setTodos(prevTodos => [\n    ...prevTodos, \n    {id: Date.now(), text: newText}\n  ]);\n};",
+                         "result": "Adds a new object to the list without erasing the previous ones.",
+                         "explanation": "For arrays and objects, never mutate the state directly. Use the spread operator (...) to create a copy, ensuring React properly detects the change."
+                     }
+                 ],
+                 "quick_challenge": {"instruction": "Create a useState that manages a boolean (true/false) to toggle a dropdown menu."}
+             }]
+        }
+
+    else:
+        session.flash = "Course not found."
+        redirect(URL('default', 'dashboard'))
+
+    return dict(course=course, course_data=course_data)
+
+
 
 def _paypal_base_url():
     mode = configuration.get("PAYPAL_MODE", "live").lower()
@@ -93,7 +499,9 @@ def _json(payload, status=200):
 def dashboard():
     if not auth.user:
         redirect(URL('default', 'login'))
-    return dict()
+    user = db.auth_user(auth.user.id) 
+    credits = user.credits     
+    return dict(credits=credits)
 
 
 def initiate_topup():
@@ -370,39 +778,49 @@ A product from 2k services
 
 
 
-def get_courses():
-    """Endpoint API sécurisé pour Brython"""
+# def get_courses():
+#     """Endpoint API sécurisé pour Brython"""
     
-    # 1. Vérification d'authentification (Gatekeeper)
-    if not auth.user:
-        # On renvoie un code 401 pour que Brython déclenche l'état Error ou Redirect
-        return response.json({"error": "Unauthorized"}, status=401)
+#     # 1. Vérification d'authentification (Gatekeeper)
+#     if not auth.user:
+#         # On renvoie un code 401 pour que Brython déclenche l'état Error ou Redirect
+#         return response.json({"error": "Unauthorized"}, status=401)
     
-    # 2. Isolation des données
-    # On force le filtre sur l'ID de la session serveur (auth.user_id)
-    # Impossible pour un utilisateur A de voir les cours de l'utilisateur B
-    courses = db(db.course.user_id == auth.user_id).select(
-        db.course.id,
-        db.course.title,
-        db.course.language,
-        db.course.created_on,
-        orderby=~db.course.created_on
-    )
+#     # 2. Isolation des données
+#     # On force le filtre sur l'ID de la session serveur (auth.user_id)
+#     # Impossible pour un utilisateur A de voir les cours de l'utilisateur B
+#     courses = db(db.course.user_id == auth.user_id).select(
+#         db.course.id,
+#         db.course.title,
+#         db.course.language,
+#         db.course.created_on,
+#         orderby=~db.course.created_on
+#     )
     
-    # 3. Formatage pour le Dashboard (Data Transformation)
-    formatted = []
-    for c in courses:
-        # Sécurité supplémentaire : double vérification (optionnel mais recommandé)
-        if c.user_id == auth.user_id:
-            formatted.append({
-                "id": c.id,
-                "title": c.title,
-                "date": c.created_on.strftime("%b %d, %Y") if c.created_on else "N/A",
-                "language": c.language
-            })
+#     # 3. Formatage pour le Dashboard (Data Transformation)
+#     formatted = []
+#     for c in courses:
+#         # Sécurité supplémentaire : double vérification (optionnel mais recommandé)
+#         if c.user_id == auth.user_id:
+#             formatted.append({
+#                 "id": c.id,
+#                 "title": c.title,
+#                 "date": c.created_on.strftime("%b %d, %Y") if c.created_on else "N/A",
+#                 "language": c.language
+#             })
         
-    return response.json(formatted)
+#     return response.json(formatted)
 
+
+@auth.requires_login()
+def get_courses():
+    """MOCK POUR LA DEMO : Renvoie 3 cours parfaits en Anglais"""
+    demo_courses = [
+        {"id": 101, "title": "Mastering CSS Flexbox", "language": "CSS", "date": "Today"},
+        {"id": 102, "title": "Python Dictionaries", "language": "Python", "date": "Yesterday"},
+        {"id": 103, "title": "React useState Hook", "language": "React", "date": "Yesterday"}
+    ]
+    return response.json(demo_courses)
 
 
 

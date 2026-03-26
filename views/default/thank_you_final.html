@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>You're in! — Reasoningframe</title>
+  
+  <!-- W3.CSS & Fonts -->
+  <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --primary-gradient: linear-gradient(135deg, #FF8A00 0%, #FF5E62 100%);
+      --text-main: #1F2937;
+      --text-muted: #6B7280;
+      --bg-light: #F9FAFB;
+      --bg-white: #FFFFFF;
+      --accent-color: #FF7331;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: var(--bg-light);
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+    }
+
+    .success-card {
+      background: var(--bg-white);
+      border-radius: 24px;
+      padding: 48px;
+      max-width: 500px;
+      width: 90%;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+      border: 1px solid #F3F4F6;
+      text-align: center;
+    }
+
+    .icon-success {
+      background: var(--primary-gradient);
+      color: white;
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 40px;
+      margin: 0 auto 24px auto;
+      box-shadow: 0 8px 24px rgba(255, 115, 49, 0.3);
+    }
+
+    h1 {
+      font-size: 2rem;
+      font-weight: 800;
+      margin-bottom: 16px;
+    }
+
+    p {
+      color: var(--text-muted);
+      font-size: 1.1rem;
+      line-height: 1.6;
+      margin-bottom: 32px;
+    }
+
+    /* Style du bloc d'information */
+    .info-box {
+      background-color: var(--bg-light);
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 32px;
+      text-align: left;
+      border: 1px solid #E5E7EB;
+    }
+
+    .info-box h3 {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-top: 0;
+      margin-bottom: 12px;
+      color: var(--text-main);
+    }
+
+    .info-box ul {
+      margin: 0;
+      padding-left: 20px;
+      color: var(--text-muted);
+      font-size: 0.95rem;
+    }
+
+    .info-box li {
+      margin-bottom: 8px;
+    }
+
+    /* Bouton retour */
+    .btn-secondary {
+      background: transparent;
+      color: var(--text-main);
+      border: 2px solid #E5E7EB;
+      padding: 12px 28px;
+      border-radius: 50px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      display: inline-block;
+    }
+    .btn-secondary:hover {
+      border-color: var(--accent-color);
+      color: var(--accent-color);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- web2py Flash Message dynamique (si besoin) -->
+  {{if response.flash:}}
+    <div style="position:fixed; top:20px; left:50%; transform:translateX(-50%); background:#10B981; color:white; padding:12px 24px; border-radius:50px; font-weight:600; z-index:1000; box-shadow:0 4px 12px rgba(16,185,129,0.3);">
+      {{=response.flash}}
+    </div>
+  {{pass}}
+
+  <div class="success-card">
+    <div class="icon-success">🚀</div>
+    
+    <h1>You're officially a Founder.</h1>
+    <p>
+      Your email has been securely saved. Welcome to the club!
+    </p>
+
+    <div class="info-box">
+      <h3>What happens next?</h3>
+      <ul>
+        <li>The beta environment opens in <b>maximum 7 days</b>.</li>
+        <li>Keep an eye on your inbox: we will send your personal access link there.</li>
+        <li>Your Founder pricing ($10/month after launch) is now permanently locked.</li>
+      </ul>
+    </div>
+
+    <!-- Redirection vers l'index web2py -->
+    <a href="{{=URL('default', 'index')}}" class="btn-secondary">Return to Homepage</a>
+  </div>
+
+</body>
+</html>
