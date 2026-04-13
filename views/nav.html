@@ -1,0 +1,380 @@
+<style>
+    .app-shell {
+        display: grid;
+        grid-template-columns: 270px 1fr;
+        gap: 22px;
+        min-height: calc(100vh - 120px);
+        padding-bottom: 40px;
+    }
+
+    .app-sidebar {
+        position: sticky;
+        top: 22px;
+        align-self: start;
+        padding: 18px;
+        border-radius: 24px;
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(255,255,255,0.08);
+        backdrop-filter: blur(10px);
+    }
+
+    .sidebar-brand {
+        font-size: 24px;
+        font-weight: 800;
+        letter-spacing: -1px;
+        margin-bottom: 22px;
+    }
+
+    .sidebar-brand span {
+        color: #818cf8;
+    }
+
+    .sidebar-nav {
+        display: grid;
+        gap: 10px;
+    }
+
+    .nav-link {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        text-decoration: none;
+        color: #e5e7eb;
+        padding: 12px 14px;
+        border-radius: 14px;
+        font-size: 14px;
+        font-weight: 700;
+        background: transparent;
+        border: 1px solid transparent;
+        transition: 0.2s;
+    }
+
+    .nav-link:hover {
+        background: rgba(255,255,255,0.05);
+        border-color: rgba(255,255,255,0.08);
+    }
+
+    .nav-link.active {
+        background: rgba(99,102,241,0.12);
+        border-color: rgba(99,102,241,0.22);
+        color: #a5b4fc;
+    }
+
+    .nav-link.disabled {
+        opacity: 0.45;
+        pointer-events: none;
+    }
+
+    .nav-divider {
+        height: 1px;
+        background: rgba(255,255,255,0.08);
+        margin: 18px 0;
+    }
+
+    .sidebar-meta {
+        display: grid;
+        gap: 10px;
+    }
+
+    .meta-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 12px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 700;
+        background: rgba(255,255,255,0.05);
+        border: 1px solid rgba(255,255,255,0.08);
+        color: #e5e7eb;
+        width: fit-content;
+    }
+
+    .meta-pill.success {
+        background: rgba(16,185,129,0.10);
+        border-color: rgba(16,185,129,0.22);
+        color: #6ee7b7;
+    }
+
+    .meta-pill.warning {
+        background: rgba(245,158,11,0.10);
+        border-color: rgba(245,158,11,0.22);
+        color: #fbbf24;
+    }
+
+    .sidebar-footer {
+        margin-top: 20px;
+    }
+
+    .nav-link-danger {
+        color: #fca5a5;
+        background: rgba(239,68,68,0.08);
+        border: 1px solid rgba(239,68,68,0.14);
+    }
+
+    .nav-link-danger:hover {
+        background: rgba(239,68,68,0.14);
+        border-color: rgba(239,68,68,0.22);
+    }
+
+    .app-main {
+        min-width: 0;
+    }
+
+    .mobile-topbar {
+        display: none;
+        align-items: center;
+        justify-content: space-between;
+        gap: 14px;
+        padding: 14px 16px;
+        border-radius: 18px;
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(255,255,255,0.08);
+        backdrop-filter: blur(10px);
+        margin-bottom: 16px;
+    }
+
+    .mobile-brand {
+        font-size: 20px;
+        font-weight: 800;
+        letter-spacing: -0.8px;
+    }
+
+    .mobile-brand span {
+        color: #818cf8;
+    }
+
+    .menu-btn {
+        background: rgba(255,255,255,0.05);
+        color: #fff;
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 12px;
+        padding: 10px 14px;
+        font-weight: 700;
+        cursor: pointer;
+    }
+
+    .mobile-drawer-backdrop {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.52);
+        z-index: 80;
+    }
+
+    .mobile-drawer {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 88%;
+        max-width: 320px;
+        height: 100vh;
+        z-index: 90;
+        padding: 18px;
+        background: #0f1016;
+        border-right: 1px solid rgba(255,255,255,0.08);
+        box-shadow: 0 20px 60px rgba(0,0,0,0.35);
+        overflow-y: auto;
+    }
+
+    .drawer-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 18px;
+    }
+
+    .drawer-close {
+        background: rgba(255,255,255,0.05);
+        color: #fff;
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 12px;
+        padding: 9px 12px;
+        cursor: pointer;
+        font-weight: 700;
+    }
+
+    @media (max-width: 960px) {
+        .app-shell {
+            grid-template-columns: 1fr;
+        }
+
+        .app-sidebar {
+            display: none;
+        }
+
+        .mobile-topbar {
+            display: flex;
+        }
+    }
+</style>
+
+
+
+<div class="mobile-drawer-backdrop" id="mobile-nav-backdrop"></div>
+
+<aside class="mobile-drawer" id="mobile-nav-drawer">
+
+
+    <nav class="sidebar-nav">
+        {{if not runner_lock_mode:}}
+            <a href="{{=URL('default','dashboard')}}" class="nav-link {{='active' if active_nav == 'dashboard' else ''}}">
+                <span class="nav-text-dashboard">Dashboard</span>
+            </a>
+
+            {{if report_nav_url:}}
+            <a href="{{=report_nav_url}}" class="nav-link {{='active' if active_nav == 'report' else ''}}">
+                <span class="nav-text-report">Rapport</span>
+            </a>
+            {{else:}}
+            <a href="#" class="nav-link disabled"><span class="nav-text-report">Rapport</span></a>
+            {{pass}}
+
+            <a href="{{=URL('default','account')}}" class="nav-link {{='active' if active_nav == 'account' else ''}}">
+                <span class="nav-text-account">Compte</span>
+            </a>
+        {{else:}}
+            <a href="#" class="nav-link disabled active"><span class="nav-text-audit">Audit en cours</span></a>
+        {{pass}}
+    </nav>
+
+  
+
+   
+
+    <div class="nav-divider"></div>
+
+    <div class="sidebar-footer">
+        {{if not runner_lock_mode:}}
+            <a href="{{=URL('auth','logout')}}" class="nav-link nav-link-danger"><span class="nav-text-logout">Déconnexion</span></a>
+        {{else:}}
+            <a href="#" class="nav-link nav-link-danger disabled"><span class="nav-text-logout">Déconnexion</span></a>
+        {{pass}}
+    </div>
+</aside>
+
+<aside class="app-sidebar">
+   
+    <nav class="sidebar-nav">
+        {{if not runner_lock_mode:}}
+            <a href="{{=URL('default','dashboard')}}" class="nav-link {{='active' if active_nav == 'dashboard' else ''}}">
+                <span class="nav-text-dashboard">Dashboard</span>
+            </a>
+
+            {{if report_nav_url:}}
+            <a href="{{=report_nav_url}}" class="nav-link {{='active' if active_nav == 'report' else ''}}">
+                <span class="nav-text-report">Rapport</span>
+            </a>
+            {{else:}}
+            <a href="#" class="nav-link disabled"><span class="nav-text-report">Rapport</span></a>
+            {{pass}}
+
+            <a href="{{=URL('default','account')}}" class="nav-link {{='active' if active_nav == 'account' else ''}}">
+                <span class="nav-text-account">Compte</span>
+            </a>
+        {{else:}}
+            <a href="#" class="nav-link disabled active"><span class="nav-text-audit">Audit en cours</span></a>
+        {{pass}}
+    </nav>
+
+
+
+   
+
+    <div class="nav-divider"></div>
+
+    <div class="sidebar-footer">
+        {{if not runner_lock_mode:}}
+            <a href="{{=URL('auth','logout')}}" class="nav-link nav-link-danger"><span class="nav-text-logout">Déconnexion</span></a>
+        {{else:}}
+            <a href="#" class="nav-link nav-link-danger disabled"><span class="nav-text-logout">Déconnexion</span></a>
+        {{pass}}
+    </div>
+</aside>
+
+<script>
+// --- Script vanilla JS pour le menu mobile (ne nécessite pas Brython) ---
+(function () {
+    const openBtn = document.getElementById("open-mobile-nav");
+    const closeBtn = document.getElementById("close-mobile-nav");
+    const drawer = document.getElementById("mobile-nav-drawer");
+    const backdrop = document.getElementById("mobile-nav-backdrop");
+
+    if (!openBtn || !closeBtn || !drawer || !backdrop) return;
+
+    function openDrawer() {
+        drawer.style.display = "block";
+        backdrop.style.display = "block";
+        document.body.style.overflow = "hidden";
+    }
+
+    function closeDrawer() {
+        drawer.style.display = "none";
+        backdrop.style.display = "none";
+        document.body.style.overflow = "";
+    }
+
+    openBtn.addEventListener("click", openDrawer);
+    closeBtn.addEventListener("click", closeDrawer);
+    backdrop.addEventListener("click", closeDrawer);
+})();
+</script>
+
+<script type="text/python">
+# --- Script Brython pour la traduction dynamique du Menu ---
+from browser import document, window
+
+NAV_LANGUAGES = {
+    'fr': {
+        'nav-text-dashboard': 'Dashboard',
+        'nav-text-report': 'Rapport',
+        'nav-text-account': 'Compte',
+        'nav-text-audit': 'Audit en cours',
+        'nav-text-logout': 'Déconnexion'
+    },
+    'en': {
+        'nav-text-dashboard': 'Dashboard',
+        'nav-text-report': 'Report',
+        'nav-text-account': 'Account',
+        'nav-text-audit': 'Audit running',
+        'nav-text-logout': 'Log out'
+    }
+}
+
+# Fonction globale que les autres pages pourront appeler
+def translate_nav(lang):
+    if lang not in NAV_LANGUAGES:
+        lang = 'fr'
+        
+    translations = NAV_LANGUAGES[lang]
+    
+    # On utilise document.select pour mettre à jour les éléments 
+    # dans la sidebar desktop ET dans le drawer mobile
+    for key, text in translations.items():
+        elements = document.select(f'.{key}')
+        for el in elements:
+            el.text = text
+            
+    # Traitement spécifique pour les crédits (pour garder le nombre dynamique injecté par Web2py)
+    credit_elements = document.select('.nav-text-credits')
+    for el in credit_elements:
+        # On lit le nombre actuel
+        current_text = el.text
+        # On extrait juste les chiffres
+        try:
+            import re
+            match = re.search(r'\d+', current_text)
+            if match:
+                balance = int(match.group())
+                if lang == 'en':
+                    el.text = f"🪙 {balance} credit{'s' if balance != 1 else ''}"
+                else:
+                    el.text = f"🪙 {balance} crédit{'s' if balance != 1 else ''}"
+        except Exception:
+            pass
+
+# Exposer la fonction à 'window' pour qu'elle puisse être appelée 
+# depuis les scripts Brython de Dashboard, Runner, Report, etc.
+window.translate_nav = translate_nav
+</script>

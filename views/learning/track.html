@@ -1,0 +1,96 @@
+{{extend 'malayout.html'}}
+
+<div class="space-y-6">
+    <section class="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+        <div>
+            <div class="text-sm font-medium text-slate-500">Parcours</div>
+            <h2 class="mt-1 text-3xl font-semibold tracking-tight text-slate-900">
+                {{=track.title}}
+            </h2>
+            {{if track.description:}}
+            <p class="mt-3 max-w-2xl text-sm leading-7 text-slate-600">
+                {{=track.description}}
+            </p>
+            {{pass}}
+        </div>
+
+        <div class="rounded-2xl bg-white px-4 py-3 shadow-sm ring-1 ring-slate-200">
+            <div class="text-xs uppercase tracking-wide text-slate-500">Track actuel</div>
+            <div class="mt-1 text-sm font-semibold text-slate-900">{{=track.slug}}</div>
+        </div>
+    </section>
+
+    {{for card in world_cards:}}
+    <section class="app-panel p-6">
+        <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div>
+                <div class="text-sm font-medium text-slate-500">Monde</div>
+                <h3 class="mt-1 text-xl font-semibold text-slate-900">{{=card['world'].title}}</h3>
+                {{if card['world'].subtitle:}}
+                <p class="mt-2 text-sm text-slate-600">{{=card['world'].subtitle}}</p>
+                {{pass}}
+            </div>
+
+            <div class="min-w-[220px]">
+                <div class="flex items-center justify-between text-xs text-slate-500">
+                    <span>Progression</span>
+                    <span>{{=card['completed_count']}} / {{=card['total_lessons']}}</span>
+                </div>
+                <div class="mt-2 h-3 rounded-full bg-slate-100">
+                    <div class="h-3 rounded-full bg-slate-900" style="width: {{=card['progress_percent']}}%;"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+            {{for item in card['lessons']:}}
+            {{
+                state = item['ui_state']
+                lesson = item['lesson']
+                state_classes = 'bg-slate-50 ring-slate-200 text-slate-700'
+                badge_text = 'Verrouillée'
+                cta_text = ''
+                cta_href = None
+
+                if state == 'done':
+                    state_classes = 'bg-slate-900 text-white ring-slate-900'
+                    badge_text = 'Terminée'
+                    cta_text = 'Revoir'
+                    cta_href = URL('learning', 'lesson', args=[lesson.slug])
+                elif state == 'current':
+                    state_classes = 'bg-white text-slate-900 ring-slate-900 shadow-sm'
+                    badge_text = 'En cours'
+                    cta_text = 'Commencer'
+                    cta_href = URL('learning', 'lesson', args=[lesson.slug])
+                    pass
+            }}
+            <div class="rounded-3xl p-4 ring-1 {{=state_classes}}">
+                <div class="flex items-start justify-between gap-3">
+                    <div class="text-sm font-semibold">{{=lesson.short_title or lesson.title}}</div>
+                    <span class="rounded-full px-2 py-1 text-[11px] font-medium {{='bg-white/10 text-white' if state == 'done' else 'bg-slate-100 text-slate-600'}}">
+                        {{=badge_text}}
+                    </span>
+                </div>
+
+                <div class="mt-3 text-xs leading-6 {{='text-slate-200' if state == 'done' else 'text-slate-500'}}">
+                    {{=lesson.title}}
+                </div>
+
+                <div class="mt-4">
+                    {{if cta_href:}}
+                    <a href="{{=cta_href}}"
+                       class="inline-flex items-center justify-center rounded-2xl px-4 py-2 text-sm font-medium {{='bg-white text-slate-900' if state == 'done' else 'bg-slate-900 text-white'}}">
+                        {{=cta_text}}
+                    </a>
+                    {{else:}}
+                    <span class="inline-flex items-center justify-center rounded-2xl bg-slate-100 px-4 py-2 text-sm font-medium text-slate-400">
+                        Bientôt
+                    </span>
+                    {{pass}}
+                </div>
+            </div>
+            {{pass}}
+        </div>
+    </section>
+    {{pass}}
+</div>

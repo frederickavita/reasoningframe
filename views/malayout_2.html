@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{{=response.title or 'reasoningframe'}}</title>
+  <meta name="description" content="reasoningframe — audit de clarté IA pour pages web." />
+  <link rel="stylesheet" href="https://www.w3schools.com/w3css/5/w3.css" />
+  <script src="https://cdn.jsdelivr.net/npm/brython@3.12.3/brython.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/brython@3.12.3/brython_stdlib.js"></script>
+
+<style>
+.cwl-shell {max-width: 1440px; margin: 0 auto;}
+.cwl-card {
+  background: #12182B;
+  color: #F5F7FB;
+  border: 1px solid #25304A;
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+}
+.cwl-card-light {
+  background: #182033;
+  color: #F5F7FB;
+  border: 1px solid #25304A;
+  border-radius: 16px;
+}
+.cwl-muted {color: #B7C0D4;}
+.cwl-soft {color: #7F8AA3;}
+.cwl-border {border-color: #25304A !important;}
+.cwl-pill {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+.cwl-pill-blue {background: rgba(109,124,255,0.15); color: #AEB8FF;}
+.cwl-pill-green {background: rgba(47,203,143,0.14); color: #8CE8C3;}
+.cwl-pill-orange {background: rgba(255,159,67,0.16); color: #FFC682;}
+.cwl-pill-red {background: rgba(255,107,107,0.16); color: #FFB1B1;}
+.cwl-pill-gray {background: rgba(255,255,255,0.08); color: #D7DEEE;}
+.cwl-title {font-weight: 800; line-height: 1.15;}
+.cwl-code {
+  font-family: "JetBrains Mono", "IBM Plex Mono", monospace;
+  background: #0E1527;
+  border: 1px solid #25304A;
+  border-radius: 14px;
+  padding: 14px;
+  overflow-x: auto;
+  color: #EAF0FF;
+}
+.cwl-pre-wrap {white-space: pre-wrap; word-break: break-word;}
+.cwl-link {text-decoration: none;}
+.cwl-link:hover {text-decoration: underline;}
+.cwl-sidebar-sticky {position: sticky; top: 18px;}
+.cwl-button-primary {
+  background: #6D7CFF !important;
+  color: #fff !important;
+  border-radius: 12px !important;
+}
+.cwl-button-secondary {
+  background: #182033 !important;
+  color: #F5F7FB !important;
+  border: 1px solid #33415F !important;
+  border-radius: 12px !important;
+}
+.cwl-input,
+.cwl-textarea,
+.cwl-select {
+  width: 100%;
+  background: #182033;
+  color: #F5F7FB;
+  border: 1px solid #33415F;
+  border-radius: 12px;
+  padding: 12px 14px;
+}
+.cwl-textarea {min-height: 140px;}
+.cwl-option {
+  display: block;
+  padding: 12px 14px;
+  border: 1px solid #33415F;
+  border-radius: 12px;
+  margin-bottom: 10px;
+  cursor: pointer;
+  background: #182033;
+}
+.cwl-option:hover {border-color: #6D7CFF;}
+.cwl-feedback {
+  border-left: 4px solid #6D7CFF;
+  background: #14233A;
+  border-radius: 12px;
+  padding: 12px 14px;
+}
+.cwl-feedback-success {border-left-color: #2FCB8F; background: #10261C;}
+.cwl-feedback-warning {border-left-color: #FF9F43; background: #2A1D0F;}
+.cwl-feedback-error {border-left-color: #FF6B6B; background: #2A1318;}
+.cwl-progress-wrap {background: #202A40; border-radius: 999px; overflow: hidden; height: 8px;}
+.cwl-progress-bar {background: linear-gradient(90deg, #6D7CFF, #8C63FF); height: 100%;}
+.cwl-divider {height: 1px; background: #25304A; margin: 18px 0;}
+.cwl-sticky-actions {
+  position: sticky;
+  bottom: 12px;
+  z-index: 2;
+}
+.cwl-resource-grid .w3-card {box-shadow: none;}
+.cwl-badge-outline {
+  border: 1px solid #33415F;
+  color: #D7DEEE;
+  border-radius: 999px;
+  padding: 3px 8px;
+  font-size: 12px;
+}
+@media (max-width: 992px) {
+  .cwl-sidebar-sticky {position: static;}
+}
+</style>
+
+</head>
+<body>
+    
+{{include}}
+
+</body>
+
+</html>

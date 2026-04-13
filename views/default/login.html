@@ -1,239 +1,126 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <title>reasoningframe - Login</title>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+{{extend 'malayout.html'}}
 
-    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:300,400,500,600,700,800&display=swap">
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/brython@3.12.0/brython.min.js"></script>
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/brython@3.12.0/brython_stdlib.js"></script>
 
-    <style>
-        /* --- Base Design (Dark Mode) --- */
-        html, body {
-            font-family: 'Inter', sans-serif;
-            background: #0b0b0f;
-            color: #e5e7eb;
-            margin: 0;
-            overflow-x: hidden;
-        }
 
-        .rf-shell { max-width: 1180px; margin: 0 auto; }
 
-        /* --- Glassmorphism --- */
-        .rf-glass {
-            background: rgba(255,255,255,0.04);
-            border: 1px solid rgba(255,255,255,0.08);
-            backdrop-filter: blur(10px);
-            border-radius: 24px;
-        }
 
-        .text-gradient {
-            background: linear-gradient(135deg, #6366f1, #a5b4fc);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            font-weight: 800;
-        }
 
-        /* --- Buttons --- */
-        .btn-google {
-            background: #fff;
-            color: #000 !important;
-            border: none;
-            border-radius: 14px;
-            padding: 16px 32px;
-            font-weight: 600;
-            display: inline-flex;
-            align-items: center;
-            gap: 12px;
-            cursor: pointer;
-            transition: 0.2s;
-            text-decoration: none;
-        }
-        .btn-google:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(255,255,255,0.1); }
-        .btn-google[disabled] { opacity: 0.6; cursor: not-allowed; transform: none; }
 
-        .btn-outline {
-            background: transparent;
-            color: #fff;
-            border: 1px solid rgba(255,255,255,0.2);
-            border-radius: 14px;
-            padding: 14px 28px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-        .btn-outline:hover { border-color: #6366f1; color: #a5b4fc; }
-
-        /* --- UI Elements --- */
-        .lang-selector {
-            background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(255,255,255,0.1);
-            color: #fff;
-            padding: 8px 12px;
-            border-radius: 10px;
-            outline: none;
-            cursor: pointer;
-        }
-
-        /* --- State Management --- */
-        .app-state { display: none; animation: fadeIn 0.5s ease-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-        .spinner {
-            width: 50px; height: 50px;
-            border: 4px solid rgba(99,102,241,0.1);
-            border-top-color: #6366f1;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin { 100% { transform: rotate(360deg); } }
-    </style>
-</head>
-
-<body onload="brython()">
-
-<div class="rf-shell w3-container">
+<div class="mx-auto max-w-6xl">
     
-    <header class="w3-padding-32 w3-cell-row">
-        <div class="w3-cell w3-cell-middle">
-            <h2 style="font-weight: 800; margin: 0; letter-spacing: -1.5px;">reasoning<span style="color:#818cf8;">frame</span></h2>
-        </div>
-        <div class="w3-cell w3-cell-middle" style="text-align: right;">
-            <select id="lang-select" class="lang-selector">
-                <option value="en">🇬🇧 EN</option>
-                <option value="fr">🇫🇷 FR</option>
-            </select>
-        </div>
-    </header>
 
-    <div id="state-ideal" class="app-state w3-row-padding" style="margin-top: 40px;">
-        <div class="w3-col l6 m12 w3-padding-32">
-            <h1 style="font-size: 56px; font-weight: 800; line-height: 1.1; letter-spacing: -2px;">
-                <span id="tr-hero-1">Master Python</span> <span class="text-gradient" id="tr-hero-2">through Action.</span>
-            </h1>
-            <p id="tr-desc" class="w3-large w3-text-grey" style="margin: 24px 0 40px 0; max-width: 500px; line-height: 1.6;">
-                Stop watching, start coding. Join thousands of students generating custom micro-courses to bridge the gap between theory and implementation.
-            </p>
-            
-            <div style="display: flex; gap: 15px; flex-wrap: wrap;">
-                <button class="btn-google btn-google-login">
-                    <svg width="20" height="20" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6,20.1H42V20H24v8h11.3C33.7,32.7,29.3,36,24,36c-6.6,0-12-5.4-12-12s5.4-12,12-12c3.1,0,5.8,1.2,8,3l5.7-5.7C34,6.1,29.3,4,24,4C13,4,4,13,4,24s9,20,20,20s20-9,20-20C44,22.7,43.9,21.4,43.6,20.1z"></path><path fill="#FF3D00" d="M6.3,14.7l6.6,4.8C14.7,15.1,19,12,24,12c3.1,0,5.8,1.2,8,3l5.7-5.7C34,6.1,29.3,4,24,4C16.3,4,9.7,8.3,6.3,14.7z"></path><path fill="#4CAF50" d="M24,44c5.2,0,9.9-2,13.4-5.2l-6.2-5.2C29.2,35.1,26.7,36,24,36c-5.2,0-9.6-3.3-11.3-7.9l-6.5,5C9.5,39.6,16.2,44,24,44z"></path><path fill="#1976D2" d="M43.6,20.1H42V20H24v8h11.3c-0.8,2.2-2.2,4.2-4.1,5.6l6.2,5.2C37,39.2,44,34,44,24C44,22.7,43.9,21.4,43.6,20.1z"></path></svg>
-                    <span id="tr-btn-google">Continue with Google</span>
-                </button>
-                <button class="btn-outline" id="tr-btn-back">Go back</button>
-            </div>
-        </div>
 
-        <div class="w3-col l6 m12 w3-padding-32 w3-hide-small">
-            <div class="rf-glass w3-padding-32 w3-container" style="background: linear-gradient(135deg, rgba(99,102,241,0.05), rgba(165,180,252,0.05)); border-radius: 40px;">
-                <div class="rf-glass w3-padding-16 w3-margin-bottom" style="opacity: 0.5; transform: scale(0.9);">
-                    <span class="w3-tiny w3-uppercase" id="tr-old-title" style="font-weight:700;">Passive Learning (Videos)</span>
-                    <p style="font-style: italic; font-size: 14px;">"Watch me code a loop for 15 minutes while you fall asleep..."</p>
+    <div class="grid gap-6 lg:grid-cols-[1.1fr_0.9fr] lg:items-stretch">
+        <section class="overflow-hidden rounded-panel bg-gradient-to-br from-slate-900 via-slate-800 to-slate-700 text-white shadow-panel ring-1 ring-slate-800">
+            <div class="flex h-full flex-col justify-between p-6 md:p-8 lg:p-10">
+                <div>
+                    <div class="inline-flex items-center rounded-full bg-white/10 px-3 py-1 text-xs font-medium text-slate-200 ring-1 ring-white/10">
+                        reasoningframe
+                    </div>
+
+                    <h2 class="mt-6 text-3xl font-semibold tracking-tight md:text-4xl">
+                        {{=T('Resume your reasoningframe journey')}}
+                    </h2>
+
+                    <p class="mt-4 max-w-xl text-sm leading-7 text-slate-300 md:text-base">
+                        {{=T('Sign in with Google to retrieve your lessons, missions, prompts, and progress — frictionless and without managing passwords.')}}
+                    </p>
+
+                    {{if request.vars._next:}}
+                    <div class="mt-6 rounded-2xl bg-white/10 p-4 ring-1 ring-white/10">
+                        <div class="text-xs font-semibold uppercase tracking-wide text-slate-300">
+                            {{=T('Resume')}}
+                        </div>
+                        <div class="mt-2 text-sm text-slate-100">
+                            {{=T('You are one click away from picking up where you left off.')}}
+                        </div>
+                    </div>
+                    {{pass}}
                 </div>
-                <div class="w3-center w3-margin-bottom" style="font-size: 24px;">⚡</div>
-                <div class="rf-glass w3-padding-24" style="border-left: 4px solid #6366f1;">
-                    <span class="w3-tiny w3-text-indigo w3-uppercase" style="font-weight: 700;" id="tr-new-title">ReasoningFrame Method</span>
-                    <p style="font-weight: 700; margin: 10px 0 5px;" id="tr-new-task">Active Coding Session</p>
-                    <p class="w3-small w3-text-grey">1. Concept generated (3s) | 2. Practice (90s)</p>
-                    <div style="background: #121218; padding: 10px; border-radius: 8px; margin-top: 10px; font-family: monospace; font-size: 12px; color: #818cf8;">
-                        for i in range(credits):<br>&nbsp;&nbsp;print("Learning by Doing")
+
+                <div class="mt-8 grid gap-3 sm:grid-cols-3">
+                    <div class="rounded-3xl bg-white/10 p-4 ring-1 ring-white/10">
+                        <div class="text-sm font-semibold">{{=T('Saved Progress')}}</div>
+                        <div class="mt-2 text-xs leading-6 text-slate-300">
+                            {{=T('Find your progress, worlds, and active lessons.')}}
+                        </div>
+                    </div>
+
+                    <div class="rounded-3xl bg-white/10 p-4 ring-1 ring-white/10">
+                        <div class="text-sm font-semibold">{{=T('Unlocked Skills')}}</div>
+                        <div class="mt-2 text-xs leading-6 text-slate-300">
+                            {{=T('Continue building real micro-skills on Claude.')}}
+                        </div>
+                    </div>
+
+                    <div class="rounded-3xl bg-white/10 p-4 ring-1 ring-white/10">
+                        <div class="text-sm font-semibold">{{=T('Accessible Prompts')}}</div>
+                        <div class="mt-2 text-xs leading-6 text-slate-300">
+                            {{=T('Find your prompts and workflows without starting from scratch.')}}
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
+        </section>
 
-    <div id="state-chargement" class="app-state w3-center" style="padding-top: 100px;">
-        <div class="spinner w3-margin-bottom" style="margin: 0 auto;"></div>
-        <h3 id="tr-loading" style="font-weight:700;">Securing your session...</h3>
-        <p class="rf-muted">You're one step away from your first programming course.</p>
-    </div>
+        <section
+            class="app-panel p-6 md:p-8"
+            x-data="{ submitting: false }"
+        >
+            <div class="mx-auto max-w-md">
+                <div class="inline-flex items-center rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-700 ring-1 ring-slate-200">
+                    {{=T('Secure Connection')}}
+                </div>
 
+                <h1 class="mt-5 text-2xl font-semibold tracking-tight text-slate-900 md:text-3xl">
+                    {{=T('Continue with Google')}}
+                </h1>
+
+                <p class="mt-3 text-sm leading-7 text-slate-600">
+                    {{=T('A single action to access your dashboard, resume your path, and sync your progress.')}}
+                </p>
+
+                {{if error_text:}}
+                <div class="mt-5 rounded-2xl bg-rose-50 px-4 py-3 text-sm text-rose-900 ring-1 ring-rose-200">
+                    <div class="font-semibold">{{=T('Unable to complete login')}}</div>
+                    <div class="mt-1">{{=error_text}}</div>
+                </div>
+                {{pass}}
+
+                <div class="mt-6 space-y-4">
+                    <a
+                        href="{{=google_url}}"
+                        class="flex w-full items-center justify-center gap-3 rounded-2xl bg-slate-900 px-5 py-4 text-sm font-medium text-white shadow-sm transition hover:bg-slate-800"
+                        @click.prevent="submitting = true; window.location.href = $el.href;"
+                        :class="submitting ? 'pointer-events-none opacity-70' : ''"
+                    >
+                        <svg class="h-5 w-5" viewBox="0 0 24 24" aria-hidden="true">
+                            <path fill="#EA4335" d="M12 10.2v3.9h5.5c-.2 1.3-1.5 3.9-5.5 3.9-3.3 0-6-2.7-6-6s2.7-6 6-6c1.9 0 3.2.8 3.9 1.5l2.7-2.6C16.9 3.3 14.7 2.4 12 2.4 6.8 2.4 2.6 6.6 2.6 11.8S6.8 21.2 12 21.2c6.9 0 9.1-4.8 9.1-7.3 0-.5 0-.9-.1-1.3H12z"/>
+                            <path fill="#34A853" d="M3.7 7.8l3.2 2.4C7.8 8 9.7 6.6 12 6.6c1.9 0 3.2.8 3.9 1.5l2.7-2.6C16.9 3.3 14.7 2.4 12 2.4c-3.7 0-6.9 2.1-8.3 5.4z"/>
+                            <path fill="#FBBC05" d="M12 21.2c2.6 0 4.8-.9 6.4-2.4l-3-2.4c-.8.6-1.9 1.1-3.4 1.1-3.9 0-5.2-2.6-5.5-3.9l-3.2 2.5c1.4 3.4 4.7 5.1 8.7 5.1z"/>
+                            <path fill="#4285F4" d="M21.1 12.6c0-.6-.1-1-.2-1.5H12v3.9h5.5c-.3 1.4-1.2 2.4-2.2 3.1l3 2.4c1.8-1.6 2.8-4.1 2.8-6.9z"/>
+                        </svg>
+
+                        <span x-show="!submitting" x-cloak>{{=T('Continue with Google')}}</span>
+                        <span x-show="submitting" x-cloak>{{=T('Connecting to Google...')}}</span>
+                    </a>
+
+                    <div class="rounded-2xl bg-slate-50 px-4 py-3 text-xs leading-6 text-slate-500 ring-1 ring-slate-200">
+                        {{=T('Fast and secure connection. No password to remember.')}}
+                    </div>
+                </div>
+
+                <div class="mt-6 border-t border-slate-200 pt-5">
+                    <div class="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                        {{=T('After connecting')}}
+                    </div>
+                    <ul class="mt-3 space-y-2 text-sm text-slate-600">
+                        <li>• {{=T('Resume your current lessons')}}</li>
+                        <li>• {{=T('Retrieve your missions and prompts')}}</li>
+                        <li>• {{=T('Keep your progress in English, French, or Spanish')}}</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </div>
 </div>
-
-<script type="text/python">
-from browser import document, window
-
-# --- DICTIONARY OF TRANSLATIONS ---
-LANGUAGES = {
-    'en': {
-        'tr-hero-1': 'Master Coding',
-        'tr-hero-2': 'through Action.',
-        'tr-desc': 'Stop watching, start coding. Join thousands of students generating custom micro-courses to bridge the gap between theory and implementation.',
-        'tr-btn-google': 'Continue with Google',
-        'tr-btn-back': 'Go back',
-        'tr-old-title': 'Passive Learning (Videos)',
-        'tr-new-title': 'ReasoningFrame Method',
-        'tr-new-task': 'Active Coding Session',
-        'tr-loading': 'Securing your session...'
-    },
-    'fr': {
-        'tr-hero-1': 'Maîtrisez le Code',
-        'tr-hero-2': 'par l\'Action.',
-        'tr-desc': 'Arrêtez de regarder, commencez à coder. Rejoignez des milliers d\'étudiants générant des micro-cours personnalisés pour combler le fossé entre théorie et pratique.',
-        'tr-btn-google': 'Continuer avec Google',
-        'tr-btn-back': 'Retour',
-        'tr-old-title': 'Apprentissage Passif (Vidéos)',
-        'tr-new-title': 'La Méthode ReasoningFrame',
-        'tr-new-task': 'Session de Code Actif',
-        'tr-loading': 'Sécurisation de la session...'
-    }
-}
-
-def apply_language(lang):
-    translations = LANGUAGES.get(lang, LANGUAGES['en'])
-    for element_id, text in translations.items():
-        if element_id in document:
-            document[element_id].text = text
-
-def on_lang_change(ev):
-    lang = ev.target.value
-    apply_language(lang)
-
-document['lang-select'].bind('change', on_lang_change)
-
-# --- STATE MANAGEMENT ---
-states = ['state-ideal', 'state-chargement']
-
-def show_state(state_id):
-    for s in states:
-        document[s].style.display = "none"
-    document[state_id].style.display = "block"
-
-# Initialize with English
-apply_language('en')
-show_state('state-ideal')
-
-# --- AUTH LOGIC ---
-def start_google_auth(ev):
-    # Disable buttons to prevent double clicks
-    for btn in document.select('.btn-google-login'):
-        btn.attrs['disabled'] = True
-    
-    show_state('state-chargement')
-    
-    # Framework Variables (web2py / py4web)
-    google_url = "{{=google_url}}"
-    # Safety check if variable is not parsed
-    if google_url and not google_url.startswith("{"):
-        window.location.href = google_url
-    else:
-        # Fallback for dev/preview
-        window.alert("Auth URL not configured in backend.")
-        show_state('state-ideal')
-
-for btn in document.select('.btn-google-login'):
-    btn.bind('click', start_google_auth)
-
-# Action: Back Button
-def go_back(ev):
-    window.history.back()
-
-document['tr-btn-back'].bind('click', go_back)
-
-</script>
-</body>
-</html>
