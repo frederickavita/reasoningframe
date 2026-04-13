@@ -91,29 +91,33 @@ auth.settings.on_failed_authorization = URL('default', 'not_authorized')
 
 # --- CONFIGURATION DE LA DÉCONNEXION (US 17) ---
 
-# 1ion']
-VALIDATION_ISSUE_SEVERITIES = ['low', 'medium', 'high']
-CONTENT_UPDATE_TRIGGERS = ['feature_change', 'ui_change', 'quality_fix', 'outdated_example', 'manual_review']
 auth.settings.logout_next = URL('default', 'index')
 
 # 2. Message flash personnalisé (traduit en français)
 auth.messages.logged_out = T('Vous êtes déconnecté. À bientôt !')
 
 
+ACCOUNT_STATUS = ('pending', 'active', 'blocked', 'refunded', 'revoked')
+LOCATOR_TYPES = ('role', 'label', 'text', 'testid', 'css')
+LOCATOR_QUALITY = ('recommended', 'good', 'acceptable', 'fragile')
+PAGE_STATUS = ('empty', 'partial', 'ready', 'error', 'archived')
+SCENARIO_STATUS = (
+    'empty', 'draft', 'blocked', 'incomplete', 'ready',
+    'running', 'passed', 'failed', 'cancelled', 'archived'
+)
+RUN_STATUS = ('idle', 'precheck', 'compiling', 'executing', 'passed', 'failed', 'cancelled', 'blocked')
+TRACE_MODE = ('off', 'on', 'retain-on-failure', 'on-first-retry')
+BROWSERS = ('chromium', 'firefox', 'webkit')
+PAYMENT_PROVIDER = ('paypal',)
+PAYMENT_STATUS = ('created', 'approved', 'captured', 'failed', 'refunded', 'revoked')
+ENTITLEMENT_CODE = ('lifetime_access',)
+ENTITLEMENT_STATUS = ('active', 'revoked', 'refunded')
+FEEDBACK_CATEGORY = ('suggestion', 'question', 'complaint', 'bug', 'billing', 'feature_request', 'other')
+FEEDBACK_STATUS = ('new', 'in_review', 'answered', 'closed')
+ARTIFACT_TYPE = ('trace', 'screenshot', 'video', 'stdout', 'stderr', 'report', 'other')
 
 
 
-def _slug_field(table_name):
-    return Field(
-        'slug',
-        length=255,
-        unique=True,
-        requires=[IS_NOT_EMPTY(), IS_NOT_IN_DB(db, '%s.slug' % table_name)],
-    )
-
-
-def _status_field(name, values, default):
-    return Field(name, default=default, requires=IS_IN_SET(values, zero=None))
 
 # -------------------------------------------------------------------------
 # auth_user extra fields (MUST be before auth.define_tables)
@@ -122,96 +126,57 @@ def _status_field(name, values, default):
 
 
 
-
-
 auth.settings.extra_fields['auth_user'] = [
-
-    Field(
-    'ui_language',
-    'string',
-    length=8,
-    default='fr',
-    requires=IS_IN_SET(['fr', 'en', 'es'])
-),
-Field(
-    'learning_language',
-    'string',
-    length=8,
-    default='fr',
-    requires=IS_IN_SET(['fr', 'en', 'es'])
-),
-    Field(
-        'auth_provider',
-        default='google',
-        writable=False,
-        readable=False
-    ),
-    Field(
-        'avatar_url',
-        'string',
-        length=512,
-        default='',
-        writable=False,
-        readable=False
-    ),
-    Field(
-        'onboarding_completed',
-        'boolean',
-        default=False
-    ),
-    Field(
-        'onboarding_step',
-        'integer',
-        default=0
-    ),
-    Field(
-        'learning_goal',
-        'string',
-        length=64,
-        default='',
-        requires=IS_IN_SET(
-            [
-                'productivity',
-                'writing',
-                'research',
-                'marketing',
-                'solopreneur',
-                'education'
-            ],
-            zero=''
-        )
-    ),
-    Field(
-        'primary_track',
-        'string',
-        length=64,
-        default='',
-        requires=IS_IN_SET(
-            [
-                'solopreneur',
-                'consultant',
-                'marketing',
-                'student',
-                'teacher',
-                'office_productivity'
-            ],
-            zero=''
-        )
-    ),
-    Field(
-        'timezone',
-        'string',
-        length=64,
-        default='Europe/Paris'
-    ),
-    Field(
-        'last_seen_at',
-        'datetime',
-        writable=False,
-        readable=False
-    )
+    Field('uuid', length=64, default=lambda: uuid.uuid4().hex, unique=True,
+          writable=False, readable=False),
+    Field('account_status', default='active',
+          requires=IS_IN_SET(ACCOUNT_STATUS, zero=None)),
+    Field('auth_provider', default='google',
+          writable=False, readable=False),
+    Field('google_sub', length=255, unique=True, writable=False, readable=False),
+    Field('google_picture_url', 'string', length=512, writable=False, readable=False),
+    Field('email_verified', 'boolean', default=False, writable=False, readable=False),
+    Field('last_login_at', 'datetime', writable=False, readable=False),
 ]
+
+
+
 auth.define_tables(username=False, signature=False)
+# Champs qu'on ne veut pas exposer
+db.auth_user.password.readable = False
+db.auth_user.password.writable = False
+db.auth_user.registration_key.readable = False
+db.auth_user.registration_key.writable = False
+db.auth_user.reset_password_key.readable = False
+db.auth_user.reset_password_key.writable = False
+db.auth_user.registration_id.readable = False
+db.auth_user.registration_id.writable = False
+
+db.auth_user.first_name.requires = IS_NOT_EMPTY()
+db.auth_user.last_name.requires = IS_NOT_EMPTY()
+db.auth_user.email.requires = [IS_EMAIL(), IS_NOT_IN_DB(db, 'auth_user.email')]
+
+
+def auth_signature_fields():
+    """
+    Version légère de auth.signature pour garder la main sur les refs / defaults.
+    """
+    return [
+        Field('created_on', 'datetime', default=request.now, writable=False, readable=False),
+        Field('created_by', 'reference auth_user',
+              default=(auth.user_id if auth.user else None),
+              writable=False, readable=False),
+        Field('modified_on', 'datetime', default=request.now, update=request.now,
+              writable=False, readable=False),
+        Field('modified_by', 'reference auth_user',
+              default=(auth.user_id if auth.user else None),
+              update=(auth.user_id if auth.user else None),
+              writable=False, readable=False),
+    ]
+
+
+def json_text_field(name, default='{}'):
+    return Field(name, 'text', default=default)
 
 
 
@@ -268,29 +233,3 @@ if configuration.get('scheduler.enabled'):
 # -------------------------------------------------------------------------
 # AI Pickup Score tables
 # -------------------------------------------------------------------------
-# 1. Profil utilisateur
-db.define_table(
-    'user_profile',
-    Field('user_id', 'reference auth_user', required=True, unique=True, ondelete='CASCADE'),
-    Field('role_label', 'string', length=100),
-    Field('experience_level', 'string', length=50),
-    Field('preferred_language', 'string', length=10, default='fr',
-          requires=IS_IN_SET(['fr', 'en', 'es', 'de', 'it'])),
-    Field('goals_summary', 'text'),
-    auth.signature
-)
-
-
-
-db.define_table(
-'user_feedback',
-Field('user_id', 'reference auth_user', required=True),
-Field('category', 'string', default='suggestion', required=True,
-        requires=IS_IN_SET(['suggestion', 'improvement', 'critique', 'bug'])),
-Field('subject', 'string', length=200),
-Field('message', 'text', required=True),
-Field('status', 'string', default='new', required=True,
-        requires=IS_IN_SET(['new', 'reviewed', 'archived'])),
-Field('created_at', 'datetime', default=request.now),
-migrate=True,
-)

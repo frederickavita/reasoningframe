@@ -1,54 +1,82 @@
+def _get_google_config():
+    """
+    Lit la config Google OAuth depuis AppConfig.
+    Adapte cette fonction si tu stockes ailleurs.
+    """
+    try:
+        client_id = configuration.take('google.client_id')
+        client_secret = configuration.take('google.client_secret')
+    except Exception:
+        client_id = None
+        client_secret = None
+    return client_id, client_secret
+
 
 def _flash_login_error(message):
     session.flash = message
     redirect(URL('default', 'login'))
 
 
-def _get_auth_user_by_email(email_value):
-    if not email_value:
-        return None
-    return db(db.auth_user.email == email_value.lower().strip()).select().first()
+def _safe_next_url(default_url):
+    """
+    Empêche les redirections externes arbitraires.
+    On accepte seulement :
+    - une URL locale relative
+    - sinon on revient sur default_url
+    """
+    nxt = session.pop('oauth_next', None)
+    if nxt and isinstance(nxt, str) and nxt.startswith('/'):
+        return nxt
+    return default_url
 
 
 def _get_auth_user_by_google_sub(google_sub):
-    if not google_sub:
-        return None
-    registration_id = 'google:%s' % google_sub
-    return db(db.auth_user.registration_id == registration_id).select().first()
+    return db(db.auth_user.google_sub == google_sub).select().first()
 
 
-def _make_auth_user_payload(email_value, given_name='', family_name='',
-                            avatar_url='', ui_language='fr',
-                            learning_language='fr'):
+def _get_auth_user_by_email(email_value):
+    return db(db.auth_user.email == email_value).select().first()
+
+
+def _build_dummy_password_hash():
+    """
+    Même si on est en Google-only, on préfère stocker un hash aléatoire
+    plutôt qu'une chaîne vide ou en clair.
+    """
+    raw = str(uuid.uuid4())
+    hashed, error = db.auth_user.password.validate(raw)
+    if error:
+        # Fallback ultra-défensif ; en pratique validate() devrait marcher.
+        return 'oauth_only_' + raw
+    return hashed
+
+
+def _make_auth_user_payload(email_value, given_name, family_name, avatar_url, google_sub, email_verified):
+    first_name = (given_name or '').strip() or 'Google'
+    last_name = (family_name or '').strip() or 'User'
+
     return dict(
-        first_name=(given_name or '').strip() or 'Utilisateur',
-        last_name=(family_name or '').strip() or 'Google',
-        email=(email_value or '').strip().lower(),
-        username=None,
-        registration_id='',
+        first_name=first_name,
+        last_name=last_name,
+        email=email_value,
+        password=_build_dummy_password_hash(),
+        account_status='active',
         auth_provider='google',
-        avatar_url=(avatar_url or '').strip(),
-        onboarding_completed=False,
-        onboarding_step=0,
-        learning_goal='productivity',
-        primary_track='solopreneur',
-        ui_language=ui_language,
-        learning_language=learning_language,
-        timezone='Europe/Paris',
-        last_seen_at=request.now,
+        google_sub=google_sub,
+        google_picture_url=avatar_url or None,
+        email_verified=bool(email_verified),
+        last_login_at=request.now,
     )
 
 
-def _update_auth_user_profile(user_id, given_name='', family_name='',
-                              avatar_url='', google_sub=''):
+def _update_auth_user_profile(user_id, given_name, family_name, avatar_url, google_sub, email_verified):
     updates = dict(
         auth_provider='google',
-        avatar_url=(avatar_url or '').strip(),
-        last_seen_at=request.now,
+        google_sub=google_sub,
+        google_picture_url=avatar_url or None,
+        email_verified=bool(email_verified),
+        last_login_at=request.now,
     )
-
-    if google_sub:
-        updates['registration_id'] = 'google:%s' % google_sub
 
     if given_name:
         updates['first_name'] = given_name.strip()
@@ -59,37 +87,51 @@ def _update_auth_user_profile(user_id, given_name='', family_name='',
     db(db.auth_user.id == user_id).update(**updates)
 
 
+def _assert_user_can_login(user):
+    if not user:
+        _flash_login_error(T("Utilisateur introuvable."))
+
+    if user.account_status in ('blocked', 'revoked'):
+        _flash_login_error(T("Votre compte est désactivé. Contactez le support."))
+
+    if user.account_status == 'refunded':
+        _flash_login_error(T("Votre accès a été révoqué suite à un remboursement."))
+
+
 def _bootstrap_user_after_login(user_id):
-    # Crée la ligne de progression résumé si elle n'existe pas
-    row = db(db.user_progress.user_id == user_id).select().first()
-    if not row:
-        db.user_progress.insert(
-            user_id=user_id,
-            total_xp=0,
-            level=1,
-            current_streak=0,
-            longest_streak=0,
-            current_world_slug='world-1-discover',
-            current_lesson_slug='ce-que-claude-sait-bien-faire',
-            current_track='solopreneur',
-            completed_lessons_count=0,
-            completed_missions_count=0,
-            unlocked_skills_count=0,
-            first_lesson_started=False,
-            first_mission_completed=False
+    """
+    Garde cette fonction légère.
+    Le login ne doit pas embarquer trop de logique métier.
+    """
+    db(db.auth_user.id == user_id).update(last_login_at=request.now)
+
+    # Optionnel : créer un projet par défaut à la première connexion
+    has_project = db(db.project.owner_id == user_id).count() > 0
+    if not has_project:
+        slug = 'starter-%s' % web2py_uuid()[:8]
+        db.project.insert(
+            owner_id=user_id,
+            name='My first project',
+            slug=slug,
+            status='draft',
+            default_browser='chromium',
+            headed=False,
+            retries=0,
+            timeout_ms=30000,
+            trace_mode='retain-on-failure',
+            last_opened_on=request.now,
         )
 
 
-def _get_google_config():
+def user_has_active_lifetime_access(user_id):
     """
-    Adapte cette fonction à ta vraie source de config.
-    Pour le moment on lit dans private/appconfig.ini via myconf.
+    À utiliser pour le gating produit si besoin.
+    On ne bloque pas forcément le login avec ça.
     """
-    try:
-        client_id = configuration.get('google.client_id')
-        client_secret = configuration.get('google.client_secret')
-    except:
-        client_id = None
-        client_secret = None
+    row = db(
+        (db.user_entitlement.user_id == user_id) &
+        (db.user_entitlement.code == 'lifetime_access') &
+        (db.user_entitlement.status == 'active')
+    ).select(db.user_entitlement.id).first()
 
-    return client_id, client_secret
+    return bool(row)
