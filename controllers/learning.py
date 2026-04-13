@@ -668,3 +668,118 @@ def library():
         user_prompts=user_prompts,
         language=language
     )
+
+
+
+LESSON_INTERACTIONS = {
+    'ce-que-claude-sait-bien-faire': {
+        'key': 'strong_use_case',
+        'prompt': "Laquelle de ces tâches est la plus adaptée à Claude ?",
+        'helper': "Choisis le cas où Claude aide surtout à structurer, reformuler ou synthétiser.",
+        'options': [
+            {'value': 'medical', 'label': "Donner un diagnostic médical définitif"},
+            {'value': 'summary', 'label': "Structurer et résumer des notes brouillon"},
+            {'value': 'legal', 'label': "Valider seul une clause contractuelle finale"},
+            {'value': 'compliance', 'label': "Garantir une conformité réglementaire sans revue humaine"},
+        ],
+        'correct_answer': 'summary',
+        'success_title': "Bien vu",
+        'success_explanation': "Claude est très utile pour transformer de l’information brute en sortie plus claire et plus exploitable.",
+        'error_title': "Pas tout à fait",
+        'error_explanation': "Le meilleur cas d’usage ici est la structuration et le résumé de notes brouillon. Claude est fort pour organiser et reformuler, pas pour garantir seul un diagnostic ou une conformité.",
+        'takeaway': "Claude est fort pour expliquer, structurer, reformuler et synthétiser."
+    },
+    'ce-que-claude-ne-garantit-pas': {
+        'key': 'verification_risk',
+        'prompt': "Laquelle de ces demandes exige la vérification la plus forte ?",
+        'helper': "Choisis la tâche où une erreur aurait les conséquences les plus élevées.",
+        'options': [
+            {'value': 'email', 'label': "Rédiger un email de relance"},
+            {'value': 'summary', 'label': "Résumer un article général"},
+            {'value': 'legal', 'label': "Fournir une clause juridique prête à signer"},
+            {'value': 'ideas', 'label': "Proposer des idées de contenu"},
+        ],
+        'correct_answer': 'legal',
+        'success_title': "Exact",
+        'success_explanation': "Une clause juridique est un cas à fort risque. Une réponse fluide ou convaincante ne suffit pas : elle doit être vérifiée par une source ou un expert adapté.",
+        'error_title': "Pas tout à fait",
+        'error_explanation': "La clause juridique est l’usage le plus risqué ici. C’est précisément le type de réponse où la vérification forte est indispensable.",
+        'takeaway': "Plus le coût d’erreur est élevé, plus la vérification doit être forte."
+    },
+    'ajouter-le-bon-contexte': {
+        'key': 'context_block',
+        'prompt': "Quel élément de contexte est le plus utile pour améliorer ce prompt : 'Rédige un email de suivi' ?",
+        'helper': "Choisis l’information qui aide Claude à produire un email pertinent plutôt qu’un message générique.",
+        'options': [
+            {'value': 'weather', 'label': "La météo de la semaine"},
+            {'value': 'recipient', 'label': "Le destinataire, le contexte commercial et l’objectif du suivi"},
+            {'value': 'mood', 'label': "L’humeur approximative de l’auteur"},
+            {'value': 'font', 'label': "La police utilisée dans le site web"},
+        ],
+        'correct_answer': 'recipient',
+        'success_title': "Oui",
+        'success_explanation': "Le destinataire, le contexte et l’objectif donnent à Claude le cadre nécessaire pour sortir du générique.",
+        'error_title': "Essaie encore",
+        'error_explanation': "Le bon contexte n’est pas décoratif. Il doit aider Claude à comprendre qui écrit, à qui, pourquoi et pour obtenir quel résultat.",
+        'takeaway': "Sans contexte, Claude remplit les vides avec des hypothèses génériques."
+    },
+    'demander-le-bon-format-de-sortie': {
+        'key': 'output_format',
+        'prompt': "Quel format est le plus adapté pour comparer 3 options ?",
+        'helper': "Choisis la structure la plus facile à lire et à exploiter rapidement.",
+        'options': [
+            {'value': 'story', 'label': "Une histoire courte"},
+            {'value': 'table', 'label': "Un tableau"},
+            {'value': 'sentence', 'label': "Une phrase simple"},
+            {'value': 'image', 'label': "Une image"},
+        ],
+        'correct_answer': 'table',
+        'success_title': "Excellent",
+        'success_explanation': "Le tableau est le meilleur format pour aligner plusieurs options sur les mêmes critères et comparer rapidement.",
+        'error_title': "Pas tout à fait",
+        'error_explanation': "Quand tu dois comparer plusieurs options, le tableau est le format le plus directement exploitable.",
+        'takeaway': "Le bon format économise du temps de retraitement."
+    }
+}
+
+
+def _get_interaction_for_lesson(lesson_slug, language=None):
+    # Pour le MVP, les interactions sont définies par slug
+    return LESSON_INTERACTIONS.get(lesson_slug)
+
+
+def validate_lesson_answer_htmx():
+    user = _require_login()
+    language = _user_language(user)
+
+    if request.env.request_method != 'POST':
+        raise HTTP(405)
+
+    lesson_slug = request.args(0)
+    if not lesson_slug:
+        raise HTTP(404)
+
+    lesson = _get_lesson_by_slug(lesson_slug, language)
+    if not lesson:
+        raise HTTP(404)
+
+    interaction = _get_interaction_for_lesson(lesson.slug, language)
+    if not interaction:
+        raise HTTP(404)
+
+    user_answer = (request.post_vars.answer or '').strip()
+    is_correct = user_answer == interaction.get('correct_answer')
+
+    response.headers['HX-Trigger'] = json.dumps({
+        "app:toast": {
+            "message": "Bonne réponse." if is_correct else "Essaie encore.",
+            "kind": "success" if is_correct else "warning"
+        }
+    })
+
+    return response.render('learning/_lesson_feedback.html', dict(
+        lesson=lesson,
+        interaction=interaction,
+        is_correct=is_correct,
+        user_answer=user_answer
+    ))

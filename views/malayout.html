@@ -153,18 +153,16 @@
     </script>
 </head>
 <body x-data="appLayout()" x-init="init()">
-    {{
-        # Custom menu configuration
-        custom_menu = [
-            (T('Home'), URL('default', 'index')),
-            (T('Path'), URL('default', 'index')),
-            (T('Missions'), URL('default', 'index')),
-            (T('Library'), URL('default', 'index')),
-            (T('Profile'), URL('default', 'user', args='profile') if auth.user else URL('default', 'user')),
-        ]
-        current_path = '/%s/%s' % (request.controller, request.function)
-    }}
-
+  {{
+custom_menu = [
+    (T('Home'), URL('default', 'dashboard')),
+    (T('Path'), URL('learning', 'track', args=['core'])),
+    (T('Missions'), URL('learning', 'mission', args=['resumer-un-document-long'])),
+    (T('Library'), URL('learning', 'library')),
+    (T('Profile'), URL('default', 'user', args='profile') if auth.user else URL('default', 'user')),
+]
+current_path = '/%s/%s' % (request.controller, request.function)
+}}
     <div class="app-shell">
       {{if request.function == 'login':}}
         <header class="mb-4 flex items-center justify-between rounded-panel bg-white px-4 py-3 shadow-panel ring-1 ring-slate-200 md:hidden">
